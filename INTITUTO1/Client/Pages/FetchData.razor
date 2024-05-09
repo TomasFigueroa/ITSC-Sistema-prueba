@@ -1,0 +1,71 @@
+﻿@page "/Alumno"
+@using INTITUTO1.Shared
+@inject HttpClient Http
+
+<PageTitle>Alumnos</PageTitle>
+
+<th>ALUMNOS</th>
+
+<button class="btn btn-success" onclick="cargarAlumno()">Cargar Alumno</button>
+<button class="btn btn-warning" onclick="eliminarAlumno()">Eliminar Alumno</button>
+<button class="btn btn-primary" onclick="modificarAlumno()">Modificar Alumno</button>
+<button class="btn btn-secondary" onclick="crearReporte()">Crear Reporte</button>
+<button class="btn btn-success" onclick="cargarExcel()">Cargar Excel</button>
+
+
+<div class="table-container">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>DNI</th>
+                <th>CUIL</th>
+                <th>Apellidos</th>
+                <th>Nombres</th>
+                <th>Correo</th>
+                <th>Corte</th>
+                <th>Estado</th>
+                <th>Carrera</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>12345678</td>
+                <td>20-12345678-9</td>
+                <td>Gonzalez</td>
+                <td>Juan</td>
+                <td>juan.gonzalez@example.com</td>
+                <td>2021</td>
+                <td>Activo</td>
+                <td>Desarrollo de Software</td>
+            </tr>
+            <tr>
+                <td>23456789</td>
+                <td>20-23456789-0</td>
+                <td>Rodriguez</td>
+                <td>Maria</td>
+                <td>maria.rodriguez@example.com</td>
+                <td>2022</td>
+                <td>Activo</td>
+                <td>Desarrollo de Software</td>
+            </tr>
+            <tr>
+                <td>34567890</td>
+                <td>20-34567890-1</td>
+                <td>Lopez</td>
+                <td>Pablo</td>
+                <td>pablo.lopez@example.com</td>
+                <td>2024</td>
+                <td>Activo</td>
+                <td>Desarrollo de Software</td>
+            </tr>
+       
+        </tbody>
+    </table>
+</div>
+
+
+
+@code {
+
+    
+}

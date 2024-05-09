@@ -1,0 +1,41 @@
+﻿@page "/counter"
+
+<PageTitle>Counter</PageTitle>
+<button class="btn btn-success" onclick="cargarCarrera()">Cargar Carrera</button>
+<button class="btn btn-danger" onclick="eliminarCarrera()">Eliminar Carrera</button>
+<button class="btn btn-primary" onclick="modificarCarrera()">Modificar Carrera</button>
+
+<div class="table-container">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Plan</th>
+               
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Desarrollo de Software</td>
+                <td>2024/22</td>
+               
+            </tr>
+            <tr>
+                <td>Enfermeria</td>
+                <td>1122/12</td>
+              
+            </tr>
+          
+
+        </tbody>
+    </table>
+</div>
+
+@code {
+    private int currentCount = 0;
+
+    private void IncrementCount()
+    {
+        currentCount++;
+    }
+}
