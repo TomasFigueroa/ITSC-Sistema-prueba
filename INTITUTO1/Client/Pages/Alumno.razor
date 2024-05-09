@@ -7,10 +7,8 @@
 <th>ALUMNOS</th>
 
 <button class="btn btn-success" onclick="cargarAlumno()">Cargar Alumno</button>
-<button class="btn btn-warning" onclick="eliminarAlumno()">Eliminar Alumno</button>
-<button class="btn btn-primary" onclick="modificarAlumno()">Modificar Alumno</button>
 <button class="btn btn-secondary" onclick="crearReporte()">Crear Reporte</button>
-<button class="btn btn-success" onclick="cargarExcel()">Cargar Excel</button>
+<button class="btn btn-primary" onclick="cargarExcel()">Cargar Excel</button>
 
 
 <div class="table-container">
@@ -25,6 +23,8 @@
                 <th>Corte</th>
                 <th>Estado</th>
                 <th>Carrera</th>
+                <th>Accion</th>
+
             </tr>
         </thead>
         <tbody>
@@ -37,6 +37,15 @@
                 <td>2021</td>
                 <td>Activo</td>
                 <td>Desarrollo de Software</td>
+                <td class="p-3 d-flex justify-content-center align-items-center gap-2 ">
+                    <button class="btn btn-danger d-inline-block mr-1" ><i class="oi oi-trash"></i></button>
+                    <button class="btn btn-primary d-inline-block" ><i class="oi oi-pencil"></i></button>
+                    <div class="nav-item ">
+                        <NavLink class="nav-link btn btn-primary" href="Materia">
+                            <span class="oi oi-book" aria-hidden="true"></span>
+                        </NavLink>
+                    </div>
+                </td>
             </tr>
             <tr>
                 <td>23456789</td>
@@ -47,6 +56,11 @@
                 <td>2022</td>
                 <td>Activo</td>
                 <td>Desarrollo de Software</td>
+                <td class="p-3 d-flex justify-content-center align-items-center gap-2 ">
+                    <button class="btn btn-danger d-inline-block mr-1" ><i class="oi oi-trash"></i></button>
+                    <button class="btn btn-primary d-inline-block" ><i class="oi oi-pencil"></i></button>
+                    <button class="btn btn-primary d-inline-block"><i class=" oi oi-book"></i></button>
+                </td>
             </tr>
             <tr>
                 <td>34567890</td>
@@ -57,6 +71,11 @@
                 <td>2024</td>
                 <td>Activo</td>
                 <td>Desarrollo de Software</td>
+                <td class="p-3 d-flex justify-content-center align-items-center gap-2 ">
+                    <button class="btn btn-danger d-inline-block mr-1" ><i class="oi oi-trash"></i></button>
+                    <button class="btn btn-primary d-inline-block" ><i class="oi oi-pencil"></i></button>
+                    <button class="btn btn-primary d-inline-block"><i class=" oi oi-book"></i></button>
+                </td>
             </tr>
        
         </tbody>

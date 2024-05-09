@@ -1,6 +1,6 @@
 ﻿@page "/counter"
 
-<PageTitle>Counter</PageTitle>
+<PageTitle>Carrera</PageTitle>
 <button class="btn btn-success" onclick="cargarCarrera()">Cargar Carrera</button>
 <button class="btn btn-danger" onclick="eliminarCarrera()">Eliminar Carrera</button>
 <button class="btn btn-primary" onclick="modificarCarrera()">Modificar Carrera</button>
@@ -32,10 +32,12 @@
 </div>
 
 @code {
-    private int currentCount = 0;
+    private bool collapseNavMenu = true;
 
-    private void IncrementCount()
+    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+    private void ToggleNavMenu()
     {
-        currentCount++;
+        collapseNavMenu = !collapseNavMenu;
     }
 }
