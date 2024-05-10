@@ -136,3 +136,11 @@ a, .btn-link {
     .button:hover {
         background-color: #2980b9;
     }
+
+
+    .centred-container {
+        position:absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
