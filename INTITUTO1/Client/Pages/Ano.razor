@@ -1,50 +1,54 @@
-﻿@page "/counter"
+﻿@page "/Ano"
+<h3>Año</h3>
 
 <PageTitle>Carrera</PageTitle>
-<button class="btn btn-success" onclick="cargarCarrera()">Cargar Carrera</button>
-
+<button class="btn btn-success" onclick="Cargar Año()">Cargar Año</button>
 
 <div class="table-container">
     <table class="table">
         <thead>
             <tr>
-                <th>Nombre</th>
-                <th>Plan</th>
-                <th>Fecha Inicio</th>
-                <th>Fecha Fin</th>
+                <th>Año</th>
+                <th>Turno</th>
                 <th>Accion</th>
+              
             </tr>
         </thead>
         <tbody>
             <tr>
-                <td>Desarrollo de Software</td>
-                <td>2024/22</td>
-                <td>01/03/2021</td>
-                <td>01/03/2024</td>
+                <td>1</td>
+                <td>M</td>
                 <td>
                     <div class="action-buttons m-1">
                         <button class="btn btn-danger"><i class="oi oi-trash"></i></button>
                         <button class="btn btn-primary"><i class="oi oi-pencil"></i></button>
-                        
+                        <a class="btn btn-primary" href="Materia"><i class="oi oi-book" aria-hidden="true"></i></a>
                     </div>
                 </td>
-               
+
             </tr>
             <tr>
-                <td>Enfermeria</td>
-                <td>1122/12</td>
-                <td>01/03/2021</td>
-                <td>01/03/2024</td>
+                <td>2</td>
+                <td>M</td>
                 <td>
                     <div class="action-buttons m-1">
                         <button class="btn btn-danger"><i class="oi oi-trash"></i></button>
                         <button class="btn btn-primary"><i class="oi oi-pencil"></i></button>
-                      
+                        <a class="btn btn-primary" href=""><i class="oi oi-book" aria-hidden="true"></i></a>
                     </div>
                 </td>
-              
             </tr>
-          
+            <tr>
+                <td>3</td>
+                <td>M</td>
+                <td>
+                    <div class="action-buttons m-1">
+                        <button class="btn btn-danger"><i class="oi oi-trash"></i></button>
+                        <button class="btn btn-primary"><i class="oi oi-pencil"></i></button>
+                        <a class="btn btn-primary" href=""><i class="oi oi-book" aria-hidden="true"></i></a>
+                    </div>
+                </td>
+            </tr>
 
         </tbody>
     </table>

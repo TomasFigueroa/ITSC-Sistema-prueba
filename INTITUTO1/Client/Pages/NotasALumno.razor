@@ -1,4 +1,4 @@
-﻿@page "/Alumno"
+﻿@page "/Calificaciones"
 @using INTITUTO1.Shared
 @inject HttpClient Http
 
@@ -6,14 +6,11 @@
 
 <th>ALUMNOS</th>
 
-<button class="btn btn-success" onclick="cargarCarrera()">Cargar Alumno</button>
-
 <div class="table-container" style="overflow: hidden; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); margin-bottom: 20px;">
     <div style="border-top-left-radius: 12px; border-top-right-radius: 12px; background-color: #f2f2f2; padding: 10px;">
         <table class="table" style="border-collapse: collapse; width: 100%; border: 2px solid #ddd;">
             <thead>
                 <tr style="border-bottom: 2px solid #ddd;">
-                    <th style="border-right: 2px solid #ddd;">DNI</th>
                     <th style="border-right: 2px solid #ddd;">CUIL</th>
                     <th style="border-right: 2px solid #ddd;">Apellidos</th>
                     <th style="border-right: 2px solid #ddd;">Nombres</th>
@@ -21,8 +18,8 @@
                     <th style="border-right: 2px solid #ddd;">Cohorte</th>
                     <th style="border-right: 2px solid #ddd;">Estado</th>
                     <th style="border-right: 2px solid #ddd;">Carrera</th>
-                    <th style="border-right: 2px solid #ddd;">Legajo</th>
-                    <th style="border-right: 2px solid #ddd;">Tbase</th>
+                 
+                  
                     <th>Acción</th>
                 </tr>
             </thead>
@@ -30,36 +27,20 @@
                 @foreach (var item in items)
                 {
                     <tr>
-                        <td style="border-right: 2px solid #ddd;">@item.DNI</td>
                         <td style="border-right: 2px solid #ddd;">@item.CUIL</td>
-                        <td  style="border-right: 2px solid #ddd;">@item.Apellidos</td>
+                        <td style="border-right: 2px solid #ddd;">@item.Apellidos</td>
                         <td style="border-right: 2px solid #ddd;">@item.Nombres</td>
                         <td style="border-right: 2px solid #ddd;">@item.Correo</td>
                         <td style="border-right: 2px solid #ddd;">@item.Cohorte</td>
                         <td style="border-right: 2px solid #ddd;">@item.Estado</td>
                         <td style="border-right: 2px solid #ddd;">@item.Carrera</td>
-                        <td style="border-right: 2px solid #ddd;">@item.Legajo</td>
-                        <td style="border-right: 2px solid #ddd;">
-                            <div class="action-buttons" >
-                                <button class="btn btn-primary" @onclick="() => ToggleTbase(item)">Tbase</button>
-                            </div>
-                            
-                            @if (item.ShowTbase)
-                            {
-                                <div class="tbase-content m-1">
-                                    @item.Tbase
-                                </div>
-                            }
-                        </td>
-                        <td style="border: none; display: flex; justify-content: space-between;">
-                            <div class="action-buttons">
-                                <button class="btn btn-danger"><i class="oi oi-trash"></i></button>
-                            </div>
-                            <div class="action-buttons">
-                                <button class="btn btn-primary"><i class="oi oi-pencil"></i></button>
-                            </div>
-                        </td>
+                      
+                        <td>
+                            <div class="action-buttons m-1">
 
+                                <a class="btn btn-primary" href="Notas"><i class="oi oi-book" aria-hidden="true"></i></a>
+                            </div>
+                        </td>
                     </tr>
                 }
             </tbody>

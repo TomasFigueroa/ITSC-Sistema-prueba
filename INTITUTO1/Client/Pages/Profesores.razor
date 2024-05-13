@@ -1,12 +1,11 @@
-﻿@page "/Alumno"
+﻿@page "/Profesores"
 @using INTITUTO1.Shared
 @inject HttpClient Http
 
-<PageTitle>Alumnos</PageTitle>
+<PageTitle>Profesores</PageTitle>
+<h3>Profesores</h3>
+<button class="btn btn-success" onclick="cargarCarrera()">Cargar Profesor</button>
 
-<th>ALUMNOS</th>
-
-<button class="btn btn-success" onclick="cargarCarrera()">Cargar Alumno</button>
 
 <div class="table-container" style="overflow: hidden; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); margin-bottom: 20px;">
     <div style="border-top-left-radius: 12px; border-top-right-radius: 12px; background-color: #f2f2f2; padding: 10px;">
@@ -18,11 +17,10 @@
                     <th style="border-right: 2px solid #ddd;">Apellidos</th>
                     <th style="border-right: 2px solid #ddd;">Nombres</th>
                     <th style="border-right: 2px solid #ddd;">Correo</th>
-                    <th style="border-right: 2px solid #ddd;">Cohorte</th>
                     <th style="border-right: 2px solid #ddd;">Estado</th>
-                    <th style="border-right: 2px solid #ddd;">Carrera</th>
+                    <th style="border-right: 2px solid #ddd;">Materia</th>
                     <th style="border-right: 2px solid #ddd;">Legajo</th>
-                    <th style="border-right: 2px solid #ddd;">Tbase</th>
+                  
                     <th>Acción</th>
                 </tr>
             </thead>
@@ -32,25 +30,13 @@
                     <tr>
                         <td style="border-right: 2px solid #ddd;">@item.DNI</td>
                         <td style="border-right: 2px solid #ddd;">@item.CUIL</td>
-                        <td  style="border-right: 2px solid #ddd;">@item.Apellidos</td>
+                        <td style="border-right: 2px solid #ddd;">@item.Apellidos</td>
                         <td style="border-right: 2px solid #ddd;">@item.Nombres</td>
                         <td style="border-right: 2px solid #ddd;">@item.Correo</td>
-                        <td style="border-right: 2px solid #ddd;">@item.Cohorte</td>
                         <td style="border-right: 2px solid #ddd;">@item.Estado</td>
-                        <td style="border-right: 2px solid #ddd;">@item.Carrera</td>
+                        <td style="border-right: 2px solid #ddd;">@item.Materia</td>
                         <td style="border-right: 2px solid #ddd;">@item.Legajo</td>
-                        <td style="border-right: 2px solid #ddd;">
-                            <div class="action-buttons" >
-                                <button class="btn btn-primary" @onclick="() => ToggleTbase(item)">Tbase</button>
-                            </div>
-                            
-                            @if (item.ShowTbase)
-                            {
-                                <div class="tbase-content m-1">
-                                    @item.Tbase
-                                </div>
-                            }
-                        </td>
+                      
                         <td style="border: none; display: flex; justify-content: space-between;">
                             <div class="action-buttons">
                                 <button class="btn btn-danger"><i class="oi oi-trash"></i></button>
@@ -77,15 +63,13 @@
         // Aquí puedes inicializar tu lista de elementos (items)
         items = new List<Item>
         {
-            new Item { DNI = "12345678", CUIL = "20-12345678-9", Apellidos = "Gonzalez", Nombres = "Juan", Correo = "juan.gonzalez@example.com", Cohorte = 2021, Estado = "Activo", Carrera = "Desarrollo de Software", Legajo = "DS-2021-01", Tbase = "Bachiller en Economia y Administracion-I.P.E.M. N° 123 'BLANCA ETCEMENDY'-Plan de estudio: Decreto 141/96 Resol min N° 344/11 y N°668/11" }
+            new Item { DNI = "12345678", CUIL = "20-12345678-9", Apellidos = "Lopez", Nombres = "Jose", Correo = "jose.lopez@example.com", Estado = "Titular", Materia = "Programacion 1", Legajo = "DS12", 
+           }
             // Agrega más elementos si es necesario
         };
     }
 
-    void ToggleTbase(Item item)
-    {
-        item.ShowTbase = !item.ShowTbase;
-    }
+ 
 
     public class Item
     {
@@ -94,11 +78,9 @@
         public string Apellidos { get; set; }
         public string Nombres { get; set; }
         public string Correo { get; set; }
-        public int Cohorte { get; set; }
         public string Estado { get; set; }
-        public string Carrera { get; set; }
+        public string Materia { get; set; }
         public string Legajo { get; set; }
-        public string Tbase { get; set; }
-        public bool ShowTbase { get; set; }
+        
     }
 }

@@ -1,7 +1,6 @@
-﻿@page "/counter"
-
-<PageTitle>Carrera</PageTitle>
-<button class="btn btn-success" onclick="cargarCarrera()">Cargar Carrera</button>
+﻿@page "/Calificacion"
+<PageTitle>Cakificacion</PageTitle>
+<h3>Calificacion</h3>
 
 
 <div class="table-container">
@@ -22,13 +21,9 @@
                 <td>01/03/2021</td>
                 <td>01/03/2024</td>
                 <td>
-                    <div class="action-buttons m-1">
-                        <button class="btn btn-danger"><i class="oi oi-trash"></i></button>
-                        <button class="btn btn-primary"><i class="oi oi-pencil"></i></button>
-                        
-                    </div>
+                    <a class="btn btn-primary centred" href="Ano"><i class="oi oi-book" aria-hidden="true"></i></a>
                 </td>
-               
+                
             </tr>
             <tr>
                 <td>Enfermeria</td>
@@ -36,15 +31,11 @@
                 <td>01/03/2021</td>
                 <td>01/03/2024</td>
                 <td>
-                    <div class="action-buttons m-1">
-                        <button class="btn btn-danger"><i class="oi oi-trash"></i></button>
-                        <button class="btn btn-primary"><i class="oi oi-pencil"></i></button>
-                      
-                    </div>
+                    <a class="btn btn-primary centred" href=""><i class="oi oi-book" aria-hidden="true"></i></a>
                 </td>
-              
+
             </tr>
-          
+
 
         </tbody>
     </table>
@@ -60,3 +51,4 @@
         collapseNavMenu = !collapseNavMenu;
     }
 }
+

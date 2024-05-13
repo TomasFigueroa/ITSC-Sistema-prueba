@@ -144,3 +144,21 @@ a, .btn-link {
         left: 50%;
         transform: translate(-50%, -50%);
     }
+.tbase-column {
+    max-width: 300px; /* Establece el ancho máximo deseado para la columna Tbase */
+    word-wrap: break-word; /* Permite que el contenido largo se divida en varias líneas */
+}
+.tbase-content.show {
+    display: block;
+}
+.action-buttons {
+    margin-right: 6px; /* Ajusta el valor según necesites */
+}
+
+.colorlavanda {
+    background-color: #8C92ac;
+}
+
+.top-row {
+    background-color: #212529;
+}
