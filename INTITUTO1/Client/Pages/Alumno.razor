@@ -6,7 +6,94 @@
 
 <th>ALUMNOS</th>
 
-<button class="btn btn-success" onclick="cargarCarrera()">Cargar Alumno</button>
+<button class="btn btn-success" @onclick="OpenModal">Cargar Alumno</button>
+
+
+@* modal para cargar alumnos *@
+
+@if (isModalOpen)
+{
+    <div class="modal fade show d-block" style="background-color: rgba(0, 0, 0, 0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Cargar Datos del Alumno</h5>
+                    <button type="button" class="btn-close" @onclick="CloseModal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">DNI</label>
+                        <input type="number" class="form-control" @bind="selectedAlumno.DNI" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">CUIL</label>
+                        <input type="number" class="form-control" @bind="selectedAlumno.CUIL" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Apellidos</label>
+                        <input type="text" class="form-control" @bind="selectedAlumno.Apellidos" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Nombres</label>
+                        <input type="text" class="form-control" @bind="selectedAlumno.Nombres" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Correo</label>
+                        <input type="email" class="form-control" @bind="selectedAlumno.Correo" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Cohorte</label>
+                        <input type="text" class="form-control" @bind="selectedAlumno.Cohorte" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Estado</label>
+                        <input type="text" class="form-control" @bind="selectedAlumno.Estado" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Carrera</label>
+                        <input type="text" class="form-control" @bind="selectedAlumno.Carrera" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Legajo</label>
+                        <input type="text" class="form-control" @bind="selectedAlumno.Legajo" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Tbase</label>
+                        <input type="text" class="form-control" @bind="selectedAlumno.Tbase" />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseModal">Cerrar</button>
+                    <button type="button" class="btn btn-primary">Cargar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@* <!-- Modal para confirmar el borrado --> *@
+@if (isConfirmModalOpen)
+{
+    <div class="modal fade show d-block" style="background-color: rgba(0, 0, 0, 0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmar Borrado</h5>
+                    <button type="button" class="btn-close" @onclick="CloseConfirmModal"></button>
+                </div>
+                <div class="modal-body">
+                    ¿Estás seguro de que deseas borrar este alumno?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseConfirmModal">Cancelar</button>
+                    <button type="button" class="btn btn-danger" @onclick="DeleteAlumno">Borrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
 
 <div class="table-container" style="overflow: hidden; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); margin-bottom: 20px;">
     <div style="border-top-left-radius: 12px; border-top-right-radius: 12px; background-color: #f2f2f2; padding: 10px;">
@@ -32,7 +119,7 @@
                     <tr>
                         <td style="border-right: 2px solid #ddd;">@item.DNI</td>
                         <td style="border-right: 2px solid #ddd;">@item.CUIL</td>
-                        <td  style="border-right: 2px solid #ddd;">@item.Apellidos</td>
+                        <td style="border-right: 2px solid #ddd;">@item.Apellidos</td>
                         <td style="border-right: 2px solid #ddd;">@item.Nombres</td>
                         <td style="border-right: 2px solid #ddd;">@item.Correo</td>
                         <td style="border-right: 2px solid #ddd;">@item.Cohorte</td>
@@ -40,10 +127,10 @@
                         <td style="border-right: 2px solid #ddd;">@item.Carrera</td>
                         <td style="border-right: 2px solid #ddd;">@item.Legajo</td>
                         <td style="border-right: 2px solid #ddd;">
-                            <div class="action-buttons" >
+                            <div class="action-buttons">
                                 <button class="btn btn-primary" @onclick="() => ToggleTbase(item)">Tbase</button>
                             </div>
-                            
+
                             @if (item.ShowTbase)
                             {
                                 <div class="tbase-content m-1">
@@ -53,13 +140,12 @@
                         </td>
                         <td style="border: none; display: flex; justify-content: space-between;">
                             <div class="action-buttons">
-                                <button class="btn btn-danger"><i class="oi oi-trash"></i></button>
+                                <button class="btn btn-danger" @onclick="() => OpenConfirmModal(item)"><i class="oi oi-trash"></i></button>
                             </div>
                             <div class="action-buttons">
-                                <button class="btn btn-primary"><i class="oi oi-pencil"></i></button>
+                                <button class="btn btn-primary" @onclick="() => OpenModalWithAlumno(item)"><i class="oi oi-pencil"></i></button>
                             </div>
                         </td>
-
                     </tr>
                 }
             </tbody>
@@ -67,24 +153,64 @@
     </div>
 </div>
 
-
-
 @code {
-    List<Item> items = new List<Item>();
+    private bool isConfirmModalOpen = false;
+    private Item selectedAlumnoToDelete;
+    private bool isModalOpen = false;
+    private Item selectedAlumno = new Item();
+    private List<Item> items = new List<Item>();
 
     protected override void OnInitialized()
     {
-        // Aquí puedes inicializar tu lista de elementos (items)
         items = new List<Item>
         {
             new Item { DNI = "12345678", CUIL = "20-12345678-9", Apellidos = "Gonzalez", Nombres = "Juan", Correo = "juan.gonzalez@example.com", Cohorte = 2021, Estado = "Activo", Carrera = "Desarrollo de Software", Legajo = "DS-2021-01", Tbase = "Bachiller en Economia y Administracion-I.P.E.M. N° 123 'BLANCA ETCEMENDY'-Plan de estudio: Decreto 141/96 Resol min N° 344/11 y N°668/11" }
-            // Agrega más elementos si es necesario
         };
     }
+    
+    //metodos modal cargar alumnno
+    private void OpenModal()
+    {
+        selectedAlumno = new Item(); // Alumno nuevo o vacío
+        isModalOpen = true;
+    }
 
-    void ToggleTbase(Item item)
+    private void OpenModalWithAlumno(Item alumno)  //habria que hacer otro modal pero con los datos ya cargados para que no aparezca en el modal "cargar datos de alumno"?
+    {
+        selectedAlumno = alumno;
+        isModalOpen = true;
+    }
+
+    private void CloseModal()
+    {
+        isModalOpen = false;
+    }
+
+    private void ToggleTbase(Item item)
     {
         item.ShowTbase = !item.ShowTbase;
+    }
+
+    //metodos para el modal de advertencia
+    private void OpenConfirmModal(Item alumno)
+    {
+        selectedAlumnoToDelete = alumno;
+        isConfirmModalOpen = true;
+    }
+
+    private void CloseConfirmModal()
+    {
+        isConfirmModalOpen = false;
+    }
+
+    private void DeleteAlumno()
+    {
+        // Aquí deberías implementar la lógica para borrar el alumno
+        // Por ejemplo, podrías eliminarlo de la lista de items
+        items.Remove(selectedAlumnoToDelete);
+
+        // Cerrar el modal de confirmación
+        CloseConfirmModal();
     }
 
     public class Item
@@ -102,3 +228,5 @@
         public bool ShowTbase { get; set; }
     }
 }
+
+
