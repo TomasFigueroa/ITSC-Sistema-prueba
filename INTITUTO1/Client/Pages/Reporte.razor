@@ -1,0 +1,140 @@
+﻿
+@inject IJSRuntime JSRuntime
+@page "/ReporteNotas"
+@using System.ComponentModel.DataAnnotations
+
+<div class="container mt-4">
+    <div>
+        <label for="alumnoSelect">Seleccionar Alumno:</label>
+        <select id="alumnoSelect" class="form-control" @onchange="OnAlumnoSelected">
+            <option value="">Seleccione un alumno</option>
+            @foreach (var alumno in alumnos)
+            {
+                <option value="@alumno.Id">@alumno.Apellido, @alumno.Nombre</option>
+            }
+        </select>
+    </div>
+
+    @if (alumnoSeleccionado != null)
+    {
+        <div class="report-header mt-4">
+            <img src="path_to_your_logo.png" alt="Logo" class="logo">
+            <div class="report-title">
+                <h3>República Argentina</h3>
+                <h3>Ministerio de Educación de la Provincia de Córdoba</h3>
+                <h3>Instituto Técnico Superior Córdoba</h3>
+                <h3>Tecnica Superior en Óptica y Contactología</h3>
+            </div>
+        </div>
+
+        <div class="report-body mt-4">
+            <h4>CERTIFICADO MATERIAS APROBADAS - ESTUDIANTE REGULAR</h4>
+
+            <div class="student-info">
+                <p><strong>Apellido y Nombre:</strong> @alumnoSeleccionado.Apellido, @alumnoSeleccionado.Nombre</p>
+                <p><strong>Tipo de DNI:</strong> DNI</p>
+                <p><strong>Número de DNI:</strong> @alumnoSeleccionado.Dni</p>
+                <p><strong>Fecha de Nac:</strong> @alumnoSeleccionado.FechaNacimiento.ToShortDateString()</p>
+                <p><strong>Curso:</strong> @alumnoSeleccionado.Curso</p>
+                <p><strong>Domicilio:</strong> @alumnoSeleccionado.Domicilio</p>
+                <p><strong>Teléfono:</strong> @alumnoSeleccionado.Telefono</p>
+            </div>
+
+            <h5>CALIFICACIONES</h5>
+
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Asignaturas</th>
+                        <th>Calificaciones Primer Año</th>
+                        <th>Calificaciones Segundo Año</th>
+                        <th>Calificaciones Tercer Año</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var nota in alumnoSeleccionado.Notas)
+                    {
+                        <tr>
+                            <td>@nota.Asignatura</td>
+                            <td>@nota.PrimerAno</td>
+                            <td>@nota.SegundoAno</td>
+                            <td>@nota.TercerAno</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            <div class="footer">
+                <p><strong>Promedio General:</strong> @alumnoSeleccionado.PromedioGeneral</p>
+                <p><strong>Estado:</strong> @alumnoSeleccionado.Estado</p>
+            </div>
+
+            <button class="btn btn-primary mt-3" @onclick="PrintReport">Imprimir Reporte</button>
+        </div>
+    }
+</div>
+
+@code {
+    private List<Alumno> alumnos = new List<Alumno>
+    {
+        new Alumno
+        {
+            Id = 1,
+            Nombre = "Juan",
+            Apellido = "Perez",
+            Dni = "12345678",
+            FechaNacimiento = new DateTime(2000, 1, 1),
+            Curso = "3° Año",
+            Domicilio = "Calle Falsa 123",
+            Telefono = "123456789",
+            Notas = new List<Nota>
+            {
+                new Nota { Asignatura = "Matemáticas", PrimerAno = 8, SegundoAno = 7, TercerAno = 9 },
+                new Nota { Asignatura = "Lengua", PrimerAno = 9, SegundoAno = 8, TercerAno = 10 }
+            },
+            PromedioGeneral = 8.5,
+            Estado = "Regular"
+        },
+        // Añadir más alumnos si es necesario
+    };
+
+    private Alumno alumnoSeleccionado;
+
+    private void OnAlumnoSelected(ChangeEventArgs e)
+    {
+        var alumnoId = int.Parse(e.Value.ToString());
+        alumnoSeleccionado = alumnos.FirstOrDefault(a => a.Id == alumnoId);
+    }
+
+    private void PrintReport()
+    {
+        JSRuntime.InvokeVoidAsync("window.print");
+    }
+
+    public class Alumno
+    {
+        public int Id { get; set; }
+        public string Nombre { get; set; }
+        public string Apellido { get; set; }
+        public string Dni { get; set; }
+        public DateTime FechaNacimiento { get; set; }
+        public string Curso { get; set; }
+        public string Domicilio { get; set; }
+        public string Telefono { get; set; }
+        public List<Nota> Notas { get; set; }
+        public double PromedioGeneral { get; set; }
+        public string Estado { get; set; }
+    }
+
+    public class Nota
+    {
+        public string Asignatura { get; set; }
+        public double PrimerAno { get; set; }
+        public double SegundoAno { get; set; }
+        public double TercerAno { get; set; }
+    }
+}
+
+
+
+

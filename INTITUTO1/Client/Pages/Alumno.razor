@@ -8,9 +8,31 @@
 
 <button class="btn btn-success" @onclick="OpenModal">Cargar Alumno</button>
 
+<!-- Select para filtrar por carrera -->
+<div class="mb-3">
+    <label class="form-label">Filtrar por Carrera</label>
+    <select class="form-control"  @bind="selectedCarrera">
+        <option value="">Seleccione una carrera</option>
+        @foreach (var carrera in carreras)
+        {
+            <option value="@carrera">@carrera</option>
+        }
+    </select>
+</div>
 
-@* modal para cargar alumnos *@
+<!-- Select para filtrar por DNI -->
+<div class="mb-3">
+    <label class="form-label">Filtrar por DNI</label>
+    <select class="form-control"  @bind="selectedDni">
+        <option value="">Seleccione un DNI</option>
+        @foreach (var dni in filteredDnis)
+        {
+            <option value="@dni">@dni</option>
+        }
+    </select>
+</div>
 
+<!-- Modal para cargar alumnos -->
 @if (isModalOpen)
 {
     <div class="modal fade show d-block" style="background-color: rgba(0, 0, 0, 0.5);">
@@ -71,7 +93,7 @@
     </div>
 }
 
-@* <!-- Modal para confirmar el borrado --> *@
+<!-- Modal para confirmar el borrado -->
 @if (isConfirmModalOpen)
 {
     <div class="modal fade show d-block" style="background-color: rgba(0, 0, 0, 0.5);">
@@ -93,8 +115,6 @@
     </div>
 }
 
-
-
 <div class="table-container" style="overflow: hidden; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); margin-bottom: 20px;">
     <div style="border-top-left-radius: 12px; border-top-right-radius: 12px; background-color: #f2f2f2; padding: 10px;">
         <table class="table" style="border-collapse: collapse; width: 100%; border: 2px solid #ddd;">
@@ -114,7 +134,7 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach (var item in items)
+                @foreach (var item in estudiantesFiltrados)
                 {
                     <tr>
                         <td style="border-right: 2px solid #ddd;">@item.DNI</td>
@@ -155,46 +175,68 @@
 
 @code {
     private bool isConfirmModalOpen = false;
-    private Item selectedAlumnoToDelete;
+    private Estudiante selectedAlumnoToDelete;
     private bool isModalOpen = false;
-    private Item selectedAlumno = new Item();
-    private List<Item> items = new List<Item>();
+    private  Estudiante selectedAlumno = new Estudiante();
+    private List<Estudiante> items = new List<Estudiante>();
 
-    protected override void OnInitialized()
+    // Listas para las carreras y DNIEss
+    private List<string> carreras = new List<string> { "Ingeniería Informática", "Medicina", "Derecho", "Arquitectura" };
+    private string selectedCarrera = string.Empty;
+
+    private List<string> dnis = new List<string>();
+    private List<string> filteredDnis = new List<string>();
+
+    private string selectedDni = string.Empty;
+
+    // Lista de estudiantes
+    private List<Estudiante> estudiantes = new List<Estudiante>
     {
-        items = new List<Item>
+        new Estudiante { DNI = "12345678", CUIL = "20-12345678-9", Apellidos = "Gonzalez", Nombres = "Juan", Correo = "juan.gonzalez@example.com", Cohorte = 2021, Estado = "Activo", Carrera = "Ingeniería Informática", Legajo = "DS-2021-01", Tbase = "Bachiller en Economia y Administracion-I.P.E.M. N° 123 'BLANCA ETCEMENDY'-Plan de estudio: Decreto 141/96 Resol min N° 344/11 y N°668/11" },
+        new Estudiante { DNI = "87654321", CUIL = "20-87654321-9", Apellidos = "López", Nombres = "Ana", Correo = "ana.lopez@example.com", Cohorte = 2019, Estado = "Activo", Carrera = "Medicina", Legajo = "002", Tbase = "Info Tbase 2", ShowTbase = false },
+        new Estudiante { DNI = "11223344", CUIL = "20-11223344-9", Apellidos = "García", Nombres = "Luis", Correo = "luis.garcia@example.com", Cohorte = 2018, Estado = "Activo", Carrera = "Derecho", Legajo = "003", Tbase = "Info Tbase 3", ShowTbase = false },
+        new Estudiante { DNI = "55667788", CUIL = "20-55667788-9", Apellidos = "Rodríguez", Nombres = "María", Correo = "maria.rodriguez@example.com", Cohorte = 2021, Estado = "Inactivo", Carrera = "Arquitectura", Legajo = "004", Tbase = "Info Tbase 4", ShowTbase = false }
+    };
+
+    // Propiedad calculada para obtener los estudiantes filtrados
+    private List<Estudiante> estudiantesFiltrados => estudiantes
+        .Where(e => (string.IsNullOrEmpty(selectedCarrera) || e.Carrera == selectedCarrera) &&
+                    (string.IsNullOrEmpty(selectedDni) || e.DNI == selectedDni))
+        .ToList();
+
+    // Método para actualizar la lista de DNIs según la carrera seleccionada
+    private void ActualizarDnis(ChangeEventArgs e)
+    {
+        selectedCarrera = e.Value.ToString();
+        filteredDnis = estudiantes
+            .Where(estudiante => string.IsNullOrEmpty(selectedCarrera) || estudiante.Carrera == selectedCarrera)
+            .Select(estudiante => estudiante.DNI)
+            .Distinct()
+            .ToList();
+
+        // Reset selected DNI if it's not in the filtered list
+        if (!filteredDnis.Contains(selectedDni))
         {
-            new Item { DNI = "12345678", CUIL = "20-12345678-9", Apellidos = "Gonzalez", Nombres = "Juan", Correo = "juan.gonzalez@example.com", Cohorte = 2021, Estado = "Activo", Carrera = "Desarrollo de Software", Legajo = "DS-2021-01", Tbase = "Bachiller en Economia y Administracion-I.P.E.M. N° 123 'BLANCA ETCEMENDY'-Plan de estudio: Decreto 141/96 Resol min N° 344/11 y N°668/11" }
-        };
-    }
-    
-    //metodos modal cargar alumnno
-    private void OpenModal()
-    {
-        selectedAlumno = new Item(); // Alumno nuevo o vacío
-        isModalOpen = true;
+            selectedDni = string.Empty;
+        }
     }
 
-    private void OpenModalWithAlumno(Item alumno)  //habria que hacer otro modal pero con los datos ya cargados para que no aparezca en el modal "cargar datos de alumno"?
+    // Método para filtrar por DNI
+    private void FiltrarPorDni(ChangeEventArgs e)
     {
-        selectedAlumno = alumno;
-        isModalOpen = true;
+        selectedDni = e.Value.ToString();
     }
 
-    private void CloseModal()
-    {
-        isModalOpen = false;
-    }
-
-    private void ToggleTbase(Item item)
+    // Métodos para los botones de acción
+    private void ToggleTbase(Estudiante item)
     {
         item.ShowTbase = !item.ShowTbase;
     }
 
-    //metodos para el modal de advertencia
-    private void OpenConfirmModal(Item alumno)
+    private void OpenConfirmModal(Estudiante item)
     {
-        selectedAlumnoToDelete = alumno;
+        // Lógica para abrir el modal de confirmación
+        selectedAlumnoToDelete = item;
         isConfirmModalOpen = true;
     }
 
@@ -207,13 +249,31 @@
     {
         // Aquí deberías implementar la lógica para borrar el alumno
         // Por ejemplo, podrías eliminarlo de la lista de items
-        items.Remove(selectedAlumnoToDelete);
+        estudiantes.Remove(selectedAlumnoToDelete);
 
         // Cerrar el modal de confirmación
         CloseConfirmModal();
     }
 
-    public class Item
+    private void OpenModal()
+    {
+        selectedAlumno = new Estudiante(); // Alumno nuevo o vacío
+        isModalOpen = true;
+    }
+
+    private void OpenModalWithAlumno(Estudiante alumno)
+    {
+        selectedAlumno = alumno;
+        isModalOpen = true;
+    }
+
+    private void CloseModal()
+    {
+        isModalOpen = false;
+    }
+
+    // Clase para representar un estudiante
+    public class Estudiante
     {
         public string DNI { get; set; }
         public string CUIL { get; set; }
@@ -227,6 +287,13 @@
         public string Tbase { get; set; }
         public bool ShowTbase { get; set; }
     }
+
+    protected override void OnInitialized()
+    {
+        // Inicializar la lista de DNIs al cargar el componente
+        filteredDnis = estudiantes.Select(e => e.DNI).Distinct().ToList();
+    }
 }
+
 
 

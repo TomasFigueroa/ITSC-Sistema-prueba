@@ -3,9 +3,97 @@
 @inject HttpClient Http
 
 <PageTitle>Profesores</PageTitle>
-<h3>Profesores</h3>
-<button class="btn btn-success" onclick="cargarCarrera()">Cargar Profesor</button>
 
+<h1>PROFESORES</h1>
+
+<button class="btn btn-success" @onclick="OpenModal">Cargar Profesor</button>
+
+<!-- Select para filtrar por materia -->
+<div class="mb-3">
+    <label class="form-label">Filtrar por Materia</label>
+    <select class="form-control" @bind="selectedMateria">
+        <option value="">Seleccione una materia</option>
+        @foreach (var materia in materias)
+        {
+            <option value="@materia">@materia</option>
+        }
+    </select>
+</div>
+
+<!-- Modal para cargar profesores -->
+@if (isModalOpen)
+{
+    <div class="modal fade show d-block" style="background-color: rgba(0, 0, 0, 0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Cargar Datos del Profesor</h5>
+                    <button type="button" class="btn-close" @onclick="CloseModal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">DNI</label>
+                        <input type="text" class="form-control" @bind="selectedProfesor.DNI" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">CUIL</label>
+                        <input type="text" class="form-control" @bind="selectedProfesor.CUIL" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Apellidos</label>
+                        <input type="text" class="form-control" @bind="selectedProfesor.Apellidos" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Nombres</label>
+                        <input type="text" class="form-control" @bind="selectedProfesor.Nombres" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Correo</label>
+                        <input type="email" class="form-control" @bind="selectedProfesor.Correo" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Estado</label>
+                        <input type="text" class="form-control" @bind="selectedProfesor.Estado" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Materia</label>
+                        <input type="text" class="form-control" @bind="selectedProfesor.Materia" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Legajo</label>
+                        <input type="text" class="form-control" @bind="selectedProfesor.Legajo" />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseModal">Cerrar</button>
+                    <button type="button" class="btn btn-primary" @onclick="SaveProfesor">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Modal para confirmar el borrado -->
+@if (isConfirmModalOpen)
+{
+    <div class="modal fade show d-block" style="background-color: rgba(0, 0, 0, 0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmar Borrado</h5>
+                    <button type="button" class="btn-close" @onclick="CloseConfirmModal"></button>
+                </div>
+                <div class="modal-body">
+                    ¿Estás seguro de que deseas borrar este profesor?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseConfirmModal">Cancelar</button>
+                    <button type="button" class="btn btn-danger" @onclick="DeleteProfesor">Borrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
 
 <div class="table-container" style="overflow: hidden; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); margin-bottom: 20px;">
     <div style="border-top-left-radius: 12px; border-top-right-radius: 12px; background-color: #f2f2f2; padding: 10px;">
@@ -20,32 +108,29 @@
                     <th style="border-right: 2px solid #ddd;">Estado</th>
                     <th style="border-right: 2px solid #ddd;">Materia</th>
                     <th style="border-right: 2px solid #ddd;">Legajo</th>
-                  
                     <th>Acción</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach (var item in items)
+                @foreach (var profesor in profesoresFiltrados)
                 {
                     <tr>
-                        <td style="border-right: 2px solid #ddd;">@item.DNI</td>
-                        <td style="border-right: 2px solid #ddd;">@item.CUIL</td>
-                        <td style="border-right: 2px solid #ddd;">@item.Apellidos</td>
-                        <td style="border-right: 2px solid #ddd;">@item.Nombres</td>
-                        <td style="border-right: 2px solid #ddd;">@item.Correo</td>
-                        <td style="border-right: 2px solid #ddd;">@item.Estado</td>
-                        <td style="border-right: 2px solid #ddd;">@item.Materia</td>
-                        <td style="border-right: 2px solid #ddd;">@item.Legajo</td>
-                      
+                        <td style="border-right: 2px solid #ddd;">@profesor.DNI</td>
+                        <td style="border-right: 2px solid #ddd;">@profesor.CUIL</td>
+                        <td style="border-right: 2px solid #ddd;">@profesor.Apellidos</td>
+                        <td style="border-right: 2px solid #ddd;">@profesor.Nombres</td>
+                        <td style="border-right: 2px solid #ddd;">@profesor.Correo</td>
+                        <td style="border-right: 2px solid #ddd;">@profesor.Estado</td>
+                        <td style="border-right: 2px solid #ddd;">@profesor.Materia</td>
+                        <td style="border-right: 2px solid #ddd;">@profesor.Legajo</td>
                         <td style="border: none; display: flex; justify-content: space-between;">
                             <div class="action-buttons">
-                                <button class="btn btn-danger"><i class="oi oi-trash"></i></button>
+                                <button class="btn btn-danger" @onclick="() => OpenConfirmModal(profesor)"><i class="oi oi-trash"></i></button>
                             </div>
                             <div class="action-buttons">
-                                <button class="btn btn-primary"><i class="oi oi-pencil"></i></button>
+                                <button class="btn btn-primary" @onclick="() => OpenModalWithProfesor(profesor)"><i class="oi oi-pencil"></i></button>
                             </div>
                         </td>
-
                     </tr>
                 }
             </tbody>
@@ -53,25 +138,82 @@
     </div>
 </div>
 
-
-
 @code {
-    List<Item> items = new List<Item>();
+    private bool isConfirmModalOpen = false;
+    private Profesor selectedProfesorToDelete;
+    private bool isModalOpen = false;
+    private Profesor selectedProfesor = new Profesor();
+    private List<Profesor> items = new List<Profesor>();
 
-    protected override void OnInitialized()
+    // Listas para las materias
+    private List<string> materias = new List<string> { "Matemáticas", "Programación", "Historia", "Química" };
+    private string selectedMateria = string.Empty;
+
+    // Lista de profesores
+    private List<Profesor> profesores = new List<Profesor>
     {
-        // Aquí puedes inicializar tu lista de elementos (items)
-        items = new List<Item>
-        {
-            new Item { DNI = "12345678", CUIL = "20-12345678-9", Apellidos = "Lopez", Nombres = "Jose", Correo = "jose.lopez@example.com", Estado = "Titular", Materia = "Programacion 1", Legajo = "DS12", 
-           }
-            // Agrega más elementos si es necesario
-        };
+        new Profesor { DNI = "12345678", CUIL = "20-12345678-9", Apellidos = "Lopez", Nombres = "Jose", Correo = "jose.lopez@example.com", Estado = "Titular", Materia = "Programación", Legajo = "DS12" },
+        new Profesor { DNI = "87654321", CUIL = "20-87654321-9", Apellidos = "Perez", Nombres = "Maria", Correo = "maria.perez@example.com", Estado = "Titular", Materia = "Matemáticas", Legajo = "DS13" },
+        new Profesor { DNI = "11223344", CUIL = "20-11223344-9", Apellidos = "Garcia", Nombres = "Luis", Correo = "luis.garcia@example.com", Estado = "Suplente", Materia = "Historia", Legajo = "DS14" },
+        new Profesor { DNI = "55667788", CUIL = "20-55667788-9", Apellidos = "Fernandez", Nombres = "Ana", Correo = "ana.fernandez@example.com", Estado = "Suplente", Materia = "Química", Legajo = "DS15" }
+    };
+
+    // Propiedad calculada para obtener los profesores filtrados
+    private List<Profesor> profesoresFiltrados => profesores
+        .Where(p => string.IsNullOrEmpty(selectedMateria) || p.Materia == selectedMateria)
+        .ToList();
+
+    // Métodos para los botones de acción
+    private void OpenConfirmModal(Profesor profesor)
+    {
+        // Lógica para abrir el modal de confirmación
+        selectedProfesorToDelete = profesor;
+        isConfirmModalOpen = true;
     }
 
- 
+    private void CloseConfirmModal()
+    {
+        isConfirmModalOpen = false;
+    }
 
-    public class Item
+    private void DeleteProfesor()
+    {
+        // Aquí deberías implementar la lógica para borrar el profesor
+        // Por ejemplo, podrías eliminarlo de la lista de profesores
+        profesores.Remove(selectedProfesorToDelete);
+
+        // Cerrar el modal de confirmación
+        CloseConfirmModal();
+    }
+
+    private void OpenModal()
+    {
+        selectedProfesor = new Profesor(); // Profesor nuevo o vacío
+        isModalOpen = true;
+    }
+
+    private void OpenModalWithProfesor(Profesor profesor)
+    {
+        selectedProfesor = profesor;
+        isModalOpen = true;
+    }
+
+    private void CloseModal()
+    {
+        isModalOpen = false;
+    }
+
+    private void SaveProfesor()
+    {
+        if (!profesores.Contains(selectedProfesor))
+        {
+            profesores.Add(selectedProfesor);
+        }
+        CloseModal();
+    }
+
+    // Clase para representar un profesor
+    public class Profesor
     {
         public string DNI { get; set; }
         public string CUIL { get; set; }
@@ -81,6 +223,11 @@
         public string Estado { get; set; }
         public string Materia { get; set; }
         public string Legajo { get; set; }
-        
+    }
+
+    protected override void OnInitialized()
+    {
+        // Inicializar la lista de materias al cargar el componente
     }
 }
+

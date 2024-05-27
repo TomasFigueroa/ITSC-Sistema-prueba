@@ -1,37 +1,36 @@
 ﻿@page "/Notas"
 
+@using System.ComponentModel.DataAnnotations
 
 <div class="table-container" style="overflow: hidden; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); margin-bottom: 20px;">
     <div style="border-top-left-radius: 12px; border-top-right-radius: 12px; background-color: #f2f2f2; padding: 10px;">
-        <table class="table" style="border-collapse: collapse; width: 100%; border: 2px solid #ddd;">
+        <button class="btn btn-success" @onclick="OpenModalToAdd">Agregar Nota</button>
+        <table class="table" style="border-collapse: collapse; width: 100%; border: 2px solid #ddd; margin-top: 10px;">
             <thead>
                 <tr style="border-bottom: 2px solid #ddd;">
                     <th rowspan="2" style="border-right: 2px solid #ddd; border-bottom: 2px solid #ddd;">Instancia</th>
-                    
-                </tr>
-                <tr>
                     <th style="border-right: 2px solid #ddd;">Nota</th>
                     <th style="border-right: 2px solid #ddd;">Fecha</th>
+                    <th>Acciones</th>
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td style="border-right: 2px solid #ddd; border-bottom: 2px solid #ddd;">Instacia evaluativa 1</td>
-                    <td style="border-right: 2px solid #ddd; border-bottom: 2px solid #ddd;">8.5</td>
-                    <td style="border-bottom: 2px solid #ddd;">20/04/2024</td>
-                </tr>
-                <tr>
-                    <td style="border-right: 2px solid #ddd; border-bottom: 2px solid #ddd;">Instacia evaluativa 2</td>
-                    <td style="border-right: 2px solid #ddd; border-bottom: 2px solid #ddd;">7</td>
-                    <td style="border-bottom: 2px solid #ddd;">20/05/2024</td>
-                </tr>
+                @foreach (var nota in notas)
+                {
+                    <tr>
+                        <td style="border-right: 2px solid #ddd; border-bottom: 2px solid #ddd;">@nota.Instancia</td>
+                        <td style="border-right: 2px solid #ddd; border-bottom: 2px solid #ddd;">@nota.Valor</td>
+                        <td style="border-right: 2px solid #ddd; border-bottom: 2px solid #ddd;">@nota.Fecha.ToShortDateString()</td>
+                        <td style="border-bottom: 2px solid #ddd;">
+                            <button class="btn btn-primary me-2" @onclick="() => OpenModalToEdit(nota)">Editar</button>
+                            <button class="btn btn-danger" @onclick="() => OpenConfirmDeleteModal(nota)">Eliminar</button>
+                        </td>
+                    </tr>
+                }
             </tbody>
         </table>
     </div>
 </div>
-
-
-
 
 <div class="table-container" style="overflow: hidden; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); margin-bottom: 20px;">
     <div style="border-top-left-radius: 12px; border-top-right-radius: 12px; background-color: #f2f2f2; padding: 10px;">
@@ -40,35 +39,205 @@
                 <tr style="border-bottom: 2px solid #ddd;">
                     <th colspan="2" style="border-right: 2px solid #ddd;">Estado de la materia</th>
                 </tr>
-                <tr >
-                    <th style="border-right: 2px solid #ddd;">Condicion</th>
+                <tr>
+                    <th style="border-right: 2px solid #ddd;">Condición</th>
                     <th style="border-right: 2px solid #ddd;">Promedio</th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
-                    <td style="border-right: 2px solid #dee2e6;">Regular</td>
-                    <td>8.5</td>
+                    <td style="border-right: 2px solid #dee2e6;">@estadoMateria.Condicion</td>
+                    <td>@estadoMateria.Promedio</td>
                 </tr>
             </tbody>
         </table>
     </div>
 </div>
 
+<!-- Modal para agregar y editar notas -->
+@if (isModalOpen)
+{
+    <div class="modal fade show d-block" style="background-color: rgba(0, 0, 0, 0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@(isEdit ? "Editar Nota" : "Agregar Nota")</h5>
+                    <button type="button" class="btn-close" @onclick="CloseModal"></button>
+                </div>
+                <div class="modal-body">
+                    <EditForm Model="@currentNota" OnValidSubmit="@(isEdit ? EditNota : AddNota)">
+                        <DataAnnotationsValidator />
+                        <div class="mb-3">
+                            <label class="form-label">Instancia</label>
+                            <InputText class="form-control" @bind-Value="currentNota.Instancia" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Nota</label>
+                            <InputNumber class="form-control" @bind-Value="currentNota.Valor" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Fecha</label>
+                            <InputDate class="form-control" @bind-Value="currentNota.Fecha" />
+                        </div>
+                        <button type="submit" class="btn btn-primary">@((isEdit) ? "Guardar Cambios" : "Agregar Nota")</button>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+}
 
-
-
-
-
-
-
-
-
-
-
-
-
+<!-- Modal para confirmar eliminación -->
+@if (isConfirmDeleteModalOpen)
+{
+    <div class="modal fade show d-block" style="background-color: rgba(0, 0, 0, 0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmar Eliminación</h5>
+                    <button type="button" class="btn-close" @onclick="CloseConfirmDeleteModal"></button>
+                </div>
+                <div class="modal-body">
+                    ¿Estás seguro de que deseas eliminar esta nota?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseConfirmDeleteModal">Cancelar</button>
+                    <button type="button" class="btn btn-danger" @onclick="DeleteNota">Eliminar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
 
 @code {
-    //??
+    private List<Nota> notas = new List<Nota>
+    {
+        new Nota { Instancia = "Instancia evaluativa 1", Valor = 8.5, Fecha = new DateTime(2024, 4, 20) },
+        new Nota { Instancia = "Instancia evaluativa 2", Valor = 7, Fecha = new DateTime(2024, 5, 20) }
+    };
+
+    private EstadoMateria estadoMateria = new EstadoMateria { Condicion = "Regular", Promedio = 8.5 };
+
+    private Alumno alumno = new Alumno { Nombre = "Juan", Apellido = "Perez", CUIL = "20-12345678-9" };
+
+    private string carreraSeleccionada;
+    private string divisionSeleccionada;
+
+    private bool isModalOpen = false;
+    private bool isEdit = false;
+    private Nota currentNota = new Nota();
+    private Nota notaToDelete;
+    private bool isConfirmDeleteModalOpen = false;
+
+    private void OpenModalToAdd()
+    {
+        currentNota = new Nota();
+        isEdit = false;
+        isModalOpen = true;
+    }
+
+    private void OpenModalToEdit(Nota nota)
+    {
+        currentNota = new Nota
+        {
+            Instancia = nota.Instancia,
+            Valor = nota.Valor,
+            Fecha = nota.Fecha
+        };
+        isEdit = true;
+        isModalOpen = true;
+    }
+
+    private void CloseModal()
+    {
+        isModalOpen = false;
+    }
+
+    private void AddNota()
+    {
+        notas.Add(currentNota);
+        CloseModal();
+        ActualizarPromedio();
+    }
+
+    private void EditNota()
+    {
+        var nota = notas.FirstOrDefault(n => n.Instancia == currentNota.Instancia && n.Fecha == currentNota.Fecha);
+        if (nota != null)
+        {
+            nota.Valor = currentNota.Valor;
+            nota.Fecha = currentNota.Fecha;
+        }
+        CloseModal();
+        ActualizarPromedio();
+    }
+
+    private void OpenConfirmDeleteModal(Nota nota)
+    {
+        notaToDelete = nota;
+        isConfirmDeleteModalOpen = true;
+    }
+
+    private void CloseConfirmDeleteModal()
+    {
+        isConfirmDeleteModalOpen = false;
+    }
+
+    private void DeleteNota()
+    {
+        notas.Remove(notaToDelete);
+        CloseConfirmDeleteModal();
+        ActualizarPromedio();
+    }
+
+    private void ActualizarPromedio()
+    {
+        if (notas.Count > 0)
+        {
+            estadoMateria.Promedio = notas.Average(n => n.Valor);
+            estadoMateria.Condicion = estadoMateria.Promedio < 4 ? "Libre" : "Regular";
+        }
+        else
+        {
+            estadoMateria.Promedio = 0;
+            estadoMateria.Condicion = "Libre";
+        }
+    }
+
+    private void CargarNotas()
+    {
+        // Aquí puedes cargar las notas según la carrera y división seleccionada.
+        // Actualmente se usa una lista de notas de ejemplo.
+        notas = new List<Nota>
+        {
+            new Nota { Instancia = "Parcial 1", Valor = 8, Fecha = new DateTime(2024, 4, 1) },
+            new Nota { Instancia = "Parcial 2", Valor = 6, Fecha = new DateTime(2024, 5, 1) }
+        };
+        ActualizarPromedio();
+    }
+
+    public class Nota
+    {
+        [Required(ErrorMessage = "La instancia es requerida.")]
+        public string Instancia { get; set; }
+
+        [Range(0, 10, ErrorMessage = "La nota debe estar entre 0 y 10.")]
+        public double Valor { get; set; }
+
+        [Required(ErrorMessage = "La fecha es requerida.")]
+        public DateTime Fecha { get; set; }
+    }
+
+    public class EstadoMateria
+    {
+        public string Condicion { get; set; }
+        public double Promedio { get; set; }
+    }
+
+    public class Alumno
+    {
+        public string Nombre { get; set; }
+        public string Apellido { get; set; }
+        public string CUIL { get; set; }
+    }
 }

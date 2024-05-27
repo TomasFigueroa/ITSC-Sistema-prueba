@@ -1,54 +1,168 @@
-﻿@page "/Calificacion"
-<PageTitle>Cakificacion</PageTitle>
-<h3>Calificacion</h3>
+﻿@page "/Notass"
+@using INTITUTO1.Shared
+@inject HttpClient Http
 
+<PageTitle>Calificaciones</PageTitle>
 
-<div class="table-container">
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Nombre</th>
-                <th>Plan</th>
-                <th>Fecha Inicio</th>
-                <th>Fecha Fin</th>
-                <th>Accion</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>Desarrollo de Software</td>
-                <td>2024/22</td>
-                <td>01/03/2021</td>
-                <td>01/03/2024</td>
-                <td>
-                    <a class="btn btn-primary centred" href="Ano"><i class="oi oi-book" aria-hidden="true"></i></a>
-                </td>
-                
-            </tr>
-            <tr>
-                <td>Enfermeria</td>
-                <td>1122/12</td>
-                <td>01/03/2021</td>
-                <td>01/03/2024</td>
-                <td>
-                    <a class="btn btn-primary centred" href=""><i class="oi oi-book" aria-hidden="true"></i></a>
-                </td>
+<h1>CALIFICACIONES</h1>
 
-            </tr>
+<!-- Select para filtrar por carrera -->
+<div class="mb-3">
+    <label class="form-label">Filtrar por Carrera</label>
+    <select class="form-control" @onchange="ActualizarDivisiones">
+        <option value="">Seleccione una carrera</option>
+        @foreach (var carrera in carreras)
+        {
+            <option value="@carrera">@carrera</option>
+        }
+    </select>
+</div>
 
+<!-- Select para filtrar por división -->
+<div class="mb-3">
+    <label class="form-label">Filtrar por División</label>
+    <select class="form-control" @onchange="ActualizarMaterias">
+        <option value="">Seleccione una división</option>
+        @foreach (var division in filteredDivisiones)
+        {
+            <option value="@division">@division</option>
+        }
+    </select>
+</div>
 
-        </tbody>
-    </table>
+<!-- Select para filtrar por materia -->
+<div class="mb-3">
+    <label class="form-label">Filtrar por Materia</label>
+    <select class="form-control" @onchange="FiltrarPorMateria">
+        <option value="">Seleccione una materia</option>
+        @foreach (var materia in filteredMaterias)
+        {
+            <option value="@materia">@materia</option>
+        }
+    </select>
+</div>
+
+<div class="table-container" style="overflow: hidden; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); margin-bottom: 20px;">
+    <div style="border-top-left-radius: 12px; border-top-right-radius: 12px; background-color: #f2f2f2; padding: 10px;">
+        <table class="table" style="border-collapse: collapse; width: 100%; border: 2px solid #ddd;">
+            <thead>
+                <tr style="border-bottom: 2px solid #ddd;">
+                    <th style="border-right: 2px solid #ddd;">DNI</th>
+                    <th style="border-right: 2px solid #ddd;">Nombre</th>
+                    <th style="border-right: 2px solid #ddd;">Materia</th>
+                    <th style="border-right: 2px solid #ddd;">Carrera</th>
+                    <th style="border-right: 2px solid #ddd;">División</th>
+                    <th style="border-right: 2px solid #ddd;">Acion</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in calificacionesFiltradas)
+                {
+                    <tr>
+                        <td style="border-right: 2px solid #ddd;">@item.DNI</td>
+                        <td style="border-right: 2px solid #ddd;">@item.Nombre</td>
+                        <td style="border-right: 2px solid #ddd;">@item.Materia</td>
+                        <td style="border-right: 2px solid #ddd;">@item.Carrera</td>
+                        <td style="border-right: 2px solid #ddd;">@item.Division</td>
+                        <td>
+                            <div class="action-buttons m-1">
+
+                                <a class="btn btn-primary" href="Notas"><i class="oi oi-book" aria-hidden="true"></i></a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
 </div>
 
 @code {
-    private bool collapseNavMenu = true;
+    private List<string> carreras = new List<string> { "Ingeniería Informática", "Medicina", "Derecho", "Arquitectura" };
+    private string selectedCarrera = string.Empty;
 
-    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+    private List<string> divisiones = new List<string> { "A", "B", "C", "D" };
+    private string selectedDivision = string.Empty;
+    private List<string> filteredDivisiones = new List<string>();
 
-    private void ToggleNavMenu()
+    private List<string> materias = new List<string> { "Matemáticas", "Física", "Química", "Historia" };
+    private string selectedMateria = string.Empty;
+    private List<string> filteredMaterias = new List<string>();
+
+    private List<Calificaciones> calificaciones = new List<Calificaciones>
     {
-        collapseNavMenu = !collapseNavMenu;
+        new Calificaciones { DNI = "12345678", Nombre = "Juan Gonzalez", Materia = "Matemáticas", Calificacion = 9, Carrera = "Ingeniería Informática", Division = "A" },
+        new Calificaciones { DNI = "87654321", Nombre = "Ana López", Materia = "Física", Calificacion = 8, Carrera = "Medicina", Division = "B" },
+        new Calificaciones { DNI = "11223344", Nombre = "Luis García", Materia = "Química", Calificacion = 7, Carrera = "Derecho", Division = "C" },
+        new Calificaciones { DNI = "55667788", Nombre = "María Rodríguez", Materia = "Historia", Calificacion = 10, Carrera = "Arquitectura", Division = "D" }
+    };
+
+    // Propiedad calculada para obtener las calificaciones filtradas
+    private List<Calificaciones> calificacionesFiltradas => calificaciones
+        .Where(c => (string.IsNullOrEmpty(selectedCarrera) || c.Carrera == selectedCarrera) &&
+                    (string.IsNullOrEmpty(selectedDivision) || c.Division == selectedDivision) &&
+                    (string.IsNullOrEmpty(selectedMateria) || c.Materia == selectedMateria))
+        .ToList();
+
+    // Método para actualizar la lista de divisiones según la carrera seleccionada
+    private void ActualizarDivisiones(ChangeEventArgs e)
+    {
+        selectedCarrera = e.Value.ToString();
+        filteredDivisiones = calificaciones
+            .Where(calificacion => string.IsNullOrEmpty(selectedCarrera) || calificacion.Carrera == selectedCarrera)
+            .Select(calificacion => calificacion.Division)
+            .Distinct()
+            .ToList();
+
+        // Reset selected Division if it's not in the filtered list
+        if (!filteredDivisiones.Contains(selectedDivision))
+        {
+            selectedDivision = string.Empty;
+        }
+
+        // También actualizamos las materias en caso de que la división esté seleccionada
+        ActualizarMaterias(null);
+    }
+
+    // Método para actualizar la lista de materias según la división seleccionada
+    private void ActualizarMaterias(ChangeEventArgs e)
+    {
+        if (e != null)
+        {
+            selectedDivision = e.Value.ToString();
+        }
+
+        filteredMaterias = calificaciones
+            .Where(calificacion => (string.IsNullOrEmpty(selectedCarrera) || calificacion.Carrera == selectedCarrera) &&
+                                   (string.IsNullOrEmpty(selectedDivision) || calificacion.Division == selectedDivision))
+            .Select(calificacion => calificacion.Materia)
+            .Distinct()
+            .ToList();
+
+        // Reset selected Materia if it's not in the filtered list
+        if (!filteredMaterias.Contains(selectedMateria))
+        {
+            selectedMateria = string.Empty;
+        }
+    }
+
+    // Método para filtrar por materia
+    private void FiltrarPorMateria(ChangeEventArgs e)
+    {
+        selectedMateria = e.Value.ToString();
+    }
+
+    // Clase para representar una calificación
+    public class Calificaciones
+    {
+        public string DNI { get; set; }
+        public string Nombre { get; set; }
+        public string Materia { get; set; }
+        public int Calificacion { get; set; }
+        public string Carrera { get; set; }
+        public string Division { get; set; }
     }
 }
+
+
 
