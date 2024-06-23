@@ -1,0 +1,313 @@
+﻿@page "/Division"
+
+<PageTitle>Division</PageTitle>
+<button class="btn btn-success" @onclick="OpenModalToAdd">Cargar División</button>
+<div class="table-container" style="overflow: hidden; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); margin-bottom: 20px;">
+    <div style="border-top-left-radius: 12px; border-top-right-radius: 12px; background-color: #f2f2f2; padding: 10px;">
+        <table class="table" style="border-collapse: collapse; width: 100%; border: 2px solid #E6E6FA;">
+            <thead>
+                <tr style="border-bottom: 2px solid #ddd;">
+                    <th style="border-right: 2px solid #ddd;">Nombre</th>
+                    <th style="border-right: 2px solid #ddd;">Carrera</th>
+                    <th style="border-right: 2px solid #ddd;">Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var division in divisiones)
+                {
+                    <tr>
+                        <td style="border-right: 2px solid #ddd;">@division.Nombre</td>
+                        <td style="border-right: 2px solid #ddd;">@division.Carrera</td>
+                        <td>
+                            <div class="action-buttons m-1">
+                                <button class="btn btn-primary me-2" @onclick="() => OpenModalToEdit(division)"><i class="oi oi-pencil"></i></button>
+                                <button class="btn btn-danger" @onclick="() => OpenConfirmDeleteModal(division)"><i class="oi oi-trash"></i></button>
+                                <button class="btn btn-info" @onclick="() => ViewAlumnos(division)"><i class="oi oi-people"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal para agregar y editar divisiones -->
+@if (isModalOpen)
+{
+    <div class="modal fade show d-block" style="background-color: rgba(0, 0, 0, 0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@(isEdit ? "Editar División" : "Agregar División")</h5>
+                    <button type="button" class="btn-close" @onclick="CloseModal"></button>
+                </div>
+                <div class="modal-body">
+                    <EditForm Model="@currentDivision" OnValidSubmit="@(isEdit ? EditDivision : AddDivision)">
+                        <DataAnnotationsValidator />
+                        <div class="mb-3">
+                            <label class="form-label">Nombre</label>
+                            <InputText class="form-control" @bind-Value="currentDivision.Nombre" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Carrera</label>
+                            <InputSelect class="form-control" @bind-Value="currentDivision.Carrera">
+                                <option value="">Seleccione una carrera</option>
+                                @foreach (var carrera in carrerasDisponibles)
+                                {
+                                    <option value="@carrera">@carrera</option>
+                                }
+                            </InputSelect>
+                        </div>
+                        <button type="submit" class="btn btn-primary">@((isEdit) ? "Guardar Cambios" : "Agregar División")</button>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Modal para confirmar eliminación -->
+@if (isConfirmDeleteModalOpen)
+{
+    <div class="modal fade show d-block" style="background-color: rgba(0, 0, 0, 0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmar Eliminación</h5>
+                    <button type="button" class="btn-close" @onclick="CloseConfirmDeleteModal"></button>
+                </div>
+                <div class="modal-body">
+                    ¿Estás seguro de que deseas eliminar esta división?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseConfirmDeleteModal">Cancelar</button>
+                    <button type="button" class="btn btn-danger" @onclick="DeleteDivision">Eliminar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Modal para ver y agregar alumnos -->
+@if (isAlumnosModalOpen)
+{
+    <div class="modal fade show d-block" style="background-color: rgba(0, 0, 0, 0.5);">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Alumnos de @currentDivision.Nombre</h5>
+                    <button type="button" class="btn-close" @onclick="CloseAlumnosModal"></button>
+                </div>
+                <div class="modal-body">
+                    <button class="btn btn-success" @onclick="OpenModalToAddAlumno">Agregar Alumno</button>
+                    <table class="table mt-3">
+                        <thead>
+                            <tr>
+                                <th>Apellido</th>
+                                <th>Nombre</th>
+                                <th>Edad</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var alumno in currentDivision.Alumnos)
+                            {
+                                <tr>
+                                    <td>@alumno.Apellido</td>
+                                    <td>@alumno.Nombre</td>
+                                    <td>@alumno.Edad</td>
+                                    <td>
+                                        <div class="action-buttons m-1">
+                                            <button class="btn btn-danger" @onclick="() => RemoveAlumno(alumno)"><i class="oi oi-trash"></i></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Modal para seleccionar alumno -->
+@if (isBuscarAlumnosModalOpen)
+{
+    <div class="modal fade show d-block" style="background-color: rgba(0, 0, 0, 0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Seleccionar Alumno</h5>
+                    <button type="button" class="btn-close" @onclick="CloseBuscarAlumnosModal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Alumno</label>
+                        <InputSelect class="form-control" @bind-Value="selectedAlumnoDni">
+                            <option value="">Seleccione un alumno</option>
+                            @foreach (var alumno in alumnosDisponibles)
+                            {
+                                <option value="@alumno.DNI">@alumno.Apellido, @alumno.Nombre (@alumno.DNI)</option>
+                            }
+                        </InputSelect>
+                    </div>
+                    <button class="btn btn-primary" @onclick="AgregarAlumnoSeleccionado">Agregar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<Divisiones> divisiones = new List<Divisiones>
+    {
+        new Divisiones { Nombre = "División 1", Carrera = "Ingeniería Informática", Alumnos = new List<Alumno>
+            {
+                new Alumno { DNI = "12345678", Apellido = "Pérez", Nombre = "Juan", Edad = 20 },
+                new Alumno { DNI = "87654321", Apellido = "López", Nombre = "Ana", Edad = 22 }
+            }
+        },
+        new Divisiones { Nombre = "División 2", Carrera = "Ingeniería Civil", Alumnos = new List<Alumno>
+            {
+                new Alumno { DNI = "34567890", Apellido = "García", Nombre = "Carlos", Edad = 23 }
+            }
+        }
+    };
+
+    private List<string> carrerasDisponibles = new List<string>
+    {
+        "Ingeniería Informática",
+        "Ingeniería Civil",
+        "Medicina",
+        "Derecho",
+        "Arquitectura"
+    };
+
+    private bool isModalOpen = false;
+    private bool isEdit = false;
+    private Divisiones currentDivision = new Divisiones();
+    private Divisiones divisionToDelete;
+    private bool isConfirmDeleteModalOpen = false;
+    private bool isAlumnosModalOpen = false;
+    private bool isBuscarAlumnosModalOpen = false;
+
+    private string selectedAlumnoDni;
+    private List<Alumno> alumnosDisponibles = new List<Alumno>
+    {
+        new Alumno { DNI = "12345678", Apellido = "Pérez", Nombre = "Juan", Edad = 20 },
+        new Alumno { DNI = "87654321", Apellido = "López", Nombre = "Ana", Edad = 22 },
+        new Alumno { DNI = "34567890", Apellido = "García", Nombre = "Carlos", Edad = 23 }
+    };
+
+    private void OpenModalToAdd()
+    {
+        currentDivision = new Divisiones();
+        isEdit = false;
+        isModalOpen = true;
+    }
+
+    private void OpenModalToEdit(Divisiones division)
+    {
+        currentDivision = new Divisiones
+            {
+                Nombre = division.Nombre,
+                Carrera = division.Carrera,
+                Alumnos = division.Alumnos
+            };
+        isEdit = true;
+        isModalOpen = true;
+    }
+
+    private void CloseModal()
+    {
+        isModalOpen = false;
+    }
+
+    private void AddDivision()
+    {
+        divisiones.Add(currentDivision);
+        CloseModal();
+    }
+
+    private void EditDivision()
+    {
+        var division = divisiones.FirstOrDefault(d => d.Nombre == currentDivision.Nombre);
+        if (division != null)
+        {
+            division.Nombre = currentDivision.Nombre;
+            division.Carrera = currentDivision.Carrera;
+            division.Alumnos = currentDivision.Alumnos;
+        }
+        CloseModal();
+    }
+
+    private void OpenConfirmDeleteModal(Divisiones division)
+    {
+        divisionToDelete = division;
+        isConfirmDeleteModalOpen = true;
+    }
+
+    private void CloseConfirmDeleteModal()
+    {
+        isConfirmDeleteModalOpen = false;
+    }
+
+    private void DeleteDivision()
+    {
+        divisiones.Remove(divisionToDelete);
+        CloseConfirmDeleteModal();
+    }
+
+    private void ViewAlumnos(Divisiones division)
+    {
+        currentDivision = division;
+        isAlumnosModalOpen = true;
+    }
+
+    private void CloseAlumnosModal()
+    {
+        isAlumnosModalOpen = false;
+    }
+
+    private void OpenModalToAddAlumno()
+    {
+        isBuscarAlumnosModalOpen = true;
+    }
+
+    private void CloseBuscarAlumnosModal()
+    {
+        isBuscarAlumnosModalOpen = false;
+    }
+
+    private void AgregarAlumnoSeleccionado()
+    {
+        var alumno = alumnosDisponibles.FirstOrDefault(a => a.DNI == selectedAlumnoDni);
+        if (alumno != null && currentDivision != null)
+        {
+            currentDivision.Alumnos.Add(alumno);
+            CloseBuscarAlumnosModal();
+        }
+    }
+
+    private void RemoveAlumno(Alumno alumno)
+    {
+        currentDivision.Alumnos.Remove(alumno);
+    }
+
+    public class Divisiones
+    {
+        public string Nombre { get; set; }
+        public string Carrera { get; set; }
+        public List<Alumno> Alumnos { get; set; } = new List<Alumno>();
+    }
+
+    public class Alumno
+    {
+        public string DNI { get; set; }
+        public string Apellido { get; set; }
+        public string Nombre { get; set; }
+        public int Edad { get; set; }
+    }
+}

@@ -1,29 +1,28 @@
 ﻿@page "/Carrera"
 
 <PageTitle>Carrera</PageTitle>
-
+<button class="btn btn-success" @onclick="OpenModalToAdd">Cargar Carrera</button>
 <div class="table-container" style="overflow: hidden; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); margin-bottom: 20px;">
     <div style="border-top-left-radius: 12px; border-top-right-radius: 12px; background-color: #f2f2f2; padding: 10px;">
-        <button class="btn btn-success" @onclick="OpenModalToAdd">Cargar Carrera</button>
-        <table class="table" style="border-collapse: collapse; width: 100%; border: 2px solid #ddd; margin-top: 10px;">
-            <thead>
+        <table class="table" style="border-collapse: collapse; width: 100%; border: 2px solid #E6E6FA;">
+            <thead >
                 <tr style="border-bottom: 2px solid #ddd;">
-                    <th>Nombre</th>
-                    <th>Plan</th>
-                    <th>Fecha Inicio</th>
-                    <th>Fecha Fin</th>
-                    <th>Accion</th>
+                    <th style="border-right: 2px solid #ddd;">Nombre</th>
+                    <th style="border-right: 2px solid #ddd;">Plan</th>
+                    <th style="border-right: 2px solid #ddd;">Fecha Inicio</th>
+                    <th style="border-right: 2px solid #ddd;">Fecha Fin</th>
+                    <th style="border-right: 2px solid #ddd;">Acción</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach (var carrera in carreras)
                 {
                     <tr>
-                        <td style="border-right: 2px solid #ddd; border-bottom: 2px solid #ddd;">@carrera.Nombre</td>
-                        <td style="border-right: 2px solid #ddd; border-bottom: 2px solid #ddd;">@carrera.Plan</td>
-                        <td style="border-right: 2px solid #ddd; border-bottom: 2px solid #ddd;">@carrera.FechaInicio.ToShortDateString()</td>
-                        <td style="border-right: 2px solid #ddd; border-bottom: 2px solid #ddd;">@carrera.FechaFin.ToShortDateString()</td>
-                        <td style="border-bottom: 2px solid #ddd;">
+                        <td style="border-right: 2px solid #ddd;">@carrera.Nombre</td>
+                        <td style="border-right: 2px solid #ddd;">@carrera.Plan</td>
+                        <td style="border-right: 2px solid #ddd;">@carrera.FechaInicio.ToShortDateString()</td>
+                        <td style="border-right: 2px solid #ddd;">@carrera.FechaFin.ToShortDateString()</td>
+                        <td>
                             <div class="action-buttons m-1">
                                 <button class="btn btn-primary me-2" @onclick="() => OpenModalToEdit(carrera)"><i class="oi oi-pencil"></i></button>
                                 <button class="btn btn-danger" @onclick="() => OpenConfirmDeleteModal(carrera)"><i class="oi oi-trash"></i></button>
@@ -35,6 +34,7 @@
         </table>
     </div>
 </div>
+
 
 <!-- Modal para agregar y editar carreras -->
 @if (isModalOpen)

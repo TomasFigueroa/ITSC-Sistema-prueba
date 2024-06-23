@@ -1,55 +1,254 @@
-﻿@page "/Materia"
+﻿@page "/materias"
 
+<PageTitle>Materias</PageTitle>
+<button class="btn btn-success" @onclick="OpenModalToAdd">Cargar Materia</button>
 
-
-
-
-
- 
-<h3 style="text-align:center">Materia</h3>
-<div class="table-container">
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Nombre</th>
-                <th>Año</th>
-                <th>Notas</th>
-
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>Programacion 1</td>
-                <td>1</td>
-                <td class ="p-3 d-flex justify-content-center align-items-center gap-2 ">
-                    
-                     <button class="btn btn-danger d-inline-block mr-1" ><i class="oi oi-trash"></i></button>
-                    <button class="btn btn-primary d-inline-block" ><i class="oi oi-pencil"></i></button>
-                    <NavLink class="nav-link btn btn-primary" href="Calificaciones">
-                            <span class="" aria-hidden="true">Alumnos</span>
-                     </NavLink>
-                    
-                </td>
-                
-
-            </tr>
-            <tr>
-                <td>Programacion 2</td>
-                <td>2</td>
-                <td class="p-3 d-flex justify-content-center align-items-center gap-2 ">
-                    <button class="btn btn-danger d-inline-block mr-1"><i class="oi oi-trash"></i></button>
-                    <button class="btn btn-primary d-inline-block"><i class="oi oi-pencil"></i></button>
-                    <NavLink class="nav-link btn btn-primary" href="">
-                        <span class="" aria-hidden="true">Alumnos</span>
-                    </NavLink>
-                </td>
-                
-            </tr>
-
-
-        </tbody>
-    </table>
+<!-- Filtros -->
+<div class="mb-3">
+    <label class="form-label">Filtrar por Carrera</label>
+    <select class="form-control" @bind="selectedCarrera">
+        <option value="">Todas las Carreras</option>
+        @foreach (var carrera in carreras)
+        {
+            <option value="@carrera.Nombre">@carrera.Nombre</option>
+        }
+    </select>
 </div>
-@code {
+<div class="mb-3">
+    <label class="form-label">Filtrar por División</label>
+    <input type="text" class="form-control" @bind="selectedDivision" placeholder="División" />
+</div>
+<div class="mb-3">
+    <label class="form-label">Filtrar por Año</label>
+    <input type="text" class="form-control" @bind="selectedAño" placeholder="Año" />
+</div>
 
+<div class="table-container" style="overflow: hidden; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); margin-bottom: 20px;">
+    <div style="border-top-left-radius: 12px; border-top-right-radius: 12px; background-color: #f2f2f2; padding: 10px;">
+        <table class="table" style="border-collapse: collapse; width: 100%; border: 2px solid #E6E6FA;">
+            <thead>
+                <tr style="border-bottom: 2px solid #ddd;">
+                    <th style="border-right: 2px solid #ddd;">Nombre</th>
+                    <th style="border-right: 2px solid #ddd;">Carrera</th>
+                    <th style="border-right: 2px solid #ddd;">División</th>
+                    <th style="border-right: 2px solid #ddd;">Año</th>
+                    <th style="border-right: 2px solid #ddd;">Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var materia in filteredMaterias)
+                {
+                    <tr>
+                        <td style="border-right: 2px solid #ddd;">@materia.Nombre</td>
+                        <td style="border-right: 2px solid #ddd;">@materia.Carrera</td>
+                        <td style="border-right: 2px solid #ddd;">@materia.Division</td>
+                        <td style="border-right: 2px solid #ddd;">@materia.Año</td>
+                        <td>
+                            <div class="action-buttons m-1">
+                                <button class="btn btn-primary me-2" @onclick="() => OpenModalToEdit(materia)"><i class="oi oi-pencil"></i></button>
+                                <button class="btn btn-danger" @onclick="() => OpenConfirmDeleteModal(materia)"><i class="oi oi-trash"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal para agregar y editar materias -->
+@if (isModalOpen)
+{
+    <div class="modal fade show d-block" style="background-color: rgba(0, 0, 0, 0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@(isEdit ? "Editar Materia" : "Agregar Materia")</h5>
+                    <button type="button" class="btn-close" @onclick="CloseModal"></button>
+                </div>
+                <div class="modal-body">
+                    <EditForm Model="@currentMateria" OnValidSubmit="@(isEdit ? EditMateria : AddMateria)">
+                        <DataAnnotationsValidator />
+                        <div class="mb-3">
+                            <label class="form-label">Nombre</label>
+                            <InputText class="form-control" @bind-Value="currentMateria.Nombre" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Carrera</label>
+                            <InputSelect class="form-control" @bind-Value="currentMateria.Carrera">
+                                <option value="">Seleccione una carrera</option>
+                                @foreach (var carrera in carreras)
+                                {
+                                    <option value="@carrera.Nombre">@carrera.Nombre</option>
+                                }
+                            </InputSelect>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">División</label>
+                            <InputSelect class="form-control" @bind-Value="currentMateria.Division">
+                                <option value="">Seleccione una división</option>
+                                @foreach (var division in FiltrarDivisionesPorCarrera(currentMateria.Carrera))
+                                {
+                                    <option value="@division">@division</option>
+                                }
+                            </InputSelect>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Año</label>
+                            <InputText class="form-control" @bind-Value="currentMateria.Año" />
+                        </div>
+                        <button type="submit" class="btn btn-primary">@((isEdit) ? "Guardar Cambios" : "Agregar Materia")</button>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Modal para confirmar eliminación -->
+@if (isConfirmDeleteModalOpen)
+{
+    <div class="modal fade show d-block" style="background-color: rgba(0, 0, 0, 0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmar Eliminación</h5>
+                    <button type="button" class="btn-close" @onclick="CloseConfirmDeleteModal"></button>
+                </div>
+                <div class="modal-body">
+                    ¿Estás seguro de que deseas eliminar esta materia?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseConfirmDeleteModal">Cancelar</button>
+                    <button type="button" class="btn btn-danger" @onclick="DeleteMateria">Eliminar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<Materias> materias = new List<Materias>
+    {
+        new Materias { Nombre = "Matemáticas", Carrera = "Desarrollo de Software", Division = "División 1", Año = "2024" },
+        new Materias { Nombre = "Física", Carrera = "Enfermería", Division = "División 2", Año = "2025" }
+    };
+
+    private List<Carrera> carreras = new List<Carrera>
+    {
+        new Carrera { Nombre = "Desarrollo de Software", Plan = "2024/22", FechaInicio = new DateTime(2021, 3, 1), FechaFin = new DateTime(2024, 3, 1) },
+        new Carrera { Nombre = "Enfermería", Plan = "1122/12", FechaInicio = new DateTime(2021, 3, 1), FechaFin = new DateTime(2024, 3, 1) }
+    };
+
+    private List<Divisiones> divisiones = new List<Divisiones>
+    {
+        new Divisiones { Nombre = "División 1", Carrera = "Desarrollo de Software" },
+        new Divisiones { Nombre = "División 2", Carrera = "Enfermería" },
+        new Divisiones { Nombre = "División 3", Carrera = "Medicina" }
+    };
+
+    private bool isModalOpen = false;
+    private bool isEdit = false;
+    private Materias currentMateria = new Materias();
+    private Materias materiaToDelete;
+    private bool isConfirmDeleteModalOpen = false;
+
+    private string selectedCarrera = string.Empty;
+    private string selectedDivision = string.Empty;
+    private string selectedAño = string.Empty;
+
+    private IEnumerable<Materias> filteredMaterias => materias
+        .Where(m => (string.IsNullOrEmpty(selectedCarrera) || m.Carrera == selectedCarrera) &&
+                    (string.IsNullOrEmpty(selectedDivision) || m.Division.Contains(selectedDivision, StringComparison.OrdinalIgnoreCase)) &&
+                    (string.IsNullOrEmpty(selectedAño) || m.Año.Contains(selectedAño, StringComparison.OrdinalIgnoreCase)));
+
+    private void OpenModalToAdd()
+    {
+        currentMateria = new Materias();
+        isEdit = false;
+        isModalOpen = true;
+    }
+
+    private void OpenModalToEdit(Materias materia)
+    {
+        currentMateria = new Materias
+            {
+                Nombre = materia.Nombre,
+                Carrera = materia.Carrera,
+                Division = materia.Division,
+                Año = materia.Año
+            };
+        isEdit = true;
+        isModalOpen = true;
+    }
+
+    private void CloseModal()
+    {
+        isModalOpen = false;
+    }
+
+    private void AddMateria()
+    {
+        materias.Add(currentMateria);
+        CloseModal();
+    }
+
+    private void EditMateria()
+    {
+        var materia = materias.FirstOrDefault(m => m.Nombre == currentMateria.Nombre && m.Carrera == currentMateria.Carrera && m.Division == currentMateria.Division && m.Año == currentMateria.Año);
+        if (materia != null)
+        {
+            materia.Nombre = currentMateria.Nombre;
+            materia.Carrera = currentMateria.Carrera;
+            materia.Division = currentMateria.Division;
+            materia.Año = currentMateria.Año;
+        }
+        CloseModal();
+    }
+
+    private void OpenConfirmDeleteModal(Materias materia)
+    {
+        materiaToDelete = materia;
+        isConfirmDeleteModalOpen = true;
+    }
+
+    private void CloseConfirmDeleteModal()
+    {
+        isConfirmDeleteModalOpen = false;
+    }
+
+    private void DeleteMateria()
+    {
+        materias.Remove(materiaToDelete);
+        CloseConfirmDeleteModal();
+    }
+
+    private IEnumerable<string> FiltrarDivisionesPorCarrera(string carrera)
+    {
+        return divisiones
+            .Where(d => d.Carrera == carrera)
+            .Select(d => d.Nombre);
+    }
+
+    public class Materias
+    {
+        public string Nombre { get; set; }
+        public string Carrera { get; set; }
+        public string Division { get; set; }
+        public string Año { get; set; }
+    }
+
+    public class Carrera
+    {
+        public string Nombre { get; set; }
+        public string Plan { get; set; }
+        public DateTime FechaInicio { get; set; }
+        public DateTime FechaFin { get; set; }
+    }
+
+    public class Divisiones
+    {
+        public string Nombre { get; set; }
+        public string Carrera { get; set; }
+    }
 }

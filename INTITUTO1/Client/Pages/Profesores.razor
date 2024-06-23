@@ -8,17 +8,7 @@
 
 <button class="btn btn-success" @onclick="OpenModal">Cargar Profesor</button>
 
-<!-- Select para filtrar por materia -->
-<div class="mb-3">
-    <label class="form-label">Filtrar por Materia</label>
-    <select class="form-control" @bind="selectedMateria">
-        <option value="">Seleccione una materia</option>
-        @foreach (var materia in materias)
-        {
-            <option value="@materia">@materia</option>
-        }
-    </select>
-</div>
+
 
 <!-- Modal para cargar profesores -->
 @if (isModalOpen)

@@ -42,6 +42,18 @@
     </select>
 </div>
 
+<!-- Select para filtrar por ciclo lectivo -->
+<div class="mb-3">
+    <label class="form-label">Filtrar por Ciclo Lectivo</label>
+    <select class="form-control" @onchange="FiltrarPorCicloLectivo">
+        <option value="">Seleccione un ciclo lectivo</option>
+        @foreach (var ciclo in ciclosLectivos)
+        {
+            <option value="@ciclo">@ciclo</option>
+        }
+    </select>
+</div>
+
 <div class="table-container" style="overflow: hidden; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); margin-bottom: 20px;">
     <div style="border-top-left-radius: 12px; border-top-right-radius: 12px; background-color: #f2f2f2; padding: 10px;">
         <table class="table" style="border-collapse: collapse; width: 100%; border: 2px solid #ddd;">
@@ -52,7 +64,8 @@
                     <th style="border-right: 2px solid #ddd;">Materia</th>
                     <th style="border-right: 2px solid #ddd;">Carrera</th>
                     <th style="border-right: 2px solid #ddd;">División</th>
-                    <th style="border-right: 2px solid #ddd;">Acion</th>
+                    <th style="border-right: 2px solid #ddd;">Ciclo Lectivo</th>
+                    <th style="border-right: 2px solid #ddd;">Acción</th>
                 </tr>
             </thead>
             <tbody>
@@ -64,9 +77,9 @@
                         <td style="border-right: 2px solid #ddd;">@item.Materia</td>
                         <td style="border-right: 2px solid #ddd;">@item.Carrera</td>
                         <td style="border-right: 2px solid #ddd;">@item.Division</td>
+                        <td style="border-right: 2px solid #ddd;">@item.CicloLectivo</td>
                         <td>
                             <div class="action-buttons m-1">
-
                                 <a class="btn btn-primary" href="Notas"><i class="oi oi-book" aria-hidden="true"></i></a>
                             </div>
                         </td>
@@ -89,19 +102,23 @@
     private string selectedMateria = string.Empty;
     private List<string> filteredMaterias = new List<string>();
 
+    private List<int> ciclosLectivos = new List<int> { 2024, 2025, 2026 };
+    private int selectedCicloLectivo = 0;
+
     private List<Calificaciones> calificaciones = new List<Calificaciones>
     {
-        new Calificaciones { DNI = "12345678", Nombre = "Juan Gonzalez", Materia = "Matemáticas", Calificacion = 9, Carrera = "Ingeniería Informática", Division = "A" },
-        new Calificaciones { DNI = "87654321", Nombre = "Ana López", Materia = "Física", Calificacion = 8, Carrera = "Medicina", Division = "B" },
-        new Calificaciones { DNI = "11223344", Nombre = "Luis García", Materia = "Química", Calificacion = 7, Carrera = "Derecho", Division = "C" },
-        new Calificaciones { DNI = "55667788", Nombre = "María Rodríguez", Materia = "Historia", Calificacion = 10, Carrera = "Arquitectura", Division = "D" }
+        new Calificaciones { DNI = "12345678", Nombre = "Juan Gonzalez", Materia = "Matemáticas", Calificacion = 9, Carrera = "Ingeniería Informática", Division = "A", CicloLectivo = 2024 },
+        new Calificaciones { DNI = "87654321", Nombre = "Ana López", Materia = "Física", Calificacion = 8, Carrera = "Medicina", Division = "B", CicloLectivo = 2025 },
+        new Calificaciones { DNI = "11223344", Nombre = "Luis García", Materia = "Química", Calificacion = 7, Carrera = "Derecho", Division = "C", CicloLectivo = 2026 },
+        new Calificaciones { DNI = "55667788", Nombre = "María Rodríguez", Materia = "Historia", Calificacion = 10, Carrera = "Arquitectura", Division = "D", CicloLectivo = 2024 }
     };
 
     // Propiedad calculada para obtener las calificaciones filtradas
     private List<Calificaciones> calificacionesFiltradas => calificaciones
         .Where(c => (string.IsNullOrEmpty(selectedCarrera) || c.Carrera == selectedCarrera) &&
                     (string.IsNullOrEmpty(selectedDivision) || c.Division == selectedDivision) &&
-                    (string.IsNullOrEmpty(selectedMateria) || c.Materia == selectedMateria))
+                    (string.IsNullOrEmpty(selectedMateria) || c.Materia == selectedMateria) &&
+                    (selectedCicloLectivo == 0 || c.CicloLectivo == selectedCicloLectivo))
         .ToList();
 
     // Método para actualizar la lista de divisiones según la carrera seleccionada
@@ -152,6 +169,12 @@
         selectedMateria = e.Value.ToString();
     }
 
+    // Método para filtrar por ciclo lectivo
+    private void FiltrarPorCicloLectivo(ChangeEventArgs e)
+    {
+        selectedCicloLectivo = int.Parse(e.Value.ToString());
+    }
+
     // Clase para representar una calificación
     public class Calificaciones
     {
@@ -161,8 +184,10 @@
         public int Calificacion { get; set; }
         public string Carrera { get; set; }
         public string Division { get; set; }
+        public int CicloLectivo { get; set; }
     }
 }
+
 
 
 
