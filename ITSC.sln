@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "INTITUTO1.Client", "INTITUT
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "INTITUTO1.Shared", "INTITUTO1\Shared\INTITUTO1.Shared.csproj", "{8CC96724-8577-48A4-AFAA-399CBE8BF9E2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "INSTITUTO.Bdat", "INSTITUTO.Bdat\INSTITUTO.Bdat.csproj", "{357AB645-4EA8-42E8-BBA0-F15EDFA6849B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{8CC96724-8577-48A4-AFAA-399CBE8BF9E2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8CC96724-8577-48A4-AFAA-399CBE8BF9E2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8CC96724-8577-48A4-AFAA-399CBE8BF9E2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{357AB645-4EA8-42E8-BBA0-F15EDFA6849B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{357AB645-4EA8-42E8-BBA0-F15EDFA6849B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{357AB645-4EA8-42E8-BBA0-F15EDFA6849B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{357AB645-4EA8-42E8-BBA0-F15EDFA6849B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
