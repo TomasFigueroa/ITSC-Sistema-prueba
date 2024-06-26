@@ -1,8 +1,8 @@
-﻿using INSTITUTO.Bdat;
-using INSTITUTO.Bdat.Data.Entity;
+﻿using INSTITUTO.Bdat.Data.Entity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using INTITUTO1.Shared.DTO;
+using INSTITUTO.Bdat;
 
 
 namespace INTITUTO1.Server.Controllers
