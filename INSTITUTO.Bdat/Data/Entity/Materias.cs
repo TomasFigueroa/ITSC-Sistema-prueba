@@ -11,9 +11,10 @@ namespace INSTITUTO.Bdat.Data.Entity
         public int IdMateria { get; set; }
         public string Nombre { get; set; }
 
-        public int DivisionesIdDivision { get; set; }
-        Divisiones Divisiones { get; set; }
+        
+        
+        public List<Divisiones> Divisiones { get; set; }
 
-        public List<DivisionCicloMateria> DivisionCicloMateria { get; set; }
+        //public List<DivisionCicloMateria> DivisionCicloMateria { get; set; }
     }
 }

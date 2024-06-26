@@ -1,5 +1,7 @@
 ﻿using INSTITUTO.Bdat.Data.Entity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+
 using System.Reflection.Emit;
 
 namespace INSTITUTO.Bdat
@@ -22,10 +24,12 @@ namespace INSTITUTO.Bdat
         public DbSet<LIbros> LIbros => Set<LIbros>();
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-          
+
         }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+
             modelBuilder.Entity<Carrerass>(o =>
             {
                 o.HasKey(b => b.IdCarrera);
@@ -45,7 +49,7 @@ namespace INSTITUTO.Bdat
             {
                 o.HasKey(b => b.IdMateria);
                 o.Property(b => b.Nombre);
-                
+
             });
             modelBuilder.Entity<Ciclo>(o =>
             {
@@ -56,20 +60,20 @@ namespace INSTITUTO.Bdat
             modelBuilder.Entity<DivisionCiclo>(o =>
             {
                 o.HasKey(b => b.IdDivCic);
-               
+
 
             });
             modelBuilder.Entity<DivisionCicloMateria>(o =>
             {
                 o.HasKey(b => b.IdDivCicMat);
-               
+
 
 
             });
             modelBuilder.Entity<DivsionCiclosMateriaAlumnos>(o =>
             {
                 o.HasKey(b => b.IdDivCicMatAlum);
-                
+
 
             });
             modelBuilder.Entity<Alumnos>(o =>
@@ -92,7 +96,7 @@ namespace INSTITUTO.Bdat
                 o.Property(b => b.Apellido_Prof);
                 o.Property(b => b.Dni);
                 o.Property(b => b.Estado);
-                
+
 
             });
             modelBuilder.Entity<LIbros>(o =>
@@ -107,16 +111,17 @@ namespace INSTITUTO.Bdat
                 o.HasKey(b => b.IdNotas);
                 o.Property(b => b.Nota);
                 o.Property(b => b.Fecha);
-               
+
 
             });
             modelBuilder.Entity<TipoEvaluacion>(o =>
             {
                 o.HasKey(b => b.IdTipoEva);
                 o.Property(b => b.NombreEva);
-               
+
             });
+           
         }
     }
-    
+
 }
