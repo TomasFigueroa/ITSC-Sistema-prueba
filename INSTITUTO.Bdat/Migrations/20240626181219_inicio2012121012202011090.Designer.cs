@@ -4,6 +4,7 @@ using INSTITUTO.Bdat;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace INSTITUTO.Bdat.Migrations
 {
     [DbContext(typeof(Context))]
-    partial class ContextModelSnapshot : ModelSnapshot
+    [Migration("20240626181219_inicio2012121012202011090")]
+    partial class inicio2012121012202011090
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -60,7 +63,7 @@ namespace INSTITUTO.Bdat.Migrations
 
                     b.HasKey("IdAlumno");
 
-                    b.ToTable("alumnos", (string)null);
+                    b.ToTable("alumnos");
                 });
 
             modelBuilder.Entity("INSTITUTO.Bdat.Data.Entity.Carrerass", b =>
@@ -83,7 +86,7 @@ namespace INSTITUTO.Bdat.Migrations
 
                     b.HasKey("IdCarrera");
 
-                    b.ToTable("Carreras", (string)null);
+                    b.ToTable("Carreras");
                 });
 
             modelBuilder.Entity("INSTITUTO.Bdat.Data.Entity.Ciclo", b =>
@@ -99,7 +102,7 @@ namespace INSTITUTO.Bdat.Migrations
 
                     b.HasKey("IdCiclo");
 
-                    b.ToTable("Ciclos", (string)null);
+                    b.ToTable("Ciclos");
                 });
 
             modelBuilder.Entity("INSTITUTO.Bdat.Data.Entity.DivisionCiclo", b =>
@@ -122,7 +125,7 @@ namespace INSTITUTO.Bdat.Migrations
 
                     b.HasIndex("DivisionesIdDivision");
 
-                    b.ToTable("DivisionCiclos", (string)null);
+                    b.ToTable("DivisionCiclos");
                 });
 
             modelBuilder.Entity("INSTITUTO.Bdat.Data.Entity.DivisionCicloMateria", b =>
@@ -145,7 +148,7 @@ namespace INSTITUTO.Bdat.Migrations
 
                     b.HasIndex("ProfesorIdProfesor");
 
-                    b.ToTable("DivisionCicloMaterias", (string)null);
+                    b.ToTable("DivisionCicloMaterias");
                 });
 
             modelBuilder.Entity("INSTITUTO.Bdat.Data.Entity.Divisiones", b =>
@@ -171,7 +174,7 @@ namespace INSTITUTO.Bdat.Migrations
 
                     b.HasIndex("CarrerassIdCarrera");
 
-                    b.ToTable("Division", (string)null);
+                    b.ToTable("Division");
                 });
 
             modelBuilder.Entity("INSTITUTO.Bdat.Data.Entity.DivsionCiclosMateriaAlumnos", b =>
@@ -199,7 +202,7 @@ namespace INSTITUTO.Bdat.Migrations
 
                     b.HasIndex("LibrosId_Libro");
 
-                    b.ToTable("DivsionCiclosMateriaAlumnos", (string)null);
+                    b.ToTable("DivsionCiclosMateriaAlumnos");
                 });
 
             modelBuilder.Entity("INSTITUTO.Bdat.Data.Entity.LIbros", b =>
@@ -216,7 +219,7 @@ namespace INSTITUTO.Bdat.Migrations
 
                     b.HasKey("Id_Libro");
 
-                    b.ToTable("LIbros", (string)null);
+                    b.ToTable("LIbros");
                 });
 
             modelBuilder.Entity("INSTITUTO.Bdat.Data.Entity.Materias", b =>
@@ -238,7 +241,7 @@ namespace INSTITUTO.Bdat.Migrations
 
                     b.HasIndex("DivisionesIdDivision");
 
-                    b.ToTable("Materia", (string)null);
+                    b.ToTable("Materia");
                 });
 
             modelBuilder.Entity("INSTITUTO.Bdat.Data.Entity.Notas", b =>
@@ -267,7 +270,7 @@ namespace INSTITUTO.Bdat.Migrations
 
                     b.HasIndex("TipoEvaluacionIdTipoEva");
 
-                    b.ToTable("notas", (string)null);
+                    b.ToTable("notas");
                 });
 
             modelBuilder.Entity("INSTITUTO.Bdat.Data.Entity.Profesor", b =>
@@ -294,7 +297,7 @@ namespace INSTITUTO.Bdat.Migrations
 
                     b.HasKey("IdProfesor");
 
-                    b.ToTable("profesors", (string)null);
+                    b.ToTable("profesors");
                 });
 
             modelBuilder.Entity("INSTITUTO.Bdat.Data.Entity.TipoEvaluacion", b =>
@@ -311,7 +314,7 @@ namespace INSTITUTO.Bdat.Migrations
 
                     b.HasKey("IdTipoEva");
 
-                    b.ToTable("TipoEvaluacions", (string)null);
+                    b.ToTable("TipoEvaluacions");
                 });
 
             modelBuilder.Entity("INSTITUTO.Bdat.Data.Entity.DivisionCiclo", b =>

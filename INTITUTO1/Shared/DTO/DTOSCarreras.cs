@@ -9,6 +9,7 @@ namespace INTITUTO1.Shared.DTO
 {
     public class DTOSCarreras
     {
+
         public String Nombres { get; set; }
         [Required(ErrorMessage = "La Fecha de inicio es Obligatoria")]
         public DateTime Fecha_inicio { get; set; }
