@@ -1,16 +1,16 @@
 ﻿@page "/Carrera"
 
-@* //prueba12 *@
+
+@inject HttpClient Http
 
 <PageTitle>Carrera</PageTitle>
 <button class="btn btn-success" @onclick="OpenModalToAdd">Cargar Carrera</button>
 <div class="table-container" style="overflow: hidden; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); margin-bottom: 20px;">
     <div style="border-top-left-radius: 12px; border-top-right-radius: 12px; background-color: #f2f2f2; padding: 10px;">
         <table class="table" style="border-collapse: collapse; width: 100%; border: 2px solid #E6E6FA;">
-            <thead >
+            <thead>
                 <tr style="border-bottom: 2px solid #ddd;">
                     <th style="border-right: 2px solid #ddd;">Nombre</th>
-                    <th style="border-right: 2px solid #ddd;">Plan</th>
                     <th style="border-right: 2px solid #ddd;">Fecha Inicio</th>
                     <th style="border-right: 2px solid #ddd;">Fecha Fin</th>
                     <th style="border-right: 2px solid #ddd;">Acción</th>
@@ -21,13 +21,12 @@
                 {
                     <tr>
                         <td style="border-right: 2px solid #ddd;">@carrera.Nombre</td>
-                        <td style="border-right: 2px solid #ddd;">@carrera.Plan</td>
                         <td style="border-right: 2px solid #ddd;">@carrera.FechaInicio.ToShortDateString()</td>
                         <td style="border-right: 2px solid #ddd;">@carrera.FechaFin.ToShortDateString()</td>
                         <td>
                             <div class="action-buttons m-1">
-                                <button class="btn btn-primary me-2" @onclick="() => OpenModalToEdit(carrera)"><i class="oi oi-pencil"></i></button>
-                                <button class="btn btn-danger" @onclick="() => OpenConfirmDeleteModal(carrera)"><i class="oi oi-trash"></i></button>
+                                <button class="btn btn-primary me-2" @onclick="() => OpenModalToEdit(carrera, carrera.IdCarrera)"><i class="oi oi-pencil"></i></button>
+                                <button class="btn btn-danger" @onclick="() => OpenConfirmDeleteModal(carrera, carrera.IdCarrera)"><i class="oi oi-trash"></i></button>
                             </div>
                         </td>
                     </tr>
@@ -36,7 +35,6 @@
         </table>
     </div>
 </div>
-
 
 <!-- Modal para agregar y editar carreras -->
 @if (isModalOpen)
@@ -53,19 +51,15 @@
                         <DataAnnotationsValidator />
                         <div class="mb-3">
                             <label class="form-label">Nombre</label>
-                            <InputText class="form-control" @bind-Value="currentCarrera.Nombre" />
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Plan</label>
-                            <InputText class="form-control" @bind-Value="currentCarrera.Plan" />
+                            <InputText class="form-control" @bind-Value="currentCarrera.Nombres" />
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Fecha Inicio</label>
-                            <InputDate class="form-control" @bind-Value="currentCarrera.FechaInicio" />
+                            <InputDate class="form-control" @bind-Value="currentCarrera.Fecha_inicio" />
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Fecha Fin</label>
-                            <InputDate class="form-control" @bind-Value="currentCarrera.FechaFin" />
+                            <InputDate class="form-control" @bind-Value="currentCarrera.Fecha_fin" />
                         </div>
                         <button type="submit" class="btn btn-primary">@((isEdit) ? "Guardar Cambios" : "Agregar Carrera")</button>
                     </EditForm>
@@ -98,33 +92,47 @@
 }
 
 @code {
-    private List<Carreras> carreras = new List<Carreras>
-    {
-        new Carreras { Nombre = "Desarrollo de Software", Plan = "2024/22", FechaInicio = new DateTime(2021, 3, 1), FechaFin = new DateTime(2024, 3, 1) },
-        new Carreras { Nombre = "Enfermería", Plan = "1122/12", FechaInicio = new DateTime(2021, 3, 1), FechaFin = new DateTime(2024, 3, 1) }
-    };
-
+    int idcarreralocal;
+    Carrerass Carreras = new Carrerass();
+    List<Carrerass> carreras = new List<Carrerass>();
     private bool isModalOpen = false;
     private bool isEdit = false;
-    private Carreras currentCarrera = new Carreras();
-    private Carreras carreraToDelete;
+    private DTOSCarreras currentCarrera = new DTOSCarreras();
+    private Carrerass carreraToDelete;
     private bool isConfirmDeleteModalOpen = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCarreras();
+    }
+
+    private async Task LoadCarreras()
+    {
+        try
+        {
+            carreras = await Http.GetFromJsonAsync<List<Carrerass>>("api/Carrera");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading carreras: {ex.Message}");
+        }
+    }
 
     private void OpenModalToAdd()
     {
-        currentCarrera = new Carreras();
+        currentCarrera = new DTOSCarreras();
         isEdit = false;
         isModalOpen = true;
     }
 
-    private void OpenModalToEdit(Carreras carrera)
+    private void OpenModalToEdit(Carrerass carrera,int id)
     {
-        currentCarrera = new Carreras
+        currentCarrera = new DTOSCarreras
             {
-                Nombre = carrera.Nombre,
-                Plan = carrera.Plan,
-                FechaInicio = carrera.FechaInicio,
-                FechaFin = carrera.FechaFin
+                IdCarrera = id,
+                Nombres = carrera.Nombre,
+                Fecha_inicio = carrera.FechaInicio,
+                Fecha_fin = carrera.FechaFin
             };
         isEdit = true;
         isModalOpen = true;
@@ -135,27 +143,51 @@
         isModalOpen = false;
     }
 
-    private void AddCarrera()
+    private async Task AddCarrera()
     {
-        carreras.Add(currentCarrera);
-        CloseModal();
-    }
-
-    private void EditCarrera()
-    {
-        var carrera = carreras.FirstOrDefault(c => c.Nombre == currentCarrera.Nombre && c.Plan == currentCarrera.Plan);
-        if (carrera != null)
+        try
         {
-            carrera.Nombre = currentCarrera.Nombre;
-            carrera.Plan = currentCarrera.Plan;
-            carrera.FechaInicio = currentCarrera.FechaInicio;
-            carrera.FechaFin = currentCarrera.FechaFin;
+            var response = await Http.PostAsJsonAsync("api/Carrera", currentCarrera);
+            if (response.IsSuccessStatusCode)
+            {
+                await LoadCarreras();
+                CloseModal();
+            }
+            else
+            {
+                Console.WriteLine($"Error adding carrera: {response.ReasonPhrase}");
+            }
         }
-        CloseModal();
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Exception adding carrera: {ex.Message}");
+        }
     }
 
-    private void OpenConfirmDeleteModal(Carreras carrera)
+    private async Task EditCarrera()
     {
+        try
+        {
+            var response = await Http.PutAsJsonAsync($"api/Carrera/{currentCarrera.IdCarrera}", currentCarrera);
+            if (response.IsSuccessStatusCode)
+            {
+                await LoadCarreras();
+                CloseModal();
+            }
+            else
+            {
+                Console.WriteLine($"Error editing carrera: {response.ReasonPhrase}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Exception editing carrera: {ex.Message}");
+        }
+    }
+
+    private void OpenConfirmDeleteModal(Carrerass carrera, int id)
+    {
+        idcarreralocal = id;
         carreraToDelete = carrera;
         isConfirmDeleteModalOpen = true;
     }
@@ -165,17 +197,38 @@
         isConfirmDeleteModalOpen = false;
     }
 
-    private void DeleteCarrera()
+    private async Task DeleteCarrera()
     {
-        carreras.Remove(carreraToDelete);
-        CloseConfirmDeleteModal();
+        try
+        {
+            var response = await Http.DeleteAsync($"api/Carrera/{idcarreralocal}");
+            if (response.IsSuccessStatusCode)
+            {
+                await LoadCarreras();
+                CloseConfirmDeleteModal();
+            }
+            else
+            {
+                Console.WriteLine($"Error deleting carrera: {response.ReasonPhrase}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Exception deleting carrera: {ex.Message}");
+        }
     }
 
-    public class Carreras
+    public class DTOSCarreras
     {
-        public string Nombre { get; set; }
-        public string Plan { get; set; }
-        public DateTime FechaInicio { get; set; }
-        public DateTime FechaFin { get; set; }
+        public int IdCarrera { get; set; }
+        public string Nombres { get; set; }
+        
+        public DateTime Fecha_inicio { get; set; }
+        
+        public DateTime Fecha_fin { get; set; }
     }
 }
+
+
+
+
