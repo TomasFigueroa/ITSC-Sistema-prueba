@@ -8,5 +8,6 @@ namespace INTITUTO1.Shared.DTO
 {
     public class DTOMaterias
     {
+        public string Nombre { get; set; }  
     }
 }

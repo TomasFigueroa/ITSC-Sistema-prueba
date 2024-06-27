@@ -56,8 +56,8 @@ namespace INTITUTO1.Server.Controllers
   
         }
 
-        // PUT: api/Ciclo/5
-        [HttpPut("{id}")]
+        // PUT: api/Ciclo
+        [HttpPut("{id:int}")]
         public async Task<IActionResult> Put (int id, DTOCiclo dtoCiclo)
         {
             var responseApi = new ResponseAPI<int>();
@@ -89,7 +89,7 @@ namespace INTITUTO1.Server.Controllers
 
                 if(dbCiclo != null)
                 {
-                    _context.alumnos.Remove(dbCiclo);
+                    _context.Ciclos.Remove(dbCiclo);
                     await _context.SaveChangesAsync();
                     responseApi.EsCorrecto = true;
                 }

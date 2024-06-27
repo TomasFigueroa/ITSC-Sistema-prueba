@@ -8,5 +8,9 @@ namespace INTITUTO1.Shared.DTO
 {
     public class DTOProfesor
     {
+        public string Apellido_Prof { get; set; }
+        public string Nombre_Prof { get; set; }
+        public int Dni { get; set; }
+        public bool Estado { get; set; }
     }
 }

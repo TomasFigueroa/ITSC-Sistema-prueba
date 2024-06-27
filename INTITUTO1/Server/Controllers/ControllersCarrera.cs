@@ -103,7 +103,7 @@ namespace INTITUTO1.Server.Controllers
 
             try
             {
-                //var dbReserva = await context.Reservas.FirstOrDefaultAsync(e => e.NroReserva == nroRes);
+                
                 var dbCarrera = await _context.Carreras.FirstOrDefaultAsync(e => e.IdCarrera == id);
 
                 if (dbCarrera != null)

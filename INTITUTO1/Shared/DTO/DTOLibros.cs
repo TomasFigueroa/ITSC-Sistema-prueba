@@ -8,5 +8,6 @@ namespace INTITUTO1.Shared.DTO
 {
     public class DTOLibros
     {
+        public string Nombre_Lib {  get; set; }
     }
 }
