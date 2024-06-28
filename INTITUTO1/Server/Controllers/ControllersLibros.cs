@@ -1,85 +1,84 @@
-﻿using INSTITUTO.Bdat.Data.Entity;
+﻿using INSTITUTO.Bdat;
+using INSTITUTO.Bdat.Data.Entity;
+using INTITUTO1.Shared.DTO;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using INTITUTO1.Shared.DTO;
-using INSTITUTO.Bdat;
+
 
 
 namespace INTITUTO1.Server.Controllers
 {
     [ApiController]
     [Route("api/Carrera")]
-    public class ControllersCarrera : ControllerBase
+    public class ControllersLibros : ControllerBase
     {
         private readonly Context _context;
 
-        public ControllersCarrera(Context context)
+        public ControllersLibros(Context context)
         {
             _context = context;
         }
 
         // GET: api/Carrera
         [HttpGet]
-        public async Task<ActionResult<List<Carrerass>>> Get()
+        public async Task<ActionResult<List<LIbros>>> Get()
         {
-            return await _context.Carreras.ToListAsync();
+            return await _context.LIbros.ToListAsync();
         }
 
-        // GET: api/Carrera/{id}
+        // GET: api/libros/{id}
         [HttpGet("{id:int}")]
-        public async Task<ActionResult<Carrerass>> Get(int id)
+        public async Task<ActionResult<LIbros>> Get(int id)
         {
-            var carrera = await _context.Carreras.FirstOrDefaultAsync(c => c.IdCarrera == id);
+            var libro = await _context.LIbros.FirstOrDefaultAsync(c => c.Id_Libro == id);
 
-            if (carrera == null)
+            if (libro == null)
             {
                 return BadRequest($"No se encontró la carrera con id: {id}");
             }
 
-            return carrera;
+            return libro;
         }
 
-        // POST: api/Carrera
+        // POST: api/libros
         [HttpPost]
-        public async Task<ActionResult<Carrerass>> Post(DTOSCarreras carrera)
+        public async Task<ActionResult<LIbros>> Post(DTOLibros dtoLibros)
         {
             var responseApi = new ResponseAPI<int>();
-            var mdCarrera = new Carrerass
+            var mdLibro = new LIbros
             {
-                Nombre = carrera.Nombres,
-                FechaInicio = carrera.Fecha_inicio,
-                FechaFin = carrera.Fecha_fin,
-               
+                Nombre_Lib = dtoLibros.Nombre_Lib
+    
+
             };
-            _context.Carreras.Add(mdCarrera);
+            _context.LIbros.Add(mdLibro);
             await _context.SaveChangesAsync();
             return Ok(responseApi);
 
         }
-           
- 
 
-        // PUT: api/Carrera/{id}
+
+
+        // PUT: api/libros/{id}
         [HttpPut("{id:int}")]
-        public async Task<IActionResult> Put(int id, DTOSCarreras carrera)
+        public async Task<IActionResult> Put(int id, DTOLibros dtoLibros)
         {
             var responseApi = new ResponseAPI<int>();
 
             try
             {
-                var dbCarrera = await _context.Carreras.FirstOrDefaultAsync(e => e.IdCarrera == id);
+                var dbLibros = await _context.LIbros.FirstOrDefaultAsync(e => e.Id_Libro == id);
 
-                if (dbCarrera != null)
+                if (dbLibros != null)
                 {
-                    
-                    dbCarrera.Nombre = carrera.Nombres;
-                    dbCarrera.FechaInicio = carrera.Fecha_inicio;
-                    dbCarrera.FechaFin = carrera.Fecha_fin;
 
-                    _context.Carreras.Update(dbCarrera);
+                    dbLibros.Nombre_Lib = dtoLibros.Nombre_Lib;
+
+
+                    _context.LIbros.Update(dbLibros);
                     await _context.SaveChangesAsync();
                     responseApi.EsCorrecto = true;
-                   
+
                 }
                 else
                 {
@@ -103,19 +102,19 @@ namespace INTITUTO1.Server.Controllers
 
             try
             {
-                
-                var dbCarrera = await _context.Carreras.FirstOrDefaultAsync(e => e.IdCarrera == id);
 
-                if (dbCarrera != null)
+                var dbLibros = await _context.LIbros.FirstOrDefaultAsync(e => e.Id_Libro == id);
+
+                if (dbLibros != null)
                 {
-                    _context.Carreras.Remove(dbCarrera);
+                    _context.LIbros.Remove(dbLibros);
                     await _context.SaveChangesAsync();
                     responseApi.EsCorrecto = true;
                 }
                 else
                 {
                     responseApi.EsCorrecto = false;
-                    responseApi.Mensaje = "Carrera no encontrada";
+                    responseApi.Mensaje = "Libro no encontrada";
                 }
             }
             catch (Exception ex)

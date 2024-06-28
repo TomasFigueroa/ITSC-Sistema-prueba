@@ -66,6 +66,13 @@ namespace INSTITUTO.Bdat
             modelBuilder.Entity<DivisionCicloMateria>(o =>
             {
                 o.HasKey(b => b.IdDivCicMat);
+<<<<<<< HEAD
+=======
+                o.HasKey(b => b.DivisionCicloIdDivCic);
+                o.HasKey(b => b.ProfesorIdProfesor);
+                o.OnDelete(DeleteBehavior.Restrict);
+
+>>>>>>> Augusto
 
 
 
@@ -73,6 +80,7 @@ namespace INSTITUTO.Bdat
             modelBuilder.Entity<DivsionCiclosMateriaAlumnos>(o =>
             {
                 o.HasKey(b => b.IdDivCicMatAlum);
+
 
 
             });
