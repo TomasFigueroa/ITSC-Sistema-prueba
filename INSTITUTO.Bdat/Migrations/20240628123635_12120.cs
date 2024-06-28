@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace INSTITUTO.Bdat.Migrations
 {
     /// <inheritdoc />
-    public partial class _132120 : Migration
+    public partial class _12120 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -78,8 +78,7 @@ namespace INSTITUTO.Bdat.Migrations
                 {
                     IdMateria = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Nombre = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    DivisionesIdDivision = table.Column<int>(type: "int", nullable: false)
+                    Nombre = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -123,8 +122,7 @@ namespace INSTITUTO.Bdat.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     NombreDiv = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     NombreCarrera = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CarrerassIdCarrera = table.Column<int>(type: "int", nullable: false),
-                    MateriasIdMateria = table.Column<int>(type: "int", nullable: false)
+                    CarrerassIdCarrera = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -134,12 +132,6 @@ namespace INSTITUTO.Bdat.Migrations
                         column: x => x.CarrerassIdCarrera,
                         principalTable: "Carreras",
                         principalColumn: "IdCarrera",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Division_Materia_MateriasIdMateria",
-                        column: x => x.MateriasIdMateria,
-                        principalTable: "Materia",
-                        principalColumn: "IdMateria",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -176,6 +168,7 @@ namespace INSTITUTO.Bdat.Migrations
                     IdDivCicMat = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     DivisionCicloIdDivCic = table.Column<int>(type: "int", nullable: false),
+                    MateriasIdMateria = table.Column<int>(type: "int", nullable: false),
                     ProfesorIdProfesor = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -186,6 +179,12 @@ namespace INSTITUTO.Bdat.Migrations
                         column: x => x.DivisionCicloIdDivCic,
                         principalTable: "DivisionCiclos",
                         principalColumn: "IdDivCic",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_DivisionCicloMaterias_Materia_MateriasIdMateria",
+                        column: x => x.MateriasIdMateria,
+                        principalTable: "Materia",
+                        principalColumn: "IdMateria",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_DivisionCicloMaterias_profesors_ProfesorIdProfesor",
@@ -262,14 +261,14 @@ namespace INSTITUTO.Bdat.Migrations
                 column: "CarrerassIdCarrera");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Division_MateriasIdMateria",
-                table: "Division",
-                column: "MateriasIdMateria");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_DivisionCicloMaterias_DivisionCicloIdDivCic",
                 table: "DivisionCicloMaterias",
                 column: "DivisionCicloIdDivCic");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DivisionCicloMaterias_MateriasIdMateria",
+                table: "DivisionCicloMaterias",
+                column: "MateriasIdMateria");
 
             migrationBuilder.CreateIndex(
                 name: "IX_DivisionCicloMaterias_ProfesorIdProfesor",
@@ -337,6 +336,9 @@ namespace INSTITUTO.Bdat.Migrations
                 name: "DivisionCiclos");
 
             migrationBuilder.DropTable(
+                name: "Materia");
+
+            migrationBuilder.DropTable(
                 name: "profesors");
 
             migrationBuilder.DropTable(
@@ -347,9 +349,6 @@ namespace INSTITUTO.Bdat.Migrations
 
             migrationBuilder.DropTable(
                 name: "Carreras");
-
-            migrationBuilder.DropTable(
-                name: "Materia");
         }
     }
 }

@@ -129,11 +129,12 @@
     {
         currentCarrera = new DTOSCarreras
             {
-                IdCarrera = id,
+
                 Nombres = carrera.Nombre,
                 Fecha_inicio = carrera.FechaInicio,
                 Fecha_fin = carrera.FechaFin
             };
+        idcarreralocal = id;
         isEdit = true;
         isModalOpen = true;
     }
@@ -168,7 +169,7 @@
     {
         try
         {
-            var response = await Http.PutAsJsonAsync($"api/Carrera/{currentCarrera.IdCarrera}", currentCarrera);
+            var response = await Http.PutAsJsonAsync($"api/Carrera/{idcarreralocal}", currentCarrera);
             if (response.IsSuccessStatusCode)
             {
                 await LoadCarreras();
@@ -218,15 +219,7 @@
         }
     }
 
-    public class DTOSCarreras
-    {
-        public int IdCarrera { get; set; }
-        public string Nombres { get; set; }
-        
-        public DateTime Fecha_inicio { get; set; }
-        
-        public DateTime Fecha_fin { get; set; }
-    }
+   
 }
 
 

@@ -13,7 +13,6 @@ namespace INSTITUTO.Bdat.Data.Entity
 
         
         
-        public List<Divisiones> Divisiones { get; set; }
 
 
         //public List<DivisionCicloMateria> DivisionCicloMateria { get; set; }

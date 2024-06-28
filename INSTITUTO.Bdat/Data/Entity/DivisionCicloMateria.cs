@@ -13,8 +13,8 @@ namespace INSTITUTO.Bdat.Data.Entity
         public int DivisionCicloIdDivCic { get; set; }
         public DivisionCiclo DivisionCiclo { get; set; }
         //Foranea
-        //public int MateriasIdMateria { get; set; }
-        //public Materias Materias { get; set; }
+        public int MateriasIdMateria { get; set; }
+        public Materias Materias { get; set; }
         //Foranea
         public int ProfesorIdProfesor { get; set; }
         public Profesor Profesor { get; set; }

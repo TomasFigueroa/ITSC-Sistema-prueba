@@ -42,7 +42,7 @@ namespace INSTITUTO.Bdat
             {
                 o.HasKey(b => b.IdDivision);
                 o.Property(b => b.NombreDiv);
-                o.Property(b => b.NombreCarrera);
+                
 
             });
             modelBuilder.Entity<Materias>(o =>
@@ -66,13 +66,6 @@ namespace INSTITUTO.Bdat
             modelBuilder.Entity<DivisionCicloMateria>(o =>
             {
                 o.HasKey(b => b.IdDivCicMat);
-
-                o.HasKey(b => b.DivisionCicloIdDivCic);
-                o.HasKey(b => b.ProfesorIdProfesor);
-                
-
-
-
 
             });
             modelBuilder.Entity<DivsionCiclosMateriaAlumnos>(o =>

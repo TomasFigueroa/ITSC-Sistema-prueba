@@ -38,20 +38,39 @@ namespace INTITUTO1.Server.Controllers
             return division;
         }
 
-        // POST: api/Division
         [HttpPost]
-        public async Task<ActionResult<Divisiones>> Post(DTODivison dtoDivision)
+        public async Task<ActionResult<ResponseAPI<int>>> Post(DTODivison dtoDivision)
         {
             var responseApi = new ResponseAPI<int>();
+
+            // Buscar el IdCarrera correspondiente al NombreCar
+            var carrera = await _context.Carreras
+                .FirstOrDefaultAsync(c => c.IdCarrera == dtoDivision.NombreCar);
+
+            if (carrera == null)
+            {
+                responseApi.EsCorrecto = false;
+                responseApi.Mensaje = "La carrera especificada no existe.";
+                return NotFound(responseApi);
+            }
+
             var division = new Divisiones
             {
                 NombreDiv = dtoDivision.NombreDiv,
-                NombreCarrera = dtoDivision.NombreCar
+                CarrerassIdCarrera = carrera.IdCarrera, // Usar el IdCarrera de la carrera encontrada
+                
             };
+
             _context.Division.Add(division);
             await _context.SaveChangesAsync();
+
+            responseApi.EsCorrecto = true;
+            responseApi.Mensaje = "División creada exitosamente.";
+            /*responseApi.Data = division.IdDivision;*/ // Devolver el ID de la nueva división creada
             return Ok(responseApi);
         }
+
+
 
         // PUT: api/Division/{id}
         [HttpPut("{id:int}")]
@@ -66,7 +85,7 @@ namespace INTITUTO1.Server.Controllers
                 if (dbDivision != null)
                 {
                     dbDivision.NombreDiv = dtoDivision.NombreDiv;
-                    dbDivision.NombreCarrera = dtoDivision.NombreCar;
+                    dbDivision.CarrerassIdCarrera = dtoDivision.NombreCar;
 
                     _context.Division.Update(dbDivision);
                     await _context.SaveChangesAsync();

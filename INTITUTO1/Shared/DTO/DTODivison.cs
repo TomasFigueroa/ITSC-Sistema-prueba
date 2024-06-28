@@ -8,8 +8,8 @@ namespace INTITUTO1.Shared.DTO
 {
     public class DTODivison
     {
-        public int Iddivision { get; set; }
+        
         public string NombreDiv { get; set; }
-        public string NombreCar { get; set; }
+        public int NombreCar { get; set; }
     }
 }

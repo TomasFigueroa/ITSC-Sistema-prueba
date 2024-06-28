@@ -1,4 +1,5 @@
 ﻿@page "/Division"
+@using Microsoft.EntityFrameworkCore
 
 @inject HttpClient Http
 
@@ -19,7 +20,7 @@
                 {
                     <tr>
                         <td style="border-right: 2px solid #ddd;">@division.NombreDiv</td>
-                        <td style="border-right: 2px solid #ddd;">@division.NombreCarrera</td>
+                        <td style="border-right: 2px solid #ddd;">@GetNombreCarrera(division.CarrerassIdCarrera)</td> <!-- Obtener el nombre de la carrera -->
                         <td>
                             <div class="action-buttons m-1">
                                 <button class="btn btn-primary me-2" @onclick="() => OpenModalToEdit(division, division.IdDivision)"><i class="oi oi-pencil"></i></button>
@@ -55,7 +56,7 @@
                             <InputSelect class="form-control" @bind-Value="currentDivision.NombreCar">
                                 @foreach (var carrera in carreras)
                                 {
-                                    <option value="@carrera.Nombre">@carrera.Nombre</option>
+                                    <option value="@carrera.IdCarrera">@carrera.Nombre</option>
                                 }
                             </InputSelect>
                         </div>
@@ -90,6 +91,7 @@
 }
 
 @code {
+
     private Divisiones division = new Divisiones();
     private List<Divisiones> divisiones = new List<Divisiones>();
     private List<Carrerass> carreras = new List<Carrerass>();
@@ -99,13 +101,20 @@
     private int divisionToDeleteId;
     private bool isConfirmDeleteModalOpen = false;
     int idactual;
+    public Context context;
+
 
     protected override async Task OnInitializedAsync()
     {
         await LoadDivisiones();
         await LoadCarreras();
-    }
 
+    }
+    private string GetNombreCarrera(int idCarrera)
+    {
+        var carrera = carreras.FirstOrDefault(c => c.IdCarrera == idCarrera);
+        return carrera?.Nombre ?? "Carrera no encontrada";
+    }
     private async Task LoadDivisiones()
     {
         try
@@ -116,6 +125,7 @@
         {
             Console.WriteLine($"Error loading divisiones: {ex.Message}");
         }
+        idactual = 0;
     }
 
     private async Task LoadCarreras()
@@ -141,10 +151,11 @@
     {
         currentDivision = new DTODivison
             {
-                Iddivision = id,
+
                 NombreDiv = division.NombreDiv,
-                NombreCar = division.NombreCarrera
+                NombreCar = division.CarrerassIdCarrera
             };
+        idactual = id;
         isEdit = true;
         isModalOpen = true;
     }
@@ -179,7 +190,7 @@
     {
         try
         {
-            var response = await Http.PutAsJsonAsync($"api/Division/{currentDivision.Iddivision}", currentDivision);
+            var response = await Http.PutAsJsonAsync($"api/Division/{idactual}", currentDivision);
             if (response.IsSuccessStatusCode)
             {
                 await LoadDivisiones();
@@ -198,7 +209,7 @@
 
     private void OpenConfirmDeleteModal(int id)
     {
-        divisionToDeleteId = id;
+        idactual = id;
         isConfirmDeleteModalOpen = true;
     }
 
@@ -211,7 +222,7 @@
     {
         try
         {
-            var response = await Http.DeleteAsync($"api/Division/{divisionToDeleteId}");
+            var response = await Http.DeleteAsync($"api/Division/{idactual}");
             if (response.IsSuccessStatusCode)
             {
                 await LoadDivisiones();

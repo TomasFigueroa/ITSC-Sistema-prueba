@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace INSTITUTO.Bdat.Migrations
 {
     [DbContext(typeof(Context))]
-    [Migration("20240626201745_2606Augusto")]
-    partial class _2606Augusto
+    [Migration("20240628215158_121201")]
+    partial class _121201
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -167,10 +167,6 @@ namespace INSTITUTO.Bdat.Migrations
                     b.Property<int>("CarrerassIdCarrera")
                         .HasColumnType("int");
 
-                    b.Property<string>("NombreCarrera")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("NombreDiv")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -235,16 +231,11 @@ namespace INSTITUTO.Bdat.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdMateria"));
 
-                    b.Property<int>("DivisionesIdDivision")
-                        .HasColumnType("int");
-
                     b.Property<string>("Nombre")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("IdMateria");
-
-                    b.HasIndex("DivisionesIdDivision");
 
                     b.ToTable("Materia");
                 });
@@ -406,15 +397,6 @@ namespace INSTITUTO.Bdat.Migrations
                     b.Navigation("LIbros");
                 });
 
-            modelBuilder.Entity("INSTITUTO.Bdat.Data.Entity.Materias", b =>
-                {
-                    b.HasOne("INSTITUTO.Bdat.Data.Entity.Divisiones", null)
-                        .WithMany("materias")
-                        .HasForeignKey("DivisionesIdDivision")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("INSTITUTO.Bdat.Data.Entity.Notas", b =>
                 {
                     b.HasOne("INSTITUTO.Bdat.Data.Entity.DivsionCiclosMateriaAlumnos", "DivsionCiclosMateriaAlumnos")
@@ -462,8 +444,6 @@ namespace INSTITUTO.Bdat.Migrations
             modelBuilder.Entity("INSTITUTO.Bdat.Data.Entity.Divisiones", b =>
                 {
                     b.Navigation("divisionCiclos");
-
-                    b.Navigation("materias");
                 });
 
             modelBuilder.Entity("INSTITUTO.Bdat.Data.Entity.DivsionCiclosMateriaAlumnos", b =>

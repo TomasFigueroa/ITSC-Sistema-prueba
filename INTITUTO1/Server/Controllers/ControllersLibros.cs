@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 namespace INTITUTO1.Server.Controllers
 {
     [ApiController]
-    [Route("api/Carrera")]
+    [Route("api/Libros")]
     public class ControllersLibros : ControllerBase
     {
         private readonly Context _context;

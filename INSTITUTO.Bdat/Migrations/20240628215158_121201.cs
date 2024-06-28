@@ -5,25 +5,25 @@
 namespace INSTITUTO.Bdat.Migrations
 {
     /// <inheritdoc />
-    public partial class _1321200 : Migration
+    public partial class _121201 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "DivisionesIdDivision",
-                table: "Materia");
+                name: "NombreCarrera",
+                table: "Division");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<int>(
-                name: "DivisionesIdDivision",
-                table: "Materia",
-                type: "int",
+            migrationBuilder.AddColumn<string>(
+                name: "NombreCarrera",
+                table: "Division",
+                type: "nvarchar(max)",
                 nullable: false,
-                defaultValue: 0);
+                defaultValue: "");
         }
     }
 }
