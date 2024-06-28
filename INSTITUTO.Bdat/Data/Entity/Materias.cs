@@ -15,11 +15,11 @@ namespace INSTITUTO.Bdat.Data.Entity
         
         public List<Divisiones> Divisiones { get; set; }
 
-<<<<<<< HEAD
+
         //public List<DivisionCicloMateria> DivisionCicloMateria { get; set; }
-=======
+
         public List<DivisionCicloMateria> DivisionCicloMateria { get; set; }
         //public ICollection<DivisionCicloMateria> DivisionCicloMaterias { get; set; }
->>>>>>> Augusto
+
     }
 }

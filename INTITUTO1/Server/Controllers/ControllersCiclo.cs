@@ -56,26 +56,26 @@ namespace INTITUTO1.Server.Controllers
   
         }
 
-        // PUT: api/Ciclo
-        [HttpPut("{id:int}")]
-        public async Task<IActionResult> Put (int id, DTOCiclo dtoCiclo)
-        {
-            var responseApi = new ResponseAPI<int>();
+        //// PUT: api/Ciclo
+        //[HttpPut("{id:int}")]
+        //public async Task<IActionResult> Put (int id, DTOCiclo dtoCiclo)
+        //{
+        //    var responseApi = new ResponseAPI<int>();
 
-            try
-            {
-                var dbCiclo = await _context.Ciclos.FirstOrDefaultAsync(e => e.IdCiclo == id);
+        //    try
+        //    {
+        //        var dbCiclo = await _context.Ciclos.FirstOrDefaultAsync(e => e.IdCiclo == id);
 
-                if (dbCiclo == null)
-                {
-                    dbCiclo.Fecha = dtoCiclo.Fecha;
+        //        if (dbCiclo == null)
+        //        {
+        //            dbCiclo.Fecha = dtoCiclo.Fecha;
 
-                    _context.Ciclos.Update(dbCiclo);
-                    await _context.SaveChangesAsync();
-                    responseApi.EsCorrecto = true;
-                }
-            }
-        }
+        //            _context.Ciclos.Update(dbCiclo);
+        //            await _context.SaveChangesAsync();
+        //            responseApi.EsCorrecto = true;
+        //        }
+        //    }
+        //}
 
         // DELETE: api/Ciclo/5
         [HttpDelete("{id}")]

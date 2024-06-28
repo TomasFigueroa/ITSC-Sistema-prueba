@@ -189,11 +189,10 @@ namespace INSTITUTO.Bdat.Migrations
 
                     b.HasIndex("CarrerassIdCarrera");
 
-<<<<<<< HEAD
+
                     b.HasIndex("MateriasIdMateria");
 
-=======
->>>>>>> Augusto
+
                     b.ToTable("Division");
                 });
 
@@ -256,11 +255,10 @@ namespace INSTITUTO.Bdat.Migrations
 
                     b.HasKey("IdMateria");
 
-<<<<<<< HEAD
-=======
+
                     b.HasIndex("DivisionesIdDivision");
 
->>>>>>> Augusto
+
                     b.ToTable("Materia");
                 });
 
@@ -500,9 +498,9 @@ namespace INSTITUTO.Bdat.Migrations
 
             modelBuilder.Entity("INSTITUTO.Bdat.Data.Entity.Materias", b =>
                 {
-<<<<<<< HEAD
+
                     b.Navigation("Divisiones");
-=======
+
                     b.Navigation("DivisionCicloMateria");
 
                     b.Navigation("DivisionCicloMaterias");
@@ -511,7 +509,7 @@ namespace INSTITUTO.Bdat.Migrations
             modelBuilder.Entity("INSTITUTO.Bdat.Data.Entity.Profesor", b =>
                 {
                     b.Navigation("DivisionCicloMaterias");
->>>>>>> Augusto
+
                 });
 
             modelBuilder.Entity("INSTITUTO.Bdat.Data.Entity.TipoEvaluacion", b =>
