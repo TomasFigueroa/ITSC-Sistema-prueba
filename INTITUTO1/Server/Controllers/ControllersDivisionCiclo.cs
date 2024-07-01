@@ -28,14 +28,14 @@ namespace INTITUTO1.Server.Controllers
 		[HttpGet("{id:int}")]
 		public async Task<ActionResult<DivisionCiclo>> Get(int id)
 		{
-			var carrera = await _context.DivisionCiclos.FirstOrDefaultAsync(c => c.IdDivCic == id);
+			var DivCiclo = await _context.DivisionCiclos.FirstOrDefaultAsync(c => c.IdDivCic == id);
 
-			if (carrera == null)
+			if (DivCiclo == null)
 			{
 				return BadRequest($"No se encontró la DivisionCiclo con id: {id}");
 			}
 
-			return carrera;
+			return DivCiclo;
 		}
 
 		// POST: api/Carrera
