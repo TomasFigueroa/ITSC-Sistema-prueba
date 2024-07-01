@@ -24,14 +24,15 @@ namespace INTITUTO1.Server.Controllers
         [HttpGet]
         public async Task<ActionResult<List<Materias>>> Get()
         {
-            return await _context.Materia.ToListAsync();
+            return await _context.Materia.Include(m => m.DivisionCicloMateria).ToListAsync();
         }
 
         // GET: api/Materias/{id}
         [HttpGet("{id:int}")]
         public async Task<ActionResult<Materias>> Get(int id)
         {
-            var materias = await _context.Materia.FirstOrDefaultAsync(c => c.IdMateria == id);
+            var materias = await _context.Materia.Include(m => m.DivisionCicloMateria)
+                                                 .FirstOrDefaultAsync(c => c.IdMateria == id);
 
             if (materias == null)
             {
@@ -43,22 +44,21 @@ namespace INTITUTO1.Server.Controllers
 
         // POST: api/materias
         [HttpPost]
-        public async Task<ActionResult<LIbros>> Post(DTOMaterias dtoMaterias)
+        public async Task<ActionResult<Materias>> Post(DTOMaterias dtoMaterias)
         {
             var responseApi = new ResponseAPI<int>();
             var mdMateria = new Materias
             {
+                Nombre = dtoMaterias.Nombre,
+                IdCarrera = dtoMaterias.IdCarrera,
                 
-                Nombre = dtoMaterias.Nombre
-
             };
             _context.Materia.Add(mdMateria);
             await _context.SaveChangesAsync();
+            responseApi.EsCorrecto = true;
+            responseApi.Mensaje = "Materia creada con éxito";
             return Ok(responseApi);
-
         }
-
-
 
         // PUT: api/materias/{id}
         [HttpPut("{id:int}")]
@@ -72,14 +72,14 @@ namespace INTITUTO1.Server.Controllers
 
                 if (dbMaterias != null)
                 {
-
                     dbMaterias.Nombre = dtoMaterias.Nombre;
-
+                    dbMaterias.IdCarrera = dtoMaterias.IdCarrera;
+                    
 
                     _context.Materia.Update(dbMaterias);
                     await _context.SaveChangesAsync();
                     responseApi.EsCorrecto = true;
-
+                    responseApi.Mensaje = "Materia actualizada con éxito";
                 }
                 else
                 {
@@ -90,7 +90,7 @@ namespace INTITUTO1.Server.Controllers
             catch (Exception ex)
             {
                 responseApi.EsCorrecto = false;
-                responseApi.Mensaje = ex.InnerException.Message;
+                responseApi.Mensaje = ex.InnerException?.Message ?? ex.Message;
             }
             return Ok(responseApi);
         }
@@ -103,7 +103,6 @@ namespace INTITUTO1.Server.Controllers
 
             try
             {
-
                 var dbMaterias = await _context.Materia.FirstOrDefaultAsync(e => e.IdMateria == id);
 
                 if (dbMaterias != null)
@@ -111,6 +110,7 @@ namespace INTITUTO1.Server.Controllers
                     _context.Materia.Remove(dbMaterias);
                     await _context.SaveChangesAsync();
                     responseApi.EsCorrecto = true;
+                    responseApi.Mensaje = "Materia eliminada con éxito";
                 }
                 else
                 {
@@ -121,10 +121,9 @@ namespace INTITUTO1.Server.Controllers
             catch (Exception ex)
             {
                 responseApi.EsCorrecto = false;
-                responseApi.Mensaje = ex.InnerException.Message;
+                responseApi.Mensaje = ex.InnerException?.Message ?? ex.Message;
             }
             return Ok(responseApi);
         }
-
     }
 }

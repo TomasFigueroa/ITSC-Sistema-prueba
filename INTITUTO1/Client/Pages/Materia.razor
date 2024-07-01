@@ -1,28 +1,19 @@
-﻿@page "/materias"
+﻿@page "/Materias"
+@using Microsoft.EntityFrameworkCore
+
+@inject HttpClient Http
 
 <PageTitle>Materias</PageTitle>
 <button class="btn btn-success" @onclick="OpenModalToAdd">Cargar Materia</button>
-
 <!-- Filtros -->
 <div class="mb-3">
+    <label class="form-label">Filtrar por Nombre de Materia</label>
+    <input type="text" class="form-control" @bind="filtroNombre" @oninput="FiltrarMaterias" placeholder="Nombre de Materia" />
+</div>
+<div class="mb-3">
     <label class="form-label">Filtrar por Carrera</label>
-    <select class="form-control" @bind="selectedCarrera">
-        <option value="">Todas las Carreras</option>
-        @foreach (var carrera in carreras)
-        {
-            <option value="@carrera.Nombre">@carrera.Nombre</option>
-        }
-    </select>
+    <input type="text" class="form-control" @bind="filtroCarrera" @oninput="FiltrarMaterias" placeholder="Carrera" />
 </div>
-<div class="mb-3">
-    <label class="form-label">Filtrar por División</label>
-    <input type="text" class="form-control" @bind="selectedDivision" placeholder="División" />
-</div>
-<div class="mb-3">
-    <label class="form-label">Filtrar por Año</label>
-    <input type="text" class="form-control" @bind="selectedAño" placeholder="Año" />
-</div>
-
 <div class="table-container" style="overflow: hidden; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); margin-bottom: 20px;">
     <div style="border-top-left-radius: 12px; border-top-right-radius: 12px; background-color: #f2f2f2; padding: 10px;">
         <table class="table" style="border-collapse: collapse; width: 100%; border: 2px solid #E6E6FA;">
@@ -30,23 +21,19 @@
                 <tr style="border-bottom: 2px solid #ddd;">
                     <th style="border-right: 2px solid #ddd;">Nombre</th>
                     <th style="border-right: 2px solid #ddd;">Carrera</th>
-                    <th style="border-right: 2px solid #ddd;">División</th>
-                    <th style="border-right: 2px solid #ddd;">Año</th>
                     <th style="border-right: 2px solid #ddd;">Acción</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach (var materia in filteredMaterias)
+                @foreach (var materia in materiasFiltradas)
                 {
                     <tr>
                         <td style="border-right: 2px solid #ddd;">@materia.Nombre</td>
-                        <td style="border-right: 2px solid #ddd;">@materia.Carrera</td>
-                        <td style="border-right: 2px solid #ddd;">@materia.Division</td>
-                        <td style="border-right: 2px solid #ddd;">@materia.Año</td>
+                        <td style="border-right: 2px solid #ddd;">@GetNombreCarrera(materia.IdCarrera)</td>
                         <td>
                             <div class="action-buttons m-1">
-                                <button class="btn btn-primary me-2" @onclick="() => OpenModalToEdit(materia)"><i class="oi oi-pencil"></i></button>
-                                <button class="btn btn-danger" @onclick="() => OpenConfirmDeleteModal(materia)"><i class="oi oi-trash"></i></button>
+                                <button class="btn btn-primary me-2" @onclick="() => OpenModalToEdit(materia, materia.IdMateria)"><i class="oi oi-pencil"></i></button>
+                                <button class="btn btn-danger" @onclick="() => OpenConfirmDeleteModal(materia.IdMateria)"><i class="oi oi-trash"></i></button>
                             </div>
                         </td>
                     </tr>
@@ -75,27 +62,13 @@
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Carrera</label>
-                            <InputSelect class="form-control" @bind-Value="currentMateria.Carrera">
+                            <InputSelect class="form-control" @bind-Value="currentMateria.IdCarrera">
                                 <option value="">Seleccione una carrera</option>
                                 @foreach (var carrera in carreras)
                                 {
-                                    <option value="@carrera.Nombre">@carrera.Nombre</option>
+                                    <option value="@carrera.IdCarrera">@carrera.Nombre</option>
                                 }
                             </InputSelect>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">División</label>
-                            <InputSelect class="form-control" @bind-Value="currentMateria.Division">
-                                <option value="">Seleccione una división</option>
-                                @foreach (var division in FiltrarDivisionesPorCarrera(currentMateria.Carrera))
-                                {
-                                    <option value="@division">@division</option>
-                                }
-                            </InputSelect>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Año</label>
-                            <InputText class="form-control" @bind-Value="currentMateria.Año" />
                         </div>
                         <button type="submit" class="btn btn-primary">@((isEdit) ? "Guardar Cambios" : "Agregar Materia")</button>
                     </EditForm>
@@ -128,56 +101,79 @@
 }
 
 @code {
-    private List<Materias> materias = new List<Materias>
-    {
-        new Materias { Nombre = "Matemáticas", Carrera = "Desarrollo de Software", Division = "División 1", Año = "2024" },
-        new Materias { Nombre = "Física", Carrera = "Enfermería", Division = "División 2", Año = "2025" }
-    };
-
-    private List<Carrera> carreras = new List<Carrera>
-    {
-        new Carrera { Nombre = "Desarrollo de Software", Plan = "2024/22", FechaInicio = new DateTime(2021, 3, 1), FechaFin = new DateTime(2024, 3, 1) },
-        new Carrera { Nombre = "Enfermería", Plan = "1122/12", FechaInicio = new DateTime(2021, 3, 1), FechaFin = new DateTime(2024, 3, 1) }
-    };
-
-    private List<Divisiones> divisiones = new List<Divisiones>
-    {
-        new Divisiones { Nombre = "División 1", Carrera = "Desarrollo de Software" },
-        new Divisiones { Nombre = "División 2", Carrera = "Enfermería" },
-        new Divisiones { Nombre = "División 3", Carrera = "Medicina" }
-    };
-
+    private List<Materias> materias = new List<Materias>();
+    private List<Carrerass> carreras = new List<Carrerass>();
     private bool isModalOpen = false;
     private bool isEdit = false;
-    private Materias currentMateria = new Materias();
-    private Materias materiaToDelete;
+    private DTOMaterias currentMateria = new DTOMaterias();
     private bool isConfirmDeleteModalOpen = false;
+    private int idToDelete;
 
-    private string selectedCarrera = string.Empty;
-    private string selectedDivision = string.Empty;
-    private string selectedAño = string.Empty;
+    // Filtros
+    private string filtroNombre = string.Empty;
+    private string filtroCarrera = string.Empty;
+    private List<Materias> materiasFiltradas = new List<Materias>();
 
-    private IEnumerable<Materias> filteredMaterias => materias
-        .Where(m => (string.IsNullOrEmpty(selectedCarrera) || m.Carrera == selectedCarrera) &&
-                    (string.IsNullOrEmpty(selectedDivision) || m.Division.Contains(selectedDivision, StringComparison.OrdinalIgnoreCase)) &&
-                    (string.IsNullOrEmpty(selectedAño) || m.Año.Contains(selectedAño, StringComparison.OrdinalIgnoreCase)));
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadMaterias();
+        await LoadCarreras();
+        await FiltrarMaterias();
+    }
+
+    private async Task LoadMaterias()
+    {
+        try
+        {
+            materias = await Http.GetFromJsonAsync<List<Materias>>("api/Materias");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading materias: {ex.Message}");
+        }
+    }
+
+    private async Task LoadCarreras()
+    {
+        try
+        {
+            carreras = await Http.GetFromJsonAsync<List<Carrerass>>("api/Carrera");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading carreras: {ex.Message}");
+        }
+    }
+
+    private async Task FiltrarMaterias()
+    {
+        materiasFiltradas = materias.Where(m =>
+            (string.IsNullOrEmpty(filtroNombre) || m.Nombre.Contains(filtroNombre, StringComparison.OrdinalIgnoreCase)) &&
+            (string.IsNullOrEmpty(filtroCarrera) || GetNombreCarrera(m.IdCarrera).Contains(filtroCarrera, StringComparison.OrdinalIgnoreCase))
+        ).ToList();
+    }
+
+    private string GetNombreCarrera(int idCarrera)
+    {
+        var carrera = carreras.FirstOrDefault(c => c.IdCarrera == idCarrera);
+        return carrera?.Nombre ?? "Carrera no encontrada";
+    }
 
     private void OpenModalToAdd()
     {
-        currentMateria = new Materias();
+        currentMateria = new DTOMaterias();
         isEdit = false;
         isModalOpen = true;
     }
 
-    private void OpenModalToEdit(Materias materia)
+    private void OpenModalToEdit(Materias materia, int id)
     {
-        currentMateria = new Materias
+        currentMateria = new DTOMaterias
             {
                 Nombre = materia.Nombre,
-                Carrera = materia.Carrera,
-                Division = materia.Division,
-                Año = materia.Año
+                IdCarrera = materia.IdCarrera
             };
+        idToDelete = id;
         isEdit = true;
         isModalOpen = true;
     }
@@ -187,28 +183,56 @@
         isModalOpen = false;
     }
 
-    private void AddMateria()
+    private async Task AddMateria()
     {
-        materias.Add(currentMateria);
-        CloseModal();
-    }
-
-    private void EditMateria()
-    {
-        var materia = materias.FirstOrDefault(m => m.Nombre == currentMateria.Nombre && m.Carrera == currentMateria.Carrera && m.Division == currentMateria.Division && m.Año == currentMateria.Año);
-        if (materia != null)
+        try
         {
-            materia.Nombre = currentMateria.Nombre;
-            materia.Carrera = currentMateria.Carrera;
-            materia.Division = currentMateria.Division;
-            materia.Año = currentMateria.Año;
+            var response = await Http.PostAsJsonAsync("api/Materias", currentMateria);
+            if (response.IsSuccessStatusCode)
+            {
+                await LoadMaterias();
+                await LoadCarreras();
+                await FiltrarMaterias();
+                CloseModal();
+            }
+            else
+            {
+                Console.WriteLine($"Error adding materia: {response.ReasonPhrase}");
+            }
         }
-        CloseModal();
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Exception adding materia: {ex.Message}");
+        }
     }
 
-    private void OpenConfirmDeleteModal(Materias materia)
+    private async Task EditMateria()
     {
-        materiaToDelete = materia;
+        try
+        {
+            var response = await Http.PutAsJsonAsync($"api/Materias/{idToDelete}", currentMateria);
+            
+            if (response.IsSuccessStatusCode)
+            {
+                await LoadMaterias();
+                await LoadCarreras();
+                await FiltrarMaterias();
+                CloseModal();
+            }
+            else
+            {
+                Console.WriteLine($"Error editing materia: {response.ReasonPhrase}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Exception editing materia: {ex.Message}");
+        }
+    }
+
+    private void OpenConfirmDeleteModal(int id)
+    {
+        idToDelete = id;
         isConfirmDeleteModalOpen = true;
     }
 
@@ -217,38 +241,28 @@
         isConfirmDeleteModalOpen = false;
     }
 
-    private void DeleteMateria()
+    private async Task DeleteMateria()
     {
-        materias.Remove(materiaToDelete);
-        CloseConfirmDeleteModal();
-    }
-
-    private IEnumerable<string> FiltrarDivisionesPorCarrera(string carrera)
-    {
-        return divisiones
-            .Where(d => d.Carrera == carrera)
-            .Select(d => d.Nombre);
-    }
-
-    public class Materias
-    {
-        public string Nombre { get; set; }
-        public string Carrera { get; set; }
-        public string Division { get; set; }
-        public string Año { get; set; }
-    }
-
-    public class Carrera
-    {
-        public string Nombre { get; set; }
-        public string Plan { get; set; }
-        public DateTime FechaInicio { get; set; }
-        public DateTime FechaFin { get; set; }
-    }
-
-    public class Divisiones
-    {
-        public string Nombre { get; set; }
-        public string Carrera { get; set; }
+        try
+        {
+            var response = await Http.DeleteAsync($"api/Materias/{idToDelete}");
+            if (response.IsSuccessStatusCode)
+            {
+                await LoadMaterias();
+                CloseConfirmDeleteModal();
+            }
+            else
+            {
+                Console.WriteLine($"Error deleting materia: {response.ReasonPhrase}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Exception deleting materia: {ex.Message}");
+        }
     }
 }
+
+
+
+
