@@ -2,6 +2,7 @@
 using INSTITUTO.Bdat;
 using INTITUTO1.Shared.DTO;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace INTITUTO1.Server.Controllers
 {
@@ -73,7 +74,7 @@ namespace INTITUTO1.Server.Controllers
                     dbDivCicMat.ProfesorIdProfesor = dbDivCicMat.ProfesorIdProfesor;
 
 
-                    _context.DivisionCiclos.Update(dbDivCicMat);
+                    _context.DivisionCicloMaterias.Update(dbDivCicMat);
                     await _context.SaveChangesAsync();
                     responseApi.EsCorrecto = true;
 
