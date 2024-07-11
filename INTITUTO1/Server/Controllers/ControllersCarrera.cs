@@ -2,7 +2,10 @@
 using INSTITUTO.Bdat;
 using INTITUTO1.Shared.DTO;
 using Microsoft.AspNetCore.Mvc;
-
+using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace INTITUTO1.Server.Controllers
 {

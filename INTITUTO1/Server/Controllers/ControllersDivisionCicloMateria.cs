@@ -3,9 +3,14 @@ using INSTITUTO.Bdat;
 using INTITUTO1.Shared.DTO;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace INTITUTO1.Server.Controllers
 {
+    [ApiController]
+    [Route("api/DivisionCicloMateria")]
 	public class ControllersDivisionCicloMateria
     {
         private readonly Context _context;
@@ -22,7 +27,7 @@ namespace INTITUTO1.Server.Controllers
             return await _context.DivisionCicloMaterias.ToListAsync();
         }
 
-        // GET: api/DivsionCiclo/{id}
+        // GET: api/DivisionCicloMateria/{id}
         [HttpGet("{id:int}")]
         public async Task<ActionResult<DivisionCicloMateria>> Get(int id)
         {
@@ -50,7 +55,7 @@ namespace INTITUTO1.Server.Controllers
             };
             _context.DivisionCicloMaterias.Add(mdDivCicMat);
             await _context.SaveChangesAsync();
-            return Ok(responseApi);
+            return Ok (responseApi);
 
         }
 
@@ -90,7 +95,7 @@ namespace INTITUTO1.Server.Controllers
                 responseApi.EsCorrecto = false;
                 responseApi.Mensaje = ex.InnerException.Message;
             }
-            return Ok(responseApi);
+            return Ok (responseApi);
         }
 
         // DELETE: api/DivisionCicloMateria/{id}
@@ -121,7 +126,7 @@ namespace INTITUTO1.Server.Controllers
                 responseApi.EsCorrecto = false;
                 responseApi.Mensaje = ex.InnerException.Message;
             }
-            return Ok(responseApi);
+            return Ok (responseApi);
         }
 
     }
