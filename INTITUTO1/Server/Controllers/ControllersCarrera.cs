@@ -1,4 +1,7 @@
 ﻿using INSTITUTO.Bdat.Data.Entity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using INTITUTO1.Shared.DTO;
 using INSTITUTO.Bdat;
 using INTITUTO1.Shared.DTO;
 using Microsoft.AspNetCore.Mvc;
