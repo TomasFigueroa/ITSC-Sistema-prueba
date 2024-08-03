@@ -1,7 +1,8 @@
 ﻿using INSTITUTO.Bdat.Data.Entity;
-using INSTITUTO.Bdat;
-using INTITUTO1.Shared.DTO;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using INTITUTO1.Shared.DTO;
+using INSTITUTO.Bdat;
 
 
 namespace INTITUTO1.Server.Controllers
@@ -48,15 +49,15 @@ namespace INTITUTO1.Server.Controllers
                 Nombre = carrera.Nombres,
                 FechaInicio = carrera.Fecha_inicio,
                 FechaFin = carrera.Fecha_fin,
-               
+
             };
             _context.Carreras.Add(mdCarrera);
             await _context.SaveChangesAsync();
             return Ok(responseApi);
 
         }
-           
- 
+
+
 
         // PUT: api/Carrera/{id}
         [HttpPut("{id:int}")]
@@ -70,7 +71,7 @@ namespace INTITUTO1.Server.Controllers
 
                 if (dbCarrera != null)
                 {
-                    
+
                     dbCarrera.Nombre = carrera.Nombres;
                     dbCarrera.FechaInicio = carrera.Fecha_inicio;
                     dbCarrera.FechaFin = carrera.Fecha_fin;
@@ -78,7 +79,7 @@ namespace INTITUTO1.Server.Controllers
                     _context.Carreras.Update(dbCarrera);
                     await _context.SaveChangesAsync();
                     responseApi.EsCorrecto = true;
-                   
+
                 }
                 else
                 {
@@ -102,7 +103,7 @@ namespace INTITUTO1.Server.Controllers
 
             try
             {
-                
+
                 var dbCarrera = await _context.Carreras.FirstOrDefaultAsync(e => e.IdCarrera == id);
 
                 if (dbCarrera != null)
