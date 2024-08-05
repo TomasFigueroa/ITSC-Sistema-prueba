@@ -55,6 +55,7 @@ namespace INTITUTO1.Server.Controllers
             };
             _context.DivisionCicloMaterias.Add(mdDivCicMat);
             await _context.SaveChangesAsync();
+            responseApi.EsCorrecto = true;
             return Ok(responseApi);
 
         }
@@ -73,16 +74,14 @@ namespace INTITUTO1.Server.Controllers
 
                 if (dbDivCicMat != null)
                 {
-
-                    dbDivCicMat.DivisionCicloIdDivCic = dbDivCicMat.DivisionCicloIdDivCic;
-                    dbDivCicMat.MateriasIdMateria = dbDivCicMat.MateriasIdMateria;
-                    dbDivCicMat.ProfesorIdProfesor = dbDivCicMat.ProfesorIdProfesor;
-
+                    // Actualiza las propiedades con los valores del DTO
+                    dbDivCicMat.DivisionCicloIdDivCic = dtoDivisionCicloMateria.DivisionCicloIdDivCic;
+                    dbDivCicMat.MateriasIdMateria = dtoDivisionCicloMateria.MateriasIdMateria;
+                    dbDivCicMat.ProfesorIdProfesor = dtoDivisionCicloMateria.ProfesorIdProfesor;
 
                     _context.DivisionCicloMaterias.Update(dbDivCicMat);
                     await _context.SaveChangesAsync();
                     responseApi.EsCorrecto = true;
-
                 }
                 else
                 {
@@ -93,10 +92,11 @@ namespace INTITUTO1.Server.Controllers
             catch (Exception ex)
             {
                 responseApi.EsCorrecto = false;
-                responseApi.Mensaje = ex.InnerException.Message;
+                responseApi.Mensaje = ex.InnerException?.Message ?? ex.Message;
             }
             return Ok(responseApi);
         }
+
 
         // DELETE: api/DivisionCicloMateria/{id}
         [HttpDelete("{id:int}")]

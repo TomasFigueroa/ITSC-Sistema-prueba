@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace INTITUTO1.Server.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/Ciclo")]
     [ApiController]
     public class CicloController : ControllerBase
     {
@@ -21,14 +21,14 @@ namespace INTITUTO1.Server.Controllers
 
         // GET: api/Ciclo
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Ciclo>>> get()
+        public async Task<ActionResult<IEnumerable<Ciclos>>> get()
         {
             return await _context.Ciclos.ToListAsync();
         }
 
         // GET: api/Ciclo/5
         [HttpGet("{id:int}")]
-        public async Task<ActionResult<Ciclo>> GetCiclo(int id)
+        public async Task<ActionResult<Ciclos>> GetCiclo(int id)
         {
             var ciclo = await _context.Ciclos.FirstOrDefaultAsync(c => c.IdCiclo == id);
 
@@ -44,10 +44,10 @@ namespace INTITUTO1.Server.Controllers
         // POST: api/Ciclo
         [HttpPost]
 
-        public async Task<ActionResult<Ciclo>> Post(DTOCiclo dtoCiclo)
+        public async Task<ActionResult<Ciclos>> Post(DTOCiclo dtoCiclo)
         {
             var responseApi = new ResponseAPI<int>();
-            var mdCiclo = new Ciclo
+            var mdCiclo = new Ciclos
             {
                 Fecha = dtoCiclo.Fecha
             };
@@ -57,33 +57,26 @@ namespace INTITUTO1.Server.Controllers
   
         }
 
-        // PUT: api/Ciclo
+        //// PUT: api/Ciclo
         [HttpPut("{id:int}")]
-        public async Task<IActionResult> Put (int id, DTOCiclo dtoCiclo)
+        public async Task<IActionResult> Put(int id, DTOCiclo dtoCiclo)
         {
             var responseApi = new ResponseAPI<int>();
 
-            try
-            {
-                var dbCiclo = await _context.Ciclos.FirstOrDefaultAsync(e => e.IdCiclo == id);
+        //    try
+        //    {
+        //        var dbCiclo = await _context.Ciclos.FirstOrDefaultAsync(e => e.IdCiclo == id);
 
-                if (dbCiclo == null)
-                {
-                    dbCiclo.Fecha = dtoCiclo.Fecha;
+        //        if (dbCiclo == null)
+        //        {
+        //            dbCiclo.Fecha = dtoCiclo.Fecha;
 
-                    _context.Ciclos.Update(dbCiclo);
-                    await _context.SaveChangesAsync();
-                    responseApi.EsCorrecto = true;
-                }
-            }
-            catch (Exception ex)
-            {
-                responseApi.EsCorrecto = false;
-                responseApi.Mensaje = ex.InnerException.Message;
-            }
-            return Ok(responseApi); 
-        }
-
+        //            _context.Ciclos.Update(dbCiclo);
+        //            await _context.SaveChangesAsync();
+        //            responseApi.EsCorrecto = true;
+        //        }
+        //    }
+        //}
 
         // DELETE: api/Ciclo/5
         [HttpDelete("{id}")]

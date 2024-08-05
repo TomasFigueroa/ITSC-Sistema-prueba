@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace INSTITUTO.Bdat.Data.Entity
 {
-    public class Ciclo
+    public class Ciclos
     {
         public int IdCiclo { get; set; }
         public DateTime Fecha { get; set; }

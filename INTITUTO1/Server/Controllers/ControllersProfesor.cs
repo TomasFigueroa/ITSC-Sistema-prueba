@@ -24,9 +24,9 @@ namespace INTITUTO1.Server.Controllers
 
         // GET: api/Profesor
         [HttpGet]
-        public async Task<ActionResult<List<Notas>>> Get()
+        public async Task<ActionResult<List<Profesor>>> Get()
         {
-            return await _context.notas.ToListAsync();
+            return await _context.profesors.ToListAsync();
         }
 
         // GET: api/Profesor/{id}
@@ -47,6 +47,11 @@ namespace INTITUTO1.Server.Controllers
         [HttpPost]
         public async Task<ActionResult<Profesor>> Post(DTOProfesor dtoProfesor)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             var responseApi = new ResponseAPI<int>();
             var mdProfesor = new Profesor
             {
@@ -54,11 +59,11 @@ namespace INTITUTO1.Server.Controllers
                 Nombre_Prof = dtoProfesor.Nombre_Prof,
                 Dni = dtoProfesor.Dni,
                 Estado = dtoProfesor.Estado,
-                //TipoEvaluacion = dtoNotas.TipoEvaluacion (desmarcala si va esta)
-
             };
             _context.profesors.Add(mdProfesor);
             await _context.SaveChangesAsync();
+            responseApi.Valor = mdProfesor.IdProfesor;
+            responseApi.EsCorrecto = true;
             return Ok(responseApi);
 
         }

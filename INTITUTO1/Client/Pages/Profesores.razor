@@ -1,124 +1,34 @@
 ﻿@page "/Profesores"
-@using INTITUTO1.Shared
+@using Microsoft.EntityFrameworkCore
+
 @inject HttpClient Http
 
-<PageTitle>Profesores</PageTitle>
-
-<h1>PROFESORES</h1>
-
-<button class="btn btn-success" @onclick="OpenModal">Cargar Profesor</button>
-
-
-
-<!-- Modal para cargar profesores -->
-@if (isModalOpen)
-{
-    <div class="modal fade show d-block" style="background-color: rgba(0, 0, 0, 0.5);">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Cargar Datos del Profesor</h5>
-                    <button type="button" class="btn-close" @onclick="CloseModal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label">DNI</label>
-                        <input type="text" class="form-control" @bind="selectedProfesor.DNI" />
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">CUIL</label>
-                        <input type="text" class="form-control" @bind="selectedProfesor.CUIL" />
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Apellidos</label>
-                        <input type="text" class="form-control" @bind="selectedProfesor.Apellidos" />
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Nombres</label>
-                        <input type="text" class="form-control" @bind="selectedProfesor.Nombres" />
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Correo</label>
-                        <input type="email" class="form-control" @bind="selectedProfesor.Correo" />
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Estado</label>
-                        <input type="text" class="form-control" @bind="selectedProfesor.Estado" />
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Materia</label>
-                        <input type="text" class="form-control" @bind="selectedProfesor.Materia" />
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Legajo</label>
-                        <input type="text" class="form-control" @bind="selectedProfesor.Legajo" />
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" @onclick="CloseModal">Cerrar</button>
-                    <button type="button" class="btn btn-primary" @onclick="SaveProfesor">Guardar</button>
-                </div>
-            </div>
-        </div>
-    </div>
-}
-
-<!-- Modal para confirmar el borrado -->
-@if (isConfirmModalOpen)
-{
-    <div class="modal fade show d-block" style="background-color: rgba(0, 0, 0, 0.5);">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Confirmar Borrado</h5>
-                    <button type="button" class="btn-close" @onclick="CloseConfirmModal"></button>
-                </div>
-                <div class="modal-body">
-                    ¿Estás seguro de que deseas borrar este profesor?
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" @onclick="CloseConfirmModal">Cancelar</button>
-                    <button type="button" class="btn btn-danger" @onclick="DeleteProfesor">Borrar</button>
-                </div>
-            </div>
-        </div>
-    </div>
-}
-
+<PageTitle>Profesor</PageTitle>
+<button class="btn btn-success" @onclick="OpenModalToAdd">Cargar Profesor</button>
 <div class="table-container" style="overflow: hidden; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); margin-bottom: 20px;">
     <div style="border-top-left-radius: 12px; border-top-right-radius: 12px; background-color: #f2f2f2; padding: 10px;">
-        <table class="table" style="border-collapse: collapse; width: 100%; border: 2px solid #ddd;">
+        <table class="table" style="border-collapse: collapse; width: 100%; border: 2px solid #E6E6FA;">
             <thead>
                 <tr style="border-bottom: 2px solid #ddd;">
+                    <th style="border-right: 2px solid #ddd;">Nombre</th>
+                    <th style="border-right: 2px solid #ddd;">Apellido</th>
                     <th style="border-right: 2px solid #ddd;">DNI</th>
-                    <th style="border-right: 2px solid #ddd;">CUIL</th>
-                    <th style="border-right: 2px solid #ddd;">Apellidos</th>
-                    <th style="border-right: 2px solid #ddd;">Nombres</th>
-                    <th style="border-right: 2px solid #ddd;">Correo</th>
                     <th style="border-right: 2px solid #ddd;">Estado</th>
-                    <th style="border-right: 2px solid #ddd;">Materia</th>
-                    <th style="border-right: 2px solid #ddd;">Legajo</th>
-                    <th>Acción</th>
+                    <th style="border-right: 2px solid #ddd;">Acción</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach (var profesor in profesoresFiltrados)
+                @foreach (var profesor in profesores)
                 {
                     <tr>
-                        <td style="border-right: 2px solid #ddd;">@profesor.DNI</td>
-                        <td style="border-right: 2px solid #ddd;">@profesor.CUIL</td>
-                        <td style="border-right: 2px solid #ddd;">@profesor.Apellidos</td>
-                        <td style="border-right: 2px solid #ddd;">@profesor.Nombres</td>
-                        <td style="border-right: 2px solid #ddd;">@profesor.Correo</td>
-                        <td style="border-right: 2px solid #ddd;">@profesor.Estado</td>
-                        <td style="border-right: 2px solid #ddd;">@profesor.Materia</td>
-                        <td style="border-right: 2px solid #ddd;">@profesor.Legajo</td>
-                        <td style="border: none; display: flex; justify-content: space-between;">
-                            <div class="action-buttons">
-                                <button class="btn btn-danger" @onclick="() => OpenConfirmModal(profesor)"><i class="oi oi-trash"></i></button>
-                            </div>
-                            <div class="action-buttons">
-                                <button class="btn btn-primary" @onclick="() => OpenModalWithProfesor(profesor)"><i class="oi oi-pencil"></i></button>
+                        <td style="border-right: 2px solid #ddd;">@profesor.Nombre_Prof</td>
+                        <td style="border-right: 2px solid #ddd;">@profesor.Apellido_Prof</td>
+                        <td style="border-right: 2px solid #ddd;">@profesor.Dni</td>
+                        <td style="border-right: 2px solid #ddd;">@(profesor.Estado ? "Activo" : "Inactivo")</td>
+                        <td>
+                            <div class="action-buttons m-1">
+                                <button class="btn btn-primary me-2" @onclick="() => OpenModalToEdit(profesor, profesor.IdProfesor)"><i class="oi oi-pencil"></i></button>
+                                <button class="btn btn-danger" @onclick="() => OpenConfirmDeleteModal(profesor.IdProfesor)"><i class="oi oi-trash"></i></button>
                             </div>
                         </td>
                     </tr>
@@ -128,63 +38,108 @@
     </div>
 </div>
 
+@if (isModalOpen)
+{
+    <div class="modal fade show d-block" style="background-color: rgba(0, 0, 0, 0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@(isEdit ? "Editar Profesor" : "Agregar Profesor")</h5>
+                    <button type="button" class="btn-close" @onclick="CloseModal"></button>
+                </div>
+                <div class="modal-body">
+                    <EditForm Model="@currentProfesor" OnValidSubmit="@(isEdit ? EditProfesor : AddProfesor)">
+                        <DataAnnotationsValidator />
+                        <div class="mb-3">
+                            <label class="form-label">Nombre</label>
+                            <InputText class="form-control" @bind-Value="currentProfesor.Nombre_Prof" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Apellido</label>
+                            <InputText class="form-control" @bind-Value="currentProfesor.Apellido_Prof" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">DNI</label>
+                            <InputNumber class="form-control" @bind-Value="currentProfesor.Dni" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Estado</label>
+                            <InputCheckbox class="form-check-input" @bind-Value="currentProfesor.Estado" />
+                            <label class="form-check-label">@((currentProfesor.Estado) ? "Activo" : "Inactivo")</label>
+                        </div>
+                        <button type="submit" class="btn btn-primary">@((isEdit) ? "Guardar Cambios" : "Agregar Profesor")</button>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@if (isConfirmDeleteModalOpen)
+{
+    <div class="modal fade show d-block" style="background-color: rgba(0, 0, 0, 0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmar Eliminación</h5>
+                    <button type="button" class="btn-close" @onclick="CloseConfirmDeleteModal"></button>
+                </div>
+                <div class="modal-body">
+                    ¿Estás seguro de que deseas eliminar este Profesor?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseConfirmDeleteModal">Cancelar</button>
+                    <button type="button" class="btn btn-danger" @onclick="DeleteProfesor">Eliminar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
 @code {
-    private bool isConfirmModalOpen = false;
-    private Profesor selectedProfesorToDelete;
+    private List<Profesor> profesores = new List<Profesor>();
+    private DTOProfesor currentProfesor = new DTOProfesor();
     private bool isModalOpen = false;
-    private Profesor selectedProfesor = new Profesor();
-    private List<Profesor> items = new List<Profesor>();
+    private bool isEdit = false;
+    private int idProfesorToDelete;
+    private bool isConfirmDeleteModalOpen = false;
+    int idactual;
 
-    // Listas para las materias
-    private List<string> materias = new List<string> { "Matemáticas", "Programación", "Historia", "Química" };
-    private string selectedMateria = string.Empty;
-
-    // Lista de profesores
-    private List<Profesor> profesores = new List<Profesor>
+    protected override async Task OnInitializedAsync()
     {
-        new Profesor { DNI = "12345678", CUIL = "20-12345678-9", Apellidos = "Lopez", Nombres = "Jose", Correo = "jose.lopez@example.com", Estado = "Titular", Materia = "Programación", Legajo = "DS12" },
-        new Profesor { DNI = "87654321", CUIL = "20-87654321-9", Apellidos = "Perez", Nombres = "Maria", Correo = "maria.perez@example.com", Estado = "Titular", Materia = "Matemáticas", Legajo = "DS13" },
-        new Profesor { DNI = "11223344", CUIL = "20-11223344-9", Apellidos = "Garcia", Nombres = "Luis", Correo = "luis.garcia@example.com", Estado = "Suplente", Materia = "Historia", Legajo = "DS14" },
-        new Profesor { DNI = "55667788", CUIL = "20-55667788-9", Apellidos = "Fernandez", Nombres = "Ana", Correo = "ana.fernandez@example.com", Estado = "Suplente", Materia = "Química", Legajo = "DS15" }
-    };
-
-    // Propiedad calculada para obtener los profesores filtrados
-    private List<Profesor> profesoresFiltrados => profesores
-        .Where(p => string.IsNullOrEmpty(selectedMateria) || p.Materia == selectedMateria)
-        .ToList();
-
-    // Métodos para los botones de acción
-    private void OpenConfirmModal(Profesor profesor)
-    {
-        // Lógica para abrir el modal de confirmación
-        selectedProfesorToDelete = profesor;
-        isConfirmModalOpen = true;
+        await LoadProfesores();
     }
 
-    private void CloseConfirmModal()
+    private async Task LoadProfesores()
     {
-        isConfirmModalOpen = false;
+        try
+        {
+            profesores = await Http.GetFromJsonAsync<List<Profesor>>("api/Profesor");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading profesores: {ex.Message}");
+        }
     }
 
-    private void DeleteProfesor()
+    private void OpenModalToAdd()
     {
-        // Aquí deberías implementar la lógica para borrar el profesor
-        // Por ejemplo, podrías eliminarlo de la lista de profesores
-        profesores.Remove(selectedProfesorToDelete);
-
-        // Cerrar el modal de confirmación
-        CloseConfirmModal();
-    }
-
-    private void OpenModal()
-    {
-        selectedProfesor = new Profesor(); // Profesor nuevo o vacío
+        currentProfesor = new DTOProfesor();
+        isEdit = false;
         isModalOpen = true;
     }
 
-    private void OpenModalWithProfesor(Profesor profesor)
+    private void OpenModalToEdit(Profesor profesor, int id)
     {
-        selectedProfesor = profesor;
+        currentProfesor = new DTOProfesor
+            {
+                Nombre_Prof = profesor.Nombre_Prof,
+                Apellido_Prof = profesor.Apellido_Prof,
+                Dni = profesor.Dni,
+                Estado = profesor.Estado
+            };
+        idactual = id;
+        isEdit = true;
         isModalOpen = true;
     }
 
@@ -193,31 +148,80 @@
         isModalOpen = false;
     }
 
-    private void SaveProfesor()
+    private void OpenConfirmDeleteModal(int id)
     {
-        if (!profesores.Contains(selectedProfesor))
+        idProfesorToDelete = id;
+        isConfirmDeleteModalOpen = true;
+    }
+
+    private void CloseConfirmDeleteModal()
+    {
+        isConfirmDeleteModalOpen = false;
+    }
+
+    private async Task AddProfesor()
+    {
+        try
         {
-            profesores.Add(selectedProfesor);
+            var response = await Http.PostAsJsonAsync("api/Profesor", currentProfesor);
+            if (response.IsSuccessStatusCode)
+            {
+                await LoadProfesores();
+                CloseModal();
+            }
+            else
+            {
+                Console.WriteLine($"Error adding profesor: {response.ReasonPhrase}");
+            }
         }
-        CloseModal();
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Exception adding profesor: {ex.Message}");
+        }
     }
 
-    // Clase para representar un profesor
-    public class Profesor
+    private async Task EditProfesor()
     {
-        public string DNI { get; set; }
-        public string CUIL { get; set; }
-        public string Apellidos { get; set; }
-        public string Nombres { get; set; }
-        public string Correo { get; set; }
-        public string Estado { get; set; }
-        public string Materia { get; set; }
-        public string Legajo { get; set; }
+        try
+        {
+            var response = await Http.PutAsJsonAsync($"api/Profesor/{idactual}", currentProfesor);
+            if (response.IsSuccessStatusCode)
+            {
+                await LoadProfesores();
+                CloseModal();
+            }
+            else
+            {
+                Console.WriteLine($"Error editing profesor: {response.ReasonPhrase}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Exception editing profesor: {ex.Message}");
+        }
     }
 
-    protected override void OnInitialized()
+    private async Task DeleteProfesor()
     {
-        // Inicializar la lista de materias al cargar el componente
+        try
+        {
+            var response = await Http.DeleteAsync($"api/Profesor/{idProfesorToDelete}");
+            if (response.IsSuccessStatusCode)
+            {
+                await LoadProfesores();
+                CloseConfirmDeleteModal();
+            }
+            else
+            {
+                Console.WriteLine($"Error deleting profesor: {response.ReasonPhrase}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Exception deleting profesor: {ex.Message}");
+        }
     }
 }
+
+
 
