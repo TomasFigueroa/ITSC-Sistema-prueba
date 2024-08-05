@@ -1,0 +1,203 @@
+﻿@page "/Ciclo"
+@using Microsoft.EntityFrameworkCore
+
+@inject HttpClient Http
+
+<PageTitle>Ciclo</PageTitle>
+<button class="btn btn-success" @onclick="OpenModalToAdd">Cargar Ciclo</button>
+<div class="table-container" style="overflow: hidden; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); margin-bottom: 20px;">
+    <div style="border-top-left-radius: 12px; border-top-right-radius: 12px; background-color: #f2f2f2; padding: 10px;">
+        <table class="table" style="border-collapse: collapse; width: 100%; border: 2px solid #E6E6FA;">
+            <thead>
+                <tr style="border-bottom: 2px solid #ddd;">
+                    <th style="border-right: 2px solid #ddd;">Fecha</th>
+                    <th style="border-right: 2px solid #ddd;">Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var ciclo in ciclos)
+                {
+                    <tr>
+                        <td style="border-right: 2px solid #ddd;">@ciclo.Fecha.ToShortDateString()</td>
+                        <td>
+                            <div class="action-buttons m-1">
+                                <button class="btn btn-primary me-2" @onclick="() => OpenModalToEdit(ciclo, ciclo.IdCiclo)"><i class="oi oi-pencil"></i></button>
+                                <button class="btn btn-danger" @onclick="() => OpenConfirmDeleteModal(ciclo.IdCiclo)"><i class="oi oi-trash"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@if (isModalOpen)
+{
+    <div class="modal fade show d-block" style="background-color: rgba(0, 0, 0, 0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@(isEdit ? "Editar Ciclo" : "Agregar Ciclo")</h5>
+                    <button type="button" class="btn-close" @onclick="CloseModal"></button>
+                </div>
+                <div class="modal-body">
+                    <EditForm Model="@currentCiclo" OnValidSubmit="@(isEdit ? EditCiclo : AddCiclo)">
+                        <DataAnnotationsValidator />
+                        <div class="mb-3">
+                            <label class="form-label">Fecha</label>
+                            <InputDate class="form-control" @bind-Value="currentCiclo.Fecha" />
+                        </div>
+                        <button type="submit" class="btn btn-primary">@((isEdit) ? "Guardar Cambios" : "Agregar Ciclo")</button>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@if (isConfirmDeleteModalOpen)
+{
+    <div class="modal fade show d-block" style="background-color: rgba(0, 0, 0, 0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmar Eliminación</h5>
+                    <button type="button" class="btn-close" @onclick="CloseConfirmDeleteModal"></button>
+                </div>
+                <div class="modal-body">
+                    ¿Estás seguro de que deseas eliminar este ciclo?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseConfirmDeleteModal">Cancelar</button>
+                    <button type="button" class="btn btn-danger" @onclick="DeleteCiclo">Eliminar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<Ciclos> ciclos = new List<Ciclos>();
+    private DTOCiclo currentCiclo = new DTOCiclo();
+    private bool isModalOpen = false;
+    private bool isEdit = false;
+    private int idCicloToDelete;
+    private bool isConfirmDeleteModalOpen = false;
+    int idactual;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCiclos();
+    }
+
+    private async Task LoadCiclos()
+    {
+        try
+        {
+            ciclos = await Http.GetFromJsonAsync<List<Ciclos>>("api/Ciclo");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading ciclos: {ex.Message}");
+        }
+    }
+
+    private void OpenModalToAdd()
+    {
+        currentCiclo = new DTOCiclo();
+        isEdit = false;
+        isModalOpen = true;
+    }
+
+    private void OpenModalToEdit(Ciclos ciclo, int id)
+    {
+        currentCiclo = new DTOCiclo
+            {
+                Fecha = ciclo.Fecha
+            };
+        idactual = id;
+        isEdit = true;
+        isModalOpen = true;
+    }
+
+    private void CloseModal()
+    {
+        isModalOpen = false;
+    }
+
+    private async Task AddCiclo()
+    {
+        try
+        {
+            var response = await Http.PostAsJsonAsync("api/Ciclo", currentCiclo);
+            if (response.IsSuccessStatusCode)
+            {
+                await LoadCiclos();
+                CloseModal();
+            }
+            else
+            {
+                Console.WriteLine($"Error adding ciclo: {response.ReasonPhrase}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Exception adding ciclo: {ex.Message}");
+        }
+    }
+
+    private async Task EditCiclo()
+    {
+        try
+        {
+            var response = await Http.PutAsJsonAsync($"api/Ciclo/{idactual}", currentCiclo);
+            if (response.IsSuccessStatusCode)
+            {
+                await LoadCiclos();
+                CloseModal();
+            }
+            else
+            {
+                Console.WriteLine($"Error editing ciclo: {response.ReasonPhrase}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Exception editing ciclo: {ex.Message}");
+        }
+    }
+
+    private void OpenConfirmDeleteModal(int id)
+    {
+        idactual = id;
+        isConfirmDeleteModalOpen = true;
+    }
+
+    private void CloseConfirmDeleteModal()
+    {
+        isConfirmDeleteModalOpen = false;
+    }
+
+    private async Task DeleteCiclo()
+    {
+        try
+        {
+            var response = await Http.DeleteAsync($"api/Ciclo/{idactual}");
+            if (response.IsSuccessStatusCode)
+            {
+                await LoadCiclos();
+                CloseConfirmDeleteModal();
+            }
+            else
+            {
+                Console.WriteLine($"Error deleting ciclo: {response.ReasonPhrase}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Exception deleting ciclo: {ex.Message}");
+        }
+    }
+}
+

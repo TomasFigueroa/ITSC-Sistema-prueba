@@ -1,169 +1,41 @@
 ﻿@page "/Alumno"
-@using INTITUTO1.Shared
+@using Microsoft.EntityFrameworkCore
 @inject HttpClient Http
 
 <PageTitle>Alumnos</PageTitle>
-
-<th>ALUMNOS</th>
-
-<button class="btn btn-success" @onclick="OpenModal">Cargar Alumno</button>
-
-<!-- Select para filtrar por carrera -->
-<div class="mb-3">
-    <label class="form-label">Filtrar por Carrera</label>
-    <select class="form-control"  @bind="selectedCarrera">
-        <option value="">Seleccione una carrera</option>
-        @foreach (var carrera in carreras)
-        {
-            <option value="@carrera">@carrera</option>
-        }
-    </select>
-</div>
-
-<!-- Select para filtrar por DNI -->
-<div class="mb-3">
-    <label class="form-label">Filtrar por DNI</label>
-    <select class="form-control"  @bind="selectedDni">
-        <option value="">Seleccione un DNI</option>
-        @foreach (var dni in filteredDnis)
-        {
-            <option value="@dni">@dni</option>
-        }
-    </select>
-</div>
-
-<!-- Modal para cargar alumnos -->
-@if (isModalOpen)
-{
-    <div class="modal fade show d-block" style="background-color: rgba(0, 0, 0, 0.5);">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Cargar Datos del Alumno</h5>
-                    <button type="button" class="btn-close" @onclick="CloseModal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label">DNI</label>
-                        <input type="number" class="form-control" @bind="selectedAlumno.DNI" />
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">CUIL</label>
-                        <input type="number" class="form-control" @bind="selectedAlumno.CUIL" />
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Apellidos</label>
-                        <input type="text" class="form-control" @bind="selectedAlumno.Apellidos" />
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Nombres</label>
-                        <input type="text" class="form-control" @bind="selectedAlumno.Nombres" />
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Correo</label>
-                        <input type="email" class="form-control" @bind="selectedAlumno.Correo" />
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Cohorte</label>
-                        <input type="text" class="form-control" @bind="selectedAlumno.Cohorte" />
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Estado</label>
-                        <input type="text" class="form-control" @bind="selectedAlumno.Estado" />
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Carrera</label>
-                        <input type="text" class="form-control" @bind="selectedAlumno.Carrera" />
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Legajo</label>
-                        <input type="text" class="form-control" @bind="selectedAlumno.Legajo" />
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Tbase</label>
-                        <input type="text" class="form-control" @bind="selectedAlumno.Tbase" />
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" @onclick="CloseModal">Cerrar</button>
-                    <button type="button" class="btn btn-primary">Cargar</button>
-                </div>
-            </div>
-        </div>
-    </div>
-}
-
-<!-- Modal para confirmar el borrado -->
-@if (isConfirmModalOpen)
-{
-    <div class="modal fade show d-block" style="background-color: rgba(0, 0, 0, 0.5);">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Confirmar Borrado</h5>
-                    <button type="button" class="btn-close" @onclick="CloseConfirmModal"></button>
-                </div>
-                <div class="modal-body">
-                    ¿Estás seguro de que deseas borrar este alumno?
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" @onclick="CloseConfirmModal">Cancelar</button>
-                    <button type="button" class="btn btn-danger" @onclick="DeleteAlumno">Borrar</button>
-                </div>
-            </div>
-        </div>
-    </div>
-}
-
+<button class="btn btn-success" @onclick="OpenModalToAdd">Cargar Alumno</button>
 <div class="table-container" style="overflow: hidden; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); margin-bottom: 20px;">
     <div style="border-top-left-radius: 12px; border-top-right-radius: 12px; background-color: #f2f2f2; padding: 10px;">
         <table class="table" style="border-collapse: collapse; width: 100%; border: 2px solid #E6E6FA;">
             <thead>
                 <tr style="border-bottom: 2px solid #ddd;">
+                    <th style="border-right: 2px solid #ddd;">Nombre</th>
+                    <th style="border-right: 2px solid #ddd;">Apellido</th>
                     <th style="border-right: 2px solid #ddd;">DNI</th>
                     <th style="border-right: 2px solid #ddd;">CUIL</th>
-                    <th style="border-right: 2px solid #ddd;">Apellidos</th>
-                    <th style="border-right: 2px solid #ddd;">Nombres</th>
-                    <th style="border-right: 2px solid #ddd;">Correo</th>
-                    <th style="border-right: 2px solid #ddd;">Cohorte</th>
-                    <th style="border-right: 2px solid #ddd;">Estado</th>
-                    <th style="border-right: 2px solid #ddd;">Carrera</th>
-                    <th style="border-right: 2px solid #ddd;">Legajo</th>
+                    <th style="border-right: 2px solid #ddd;">Fecha de Nacimiento</th>
                     <th style="border-right: 2px solid #ddd;">Tbase</th>
-                    <th>Acción</th>
+                    <th style="border-right: 2px solid #ddd;">Nacionalidad</th>
+                    <th style="border-right: 2px solid #ddd;">Estado</th>
+                    <th style="border-right: 2px solid #ddd;">Acción</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach (var item in estudiantesFiltrados)
+                @foreach (var alumno in alumnos)
                 {
                     <tr>
-                        <td style="border-right: 2px solid #ddd;">@item.DNI</td>
-                        <td style="border-right: 2px solid #ddd;">@item.CUIL</td>
-                        <td style="border-right: 2px solid #ddd;">@item.Apellidos</td>
-                        <td style="border-right: 2px solid #ddd;">@item.Nombres</td>
-                        <td style="border-right: 2px solid #ddd;">@item.Correo</td>
-                        <td style="border-right: 2px solid #ddd;">@item.Cohorte</td>
-                        <td style="border-right: 2px solid #ddd;">@item.Estado</td>
-                        <td style="border-right: 2px solid #ddd;">@item.Carrera</td>
-                        <td style="border-right: 2px solid #ddd;">@item.Legajo</td>
-                        <td style="border-right: 2px solid #ddd;">
-                            <div class="action-buttons">
-                                <button class="btn btn-primary" @onclick="() => ToggleTbase(item)">Tbase</button>
-                            </div>
-
-                            @if (item.ShowTbase)
-                            {
-                                <div class="tbase-content m-1">
-                                    @item.Tbase
-                                </div>
-                            }
-                        </td>
-                        <td style="border: none; display: flex; justify-content: space-between;">
-                            <div class="action-buttons">
-                                <button class="btn btn-danger" @onclick="() => OpenConfirmModal(item)"><i class="oi oi-trash"></i></button>
-                            </div>
-                            <div class="action-buttons">
-                                <button class="btn btn-primary" @onclick="() => OpenModalWithAlumno(item)"><i class="oi oi-pencil"></i></button>
+                        <td style="border-right: 2px solid #ddd;">@alumno.Nombre</td>
+                        <td style="border-right: 2px solid #ddd;">@alumno.Apellido</td>
+                        <td style="border-right: 2px solid #ddd;">@alumno.DNI_Alum</td>
+                        <td style="border-right: 2px solid #ddd;">@alumno.Cuil</td>
+                        <td style="border-right: 2px solid #ddd;">@alumno.Fecha_Nac.ToShortDateString()</td>
+                        <td style="border-right: 2px solid #ddd;">@alumno.Tbase</td>
+                        <td style="border-right: 2px solid #ddd;">@alumno.Nacionalidad</td>
+                        <td style="border-right: 2px solid #ddd;">@(alumno.Estado ? "Activo" : "Inactivo")</td>
+                        <td>
+                            <div class="action-buttons m-1">
+                                <button class="btn btn-primary me-2" @onclick="() => OpenModalToEdit(alumno, alumno.IdAlumno)"><i class="oi oi-pencil"></i></button>
+                                <button class="btn btn-danger" @onclick="() => OpenConfirmDeleteModal(alumno.IdAlumno)"><i class="oi oi-trash"></i></button>
                             </div>
                         </td>
                     </tr>
@@ -173,127 +45,219 @@
     </div>
 </div>
 
+@if (isModalOpen)
+{
+    <div class="modal fade show d-block" style="background-color: rgba(0, 0, 0, 0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@(isEdit ? "Editar Alumno" : "Agregar Alumno")</h5>
+                    <button type="button" class="btn-close" @onclick="CloseModal"></button>
+                </div>
+                <div class="modal-body">
+                    <EditForm Model="@currentAlumno" OnValidSubmit="@(isEdit ? EditAlumno : AddAlumno)">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary />
+                        <div class="mb-3">
+                            <label class="form-label">Nombre</label>
+                            <InputText class="form-control" @bind-Value="currentAlumno.Nombre" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Apellido</label>
+                            <InputText class="form-control" @bind-Value="currentAlumno.Apellido" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">DNI</label>
+                            <InputNumber class="form-control" @bind-Value="currentAlumno.DNI_Alum" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">CUIL</label>
+                            <InputNumber class="form-control" @bind-Value="currentAlumno.Cuil" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Fecha de Nacimiento</label>
+                            <InputDate class="form-control" @bind-Value="currentAlumno.Fecha_Nac" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Tbase</label>
+                            <InputText class="form-control" @bind-Value="currentAlumno.Tbase" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Nacionalidad</label>
+                            <InputSelect class="form-select" @bind-Value="currentAlumno.Nacionalidad">
+                                @foreach (var nacionalidad in nacionalidades)
+                                {
+                                    <option value="@nacionalidad">@nacionalidad</option>
+                                }
+                            </InputSelect>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Estado</label>
+                            <InputCheckbox class="form-check-input" @bind-Value="currentAlumno.Estado" />
+                            <label class="form-check-label">@((currentAlumno.Estado) ? "Activo" : "Inactivo")</label>
+                        </div>
+                        <button type="submit" class="btn btn-primary">@((isEdit) ? "Guardar Cambios" : "Agregar Alumno")</button>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@if (isConfirmDeleteModalOpen)
+{
+    <div class="modal fade show d-block" style="background-color: rgba(0, 0, 0, 0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmar Eliminación</h5>
+                    <button type="button" class="btn-close" @onclick="CloseConfirmDeleteModal"></button>
+                </div>
+                <div class="modal-body">
+                    ¿Estás seguro de que deseas eliminar este Alumno?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseConfirmDeleteModal">Cancelar</button>
+                    <button type="button" class="btn btn-danger" @onclick="DeleteAlumno">Eliminar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
 @code {
-    private bool isConfirmModalOpen = false;
-    private Estudiante selectedAlumnoToDelete;
+    private List<Alumnos> alumnos = new List<Alumnos>();
+    private DTOAlumnos currentAlumno = new DTOAlumnos();
     private bool isModalOpen = false;
-    private  Estudiante selectedAlumno = new Estudiante();
-    private List<Estudiante> items = new List<Estudiante>();
+    private bool isEdit = false;
+    private int idAlumnoToDelete;
+    private bool isConfirmDeleteModalOpen = false;
+    private List<string> nacionalidades = new List<string> { "Argentina", "Brasil", "Chile", "Uruguay", "Paraguay" }; // Listado de nacionalidades pre cargadas
+    private int idactual;
 
-    // Listas para las carreras y DNIEss
-    private List<string> carreras = new List<string> { "Ingeniería Informática", "Medicina", "Derecho", "Arquitectura" };
-    private string selectedCarrera = string.Empty;
-
-    private List<string> dnis = new List<string>();
-    private List<string> filteredDnis = new List<string>();
-
-    private string selectedDni = string.Empty;
-
-    // Lista de estudiantes
-    private List<Estudiante> estudiantes = new List<Estudiante>
+    protected override async Task OnInitializedAsync()
     {
-        new Estudiante { DNI = "12345678", CUIL = "20-12345678-9", Apellidos = "Gonzalez", Nombres = "Juan", Correo = "juan.gonzalez@example.com", Cohorte = 2021, Estado = "Activo", Carrera = "Ingeniería Informática", Legajo = "DS-2021-01", Tbase = "Bachiller en Economia y Administracion-I.P.E.M. N° 123 'BLANCA ETCEMENDY'-Plan de estudio: Decreto 141/96 Resol min N° 344/11 y N°668/11" },
-        new Estudiante { DNI = "87654321", CUIL = "20-87654321-9", Apellidos = "López", Nombres = "Ana", Correo = "ana.lopez@example.com", Cohorte = 2019, Estado = "Activo", Carrera = "Medicina", Legajo = "002", Tbase = "Info Tbase 2", ShowTbase = false },
-        new Estudiante { DNI = "11223344", CUIL = "20-11223344-9", Apellidos = "García", Nombres = "Luis", Correo = "luis.garcia@example.com", Cohorte = 2018, Estado = "Activo", Carrera = "Derecho", Legajo = "003", Tbase = "Info Tbase 3", ShowTbase = false },
-        new Estudiante { DNI = "55667788", CUIL = "20-55667788-9", Apellidos = "Rodríguez", Nombres = "María", Correo = "maria.rodriguez@example.com", Cohorte = 2021, Estado = "Inactivo", Carrera = "Arquitectura", Legajo = "004", Tbase = "Info Tbase 4", ShowTbase = false }
-    };
+        await LoadAlumnos();
+    }
 
-    // Propiedad calculada para obtener los estudiantes filtrados
-    private List<Estudiante> estudiantesFiltrados => estudiantes
-        .Where(e => (string.IsNullOrEmpty(selectedCarrera) || e.Carrera == selectedCarrera) &&
-                    (string.IsNullOrEmpty(selectedDni) || e.DNI == selectedDni))
-        .ToList();
-
-    // Método para actualizar la lista de DNIs según la carrera seleccionada
-    private void ActualizarDnis(ChangeEventArgs e)
+    private async Task LoadAlumnos()
     {
-        selectedCarrera = e.Value.ToString();
-        filteredDnis = estudiantes
-            .Where(estudiante => string.IsNullOrEmpty(selectedCarrera) || estudiante.Carrera == selectedCarrera)
-            .Select(estudiante => estudiante.DNI)
-            .Distinct()
-            .ToList();
-
-        // Reset selected DNI if it's not in the filtered list
-        if (!filteredDnis.Contains(selectedDni))
+        try
         {
-            selectedDni = string.Empty;
+            alumnos = await Http.GetFromJsonAsync<List<Alumnos>>("api/Alumnos");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading alumnos: {ex.Message}");
         }
     }
 
-    // Método para filtrar por DNI
-    private void FiltrarPorDni(ChangeEventArgs e)
+    private void OpenModalToAdd()
     {
-        selectedDni = e.Value.ToString();
-    }
-
-    // Métodos para los botones de acción
-    private void ToggleTbase(Estudiante item)
-    {
-        item.ShowTbase = !item.ShowTbase;
-    }
-
-    private void OpenConfirmModal(Estudiante item)
-    {
-        // Lógica para abrir el modal de confirmación
-        selectedAlumnoToDelete = item;
-        isConfirmModalOpen = true;
-    }
-
-    private void CloseConfirmModal()
-    {
-        isConfirmModalOpen = false;
-    }
-
-    private void DeleteAlumno()
-    {
-        // Aquí deberías implementar la lógica para borrar el alumno
-        // Por ejemplo, podrías eliminarlo de la lista de items
-        estudiantes.Remove(selectedAlumnoToDelete);
-
-        // Cerrar el modal de confirmación
-        CloseConfirmModal();
-    }
-
-    private void OpenModal()
-    {
-        selectedAlumno = new Estudiante(); // Alumno nuevo o vacío
+        currentAlumno = new DTOAlumnos();
+        isEdit = false;
         isModalOpen = true;
     }
 
-    private void OpenModalWithAlumno(Estudiante alumno)
+    private void OpenModalToEdit(Alumnos alumno, int id)
     {
-        selectedAlumno = alumno;
+        currentAlumno = new DTOAlumnos
+            {
+                Nombre = alumno.Nombre,
+                Apellido = alumno.Apellido,
+                DNI_Alum = alumno.DNI_Alum,
+                Cuil = alumno.Cuil,
+                Fecha_Nac = alumno.Fecha_Nac,
+                Tbase = alumno.Tbase,
+                Nacionalidad = alumno.Nacionalidad,
+                Estado = alumno.Estado
+            };
+        idactual = id;
+        isEdit = true;
         isModalOpen = true;
     }
 
     private void CloseModal()
     {
         isModalOpen = false;
+        currentAlumno = new DTOAlumnos(); // Limpiar el formulario al cerrar
     }
 
-    // Clase para representar un estudiante
-    public class Estudiante
+    private void OpenConfirmDeleteModal(int id)
     {
-        public string DNI { get; set; }
-        public string CUIL { get; set; }
-        public string Apellidos { get; set; }
-        public string Nombres { get; set; }
-        public string Correo { get; set; }
-        public int Cohorte { get; set; }
-        public string Estado { get; set; }
-        public string Carrera { get; set; }
-        public string Legajo { get; set; }
-        public string Tbase { get; set; }
-        public bool ShowTbase { get; set; }
+        idAlumnoToDelete = id;
+        isConfirmDeleteModalOpen = true;
     }
 
-    protected override void OnInitialized()
+    private void CloseConfirmDeleteModal()
     {
-        // Inicializar la lista de DNIs al cargar el componente
-        filteredDnis = estudiantes.Select(e => e.DNI).Distinct().ToList();
+        isConfirmDeleteModalOpen = false;
+    }
+
+    private async Task AddAlumno()
+    {
+        try
+        {
+            var response = await Http.PostAsJsonAsync("api/Alumnos", currentAlumno);
+            if (response.IsSuccessStatusCode)
+            {
+                await LoadAlumnos();
+                CloseModal();
+            }
+            else
+            {
+                Console.WriteLine($"Error adding alumno: {response.ReasonPhrase}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Exception adding alumno: {ex.Message}");
+        }
+    }
+
+    private async Task EditAlumno()
+    {
+        try
+        {
+            var response = await Http.PutAsJsonAsync($"api/Alumnos/{idactual}", currentAlumno);
+            if (response.IsSuccessStatusCode)
+            {
+                await LoadAlumnos();
+                CloseModal();
+            }
+            else
+            {
+                Console.WriteLine($"Error editing alumno: {response.ReasonPhrase}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Exception editing alumno: {ex.Message}");
+        }
+    }
+
+    private async Task DeleteAlumno()
+    {
+        try
+        {
+            var response = await Http.DeleteAsync($"api/Alumnos/{idAlumnoToDelete}");
+            if (response.IsSuccessStatusCode)
+            {
+                await LoadAlumnos();
+                CloseConfirmDeleteModal();
+            }
+            else
+            {
+                Console.WriteLine($"Error deleting alumno: {response.ReasonPhrase}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Exception deleting alumno: {ex.Message}");
+        }
     }
 }
+
 
 
 

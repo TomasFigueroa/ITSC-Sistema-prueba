@@ -13,7 +13,7 @@ namespace INSTITUTO.Bdat
         public DbSet<Carrerass> Carreras => Set<Carrerass>();
         public DbSet<Divisiones> Division => Set<Divisiones>();
         public DbSet<Materias> Materia => Set<Materias>();
-        public DbSet<Ciclo> Ciclos => Set<Ciclo>();
+        public DbSet<Ciclos> Ciclos => Set<Ciclos>();
         public DbSet<DivisionCicloMateria> DivisionCicloMaterias => Set<DivisionCicloMateria>();
         public DbSet<DivisionCiclo> DivisionCiclos => Set<DivisionCiclo>();
         public DbSet<DivsionCiclosMateriaAlumnos> DivsionCiclosMateriaAlumnos => Set<DivsionCiclosMateriaAlumnos>();
@@ -51,7 +51,7 @@ namespace INSTITUTO.Bdat
                 o.Property(b => b.Nombre);
 
             });
-            modelBuilder.Entity<Ciclo>(o =>
+            modelBuilder.Entity<Ciclos>(o =>
             {
                 o.HasKey(b => b.IdCiclo);
                 o.Property(b => b.Fecha);
