@@ -11,7 +11,7 @@ namespace INSTITUTO.Bdat.Data.Entity
         public int IdDivCic { get; set; }
         //Foranea De Ciclo
         public int CicloIdCiclo { get; set; }
-        public Ciclo Ciclo { get; set; }
+        public Ciclos Ciclo { get; set; }
         //Foranea de Division
         public int DivisionesIdDivision { get; set; }
         public Divisiones Divisiones { get; set; }

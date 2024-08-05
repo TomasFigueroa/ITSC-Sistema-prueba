@@ -43,33 +43,48 @@ namespace INTITUTO1.Server.Controllers
         }
 
 
-        //POST api/Alumnos
+        // POST api/Alumnos
         [HttpPost]
-
-        public async Task<ActionResult<Alumnos>> Post(DTOAlumnos dtoAlumno)
+        public async Task<ActionResult<ResponseAPI<int>>> Post(DTOAlumnos dtoAlumno)
         {
             var responseApi = new ResponseAPI<int>();
-            var mdAlumno = new Alumnos
+            try
             {
-                Nombre = dtoAlumno.Nombre,
-                Apellido = dtoAlumno.Apellido,
-                DNI_Alum = dtoAlumno.DNI_Alum,
-                Cuil = dtoAlumno.Cuil,
-                Fecha_Nac = dtoAlumno.Fecha_Nac,
-                Tbase = dtoAlumno.Tbase,
-                Nacionalidad = dtoAlumno.Nacionalidad,
-                Estado = dtoAlumno.Estado,
-            };
-            _context.alumnos.Add(mdAlumno);
-            await _context.SaveChangesAsync();
-            return Ok(responseApi);
+                if (dtoAlumno == null)
+                {
+                    responseApi.EsCorrecto = false;
+                    responseApi.Mensaje = "El DTO del alumno es nulo.";
+                    return BadRequest(responseApi);
+                }
 
+                var mdAlumno = new Alumnos
+                {
+                    Nombre = dtoAlumno.Nombre,
+                    Apellido = dtoAlumno.Apellido,
+                    DNI_Alum = dtoAlumno.DNI_Alum,
+                    Cuil = dtoAlumno.Cuil,
+                    Fecha_Nac = dtoAlumno.Fecha_Nac,
+                    Tbase = dtoAlumno.Tbase,
+                    Nacionalidad = dtoAlumno.Nacionalidad,
+                    Estado = dtoAlumno.Estado,
+                };
+                _context.alumnos.Add(mdAlumno);
+                await _context.SaveChangesAsync();
+
+                responseApi.EsCorrecto = true;
+                responseApi.Valor = mdAlumno.IdAlumno; // Devolver el id del alumno creado
+            }
+            catch (Exception ex)
+            {
+                responseApi.EsCorrecto = false;
+                responseApi.Mensaje = ex.Message;
+            }
+            return Ok(responseApi);
         }
 
-        //PUT: api/Alumnos{id}
+        // PUT: api/Alumnos/{id}
         [HttpPut("{id:int}")]
-
-        public async Task<IActionResult> Put (int id, DTOAlumnos dtoAlumnos)
+        public async Task<IActionResult> Put(int id, DTOAlumnos dtoAlumnos)
         {
             var responseApi = new ResponseAPI<int>();
 
@@ -77,7 +92,7 @@ namespace INTITUTO1.Server.Controllers
             {
                 var dbAlumno = await _context.alumnos.FirstOrDefaultAsync(e => e.IdAlumno == id);
 
-                if (dbAlumno == null)
+                if (dbAlumno != null)
                 {
                     dbAlumno.Nombre = dtoAlumnos.Nombre;
                     dbAlumno.Apellido = dtoAlumnos.Apellido;
@@ -91,22 +106,19 @@ namespace INTITUTO1.Server.Controllers
                     _context.alumnos.Update(dbAlumno);
                     await _context.SaveChangesAsync();
                     responseApi.EsCorrecto = true;
-
-
                 }
                 else
                 {
-                    responseApi.EsCorrecto = true;
+                    responseApi.EsCorrecto = false;
                     responseApi.Mensaje = "Alumno no encontrado";
                 }
-                
             }
             catch (Exception ex)
             {
                 responseApi.EsCorrecto = false;
-                responseApi.Mensaje = ex.InnerException.Message;
+                responseApi.Mensaje = ex.InnerException?.Message ?? ex.Message;
             }
-            return Ok (responseApi);
+            return Ok(responseApi);
         }
 
 
