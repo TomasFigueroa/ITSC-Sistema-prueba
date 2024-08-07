@@ -4,7 +4,40 @@
 @inject HttpClient Http
 
 <PageTitle>DivisionCicloMateriaAlumnos</PageTitle>
-<button class="btn btn-success" @onclick="OpenModalToAdd">Cargar DivisionCicloMateriaAlumnos</button>
+<button class="btn btn-success" @onclick="OpenModalToAdd">Cargar Profesor</button>
+<button class="btn btn-success" @onclick="OpenModalToAddAlumno">Cargar Alumno</button>
+
+<div class="table-container" style="overflow: hidden; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); margin-bottom: 20px;">
+    <div style="border-top-left-radius: 12px; border-top-right-radius: 12px; background-color: #f2f2f2; padding: 10px;">
+        <table class="table" style="border-collapse: collapse; width: 100%; border: 2px solid #E6E6FA;">
+            <thead>
+                <tr style="border-bottom: 2px solid #ddd;">
+                    <th style="border-right: 2px solid #ddd;">Division-Ciclo Electivo</th>
+                    <th style="border-right: 2px solid #ddd;">Materia</th>
+                    <th style="border-right: 2px solid #ddd;">Profesor</th>
+                    <th style="border-right: 2px solid #ddd;">Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var divisionCicloMateria in divisionCicloMaterias)
+                {
+                    <tr>
+                        <td style="border-right: 2px solid #ddd;">@GetDivisionCicloNombre(divisionCicloMateria.DivisionCicloIdDivCic)</td>
+                        <td style="border-right: 2px solid #ddd;">@GetMateriaNombre(divisionCicloMateria.MateriasIdMateria)</td>
+                        <td style="border-right: 2px solid #ddd;">@GetProfesorNombre(divisionCicloMateria.ProfesorIdProfesor)</td>
+                        <td>
+                            <div class="action-buttons m-1">
+                                <button class="btn btn-primary me-2" @onclick="() => OpenModalToEdit(divisionCicloMateria, divisionCicloMateria.IdDivCicMat)"><i class="oi oi-pencil"></i></button>
+                                <button class="btn btn-danger" @onclick="() => OpenConfirmDeleteModal(divisionCicloMateria.IdDivCicMat)"><i class="oi oi-trash"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
 <div class="table-container" style="overflow: hidden; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); margin-bottom: 20px;">
     <div style="border-top-left-radius: 12px; border-top-right-radius: 12px; background-color: #f2f2f2; padding: 10px;">
         <table class="table" style="border-collapse: collapse; width: 100%; border: 2px solid #E6E6FA;">
@@ -17,16 +50,16 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach (var item in divisionCicloMateriaAlumnos)
+                @foreach (var divisionCicloMateriaAlumno in divisionCicloMateriaAlumnos)
                 {
                     <tr>
-                        <td style="border-right: 2px solid #ddd;">@GetDivisionCicloMateriaNombre(item.DivisionCicloMateriaIdDivCicMat)</td>
-                        <td style="border-right: 2px solid #ddd;">@GetAlumnoNombre(item.AlumnosIdAlumno)</td>
-                        <td style="border-right: 2px solid #ddd;">@GetLibroNombre(item.LibrosId_Libro)</td>
+                        <td style="border-right: 2px solid #ddd;">@GetDivisionCicloMateriaNombre(divisionCicloMateriaAlumno.DivisionCicloMateriaIdDivCicMat)</td>
+                        <td style="border-right: 2px solid #ddd;">@GetAlumnoNombre(divisionCicloMateriaAlumno.AlumnosIdAlumno)</td>
+                        <td style="border-right: 2px solid #ddd;">@GetLibroNombre(divisionCicloMateriaAlumno.LibrosId_Libro)</td>
                         <td>
                             <div class="action-buttons m-1">
-                                <button class="btn btn-primary me-2" @onclick="() => OpenModalToEdit(item, item.IdDivCicMatAlum)"><i class="oi oi-pencil"></i></button>
-                                <button class="btn btn-danger" @onclick="() => OpenConfirmDeleteModal(item.IdDivCicMatAlum)"><i class="oi oi-trash"></i></button>
+                                <button class="btn btn-primary me-2" @onclick="() => OpenModalToEditAlumno(divisionCicloMateriaAlumno, divisionCicloMateriaAlumno.IdDivCicMatAlum)"><i class="oi oi-pencil"></i></button>
+                                <button class="btn btn-danger" @onclick="() => OpenConfirmDeleteModalAlumno(divisionCicloMateriaAlumno.IdDivCicMatAlum)"><i class="oi oi-trash"></i></button>
                             </div>
                         </td>
                     </tr>
@@ -36,17 +69,86 @@
     </div>
 </div>
 
+@* Modales y confirmaciones aquí *@
+
 @if (isModalOpen)
 {
     <div class="modal fade show d-block" style="background-color: rgba(0, 0, 0, 0.5);">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">@(isEdit ? "Editar DivisionCicloMateriaAlumno" : "Agregar DivisionCicloMateriaAlumno")</h5>
+                    <h5 class="modal-title">@(isEdit ? "Editar DivisionCicloMateria" : "Agregar DivisionCicloMateria")</h5>
                     <button type="button" class="btn-close" @onclick="CloseModal"></button>
                 </div>
                 <div class="modal-body">
-                    <EditForm Model="@currentDivisionCicloMateriaAlumno" OnValidSubmit="@(isEdit ? EditDivisionCicloMateriaAlumno : AddDivisionCicloMateriaAlumno)">
+                    <EditForm Model="@currentDivisionCicloMateria" OnValidSubmit="@(isEdit ? EditDivisionCicloMateria : AddDivisionCicloMateria)">
+                        <DataAnnotationsValidator />
+                        <div class="mb-3">
+                            <label class="form-label">DivisionCiclo</label>
+                            <InputSelect class="form-control" @bind-Value="currentDivisionCicloMateria.DivisionCicloIdDivCic">
+                                @foreach (var divisionCiclo in divisionCiclos)
+                                {
+                                    <option value="@divisionCiclo.IdDivCic">@GetDivisionCicloNombre(divisionCiclo.IdDivCic)</option>
+                                }
+                            </InputSelect>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Materia</label>
+                            <InputSelect class="form-control" @bind-Value="currentDivisionCicloMateria.MateriasIdMateria">
+                                @foreach (var materia in materias)
+                                {
+                                    <option value="@materia.IdMateria">@GetMateriaNombre(materia.IdMateria)</option>
+                                }
+                            </InputSelect>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Profesor</label>
+                            <InputSelect class="form-control" @bind-Value="currentDivisionCicloMateria.ProfesorIdProfesor">
+                                @foreach (var profesor in profesores)
+                                {
+                                    <option value="@profesor.IdProfesor">@GetProfesorNombre(profesor.IdProfesor)</option>
+                                }
+                            </InputSelect>
+                        </div>
+                        <button type="submit" class="btn btn-primary">@((isEdit) ? "Guardar Cambios" : "Agregar DivisionCicloMateria")</button>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@if (isConfirmDeleteModalOpen)
+{
+    <div class="modal fade show d-block" style="background-color: rgba(0, 0, 0, 0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmar Eliminación</h5>
+                    <button type="button" class="btn-close" @onclick="CloseConfirmDeleteModal"></button>
+                </div>
+                <div class="modal-body">
+                    ¿Estás seguro de que deseas eliminar esta DivisionCicloMateria?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseConfirmDeleteModal">Cancelar</button>
+                    <button type="button" class="btn btn-danger" @onclick="DeleteDivisionCicloMateria">Eliminar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+@if (isModalOpenAlumno)
+{
+    <div class="modal fade show d-block" style="background-color: rgba(0, 0, 0, 0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@(isEditAlumno ? "Editar DivisionCicloMateriaAlumno" : "Agregar DivisionCicloMateriaAlumno")</h5>
+                    <button type="button" class="btn-close" @onclick="CloseModalAlumno"></button>
+                </div>
+                <div class="modal-body">
+                    <EditForm Model="@currentDivisionCicloMateriaAlumno" OnValidSubmit="@(isEditAlumno ? EditDivisionCicloMateriaAlumno : AddDivisionCicloMateriaAlumno)">
                         <DataAnnotationsValidator />
                         <div class="mb-3">
                             <label class="form-label">DivisionCicloMateria</label>
@@ -75,7 +177,7 @@
                                 }
                             </InputSelect>
                         </div>
-                        <button type="submit" class="btn btn-primary">@((isEdit) ? "Guardar Cambios" : "Agregar DivisionCicloMateriaAlumno")</button>
+                        <button type="submit" class="btn btn-primary">@((isEditAlumno) ? "Guardar Cambios" : "Agregar DivisionCicloMateriaAlumno")</button>
                     </EditForm>
                 </div>
             </div>
@@ -83,44 +185,91 @@
     </div>
 }
 
-@if (isConfirmDeleteModalOpen)
+@if (isConfirmDeleteModalOpenAlumno)
 {
     <div class="modal fade show d-block" style="background-color: rgba(0, 0, 0, 0.5);">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Confirmar Eliminación</h5>
-                    <button type="button" class="btn-close" @onclick="CloseConfirmDeleteModal"></button>
+                    <button type="button" class="btn-close" @onclick="CloseConfirmDeleteModalAlumno"></button>
                 </div>
                 <div class="modal-body">
-                    ¿Estás seguro de que deseas eliminar esta DivisionCicloMateriaAlumno?
+                    ¿Estás seguro de que deseas eliminar este registro?
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" @onclick="CloseConfirmDeleteModal">Cancelar</button>
+                    <button type="button" class="btn btn-secondary" @onclick="CloseConfirmDeleteModalAlumno">Cancelar</button>
                     <button type="button" class="btn btn-danger" @onclick="DeleteDivisionCicloMateriaAlumno">Eliminar</button>
                 </div>
             </div>
         </div>
     </div>
 }
-
 @code {
     private List<DivsionCiclosMateriaAlumnos> divisionCicloMateriaAlumnos = new List<DivsionCiclosMateriaAlumnos>();
     private List<DivisionCicloMateria> divisionCicloMaterias = new List<DivisionCicloMateria>();
+    private List<DivisionCiclo> divisionCiclos = new List<DivisionCiclo>();
     private List<Alumnos> alumnos = new List<Alumnos>();
     private List<LIbros> libros = new List<LIbros>();
-    private DTODivisionCicloMateriaAlumno currentDivisionCicloMateriaAlumno = new DTODivisionCicloMateriaAlumno();
+    private List<Materias> materias = new List<Materias>();
+    private List<Profesor> profesores = new List<Profesor>();
+    private List<Ciclos> ciclos = new List<Ciclos>();
+    private List<Divisiones> divisiones = new List<Divisiones>();
+
+    private DivsionCiclosMateriaAlumnos currentDivisionCicloMateriaAlumno = new DivsionCiclosMateriaAlumnos();
+    private DTODivisionCicloMateria currentDivisionCicloMateria = new DTODivisionCicloMateria();
     private bool isModalOpen = false;
     private bool isEdit = false;
-    private int idDivisionCicloMateriaAlumnoToDelete;
     private bool isConfirmDeleteModalOpen = false;
-
+    private int idActual;
+    private bool isModalOpenAlumno = false;
+    private bool isEditAlumno = false;
+    private int idDivisionCicloMateriaAlumnoToDelete;
+    private bool isConfirmDeleteModalOpenAlumno = false;
+    private int idActualAlumno;
+    private int idDivisionCicloMateriaToDelete;
+   
+    int idactual;
     protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
     {
         await LoadDivisionCicloMateriaAlumnos();
         await LoadDivisionCicloMaterias();
+        await LoadDivisionCiclos();
         await LoadAlumnos();
         await LoadLibros();
+        await LoadMaterias();
+        await LoadProfesores();
+        await LoadDivisiones();
+        await LoadCiclos();
+    }
+
+    private async Task LoadDivisiones()
+    {
+        try
+        {
+            divisiones = await Http.GetFromJsonAsync<List<Divisiones>>("api/Division");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading Divisiones: {ex.Message}");
+        }
+    }
+
+    private async Task LoadCiclos()
+    {
+        try
+        {
+            ciclos = await Http.GetFromJsonAsync<List<Ciclos>>("api/Ciclo");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading Ciclos: {ex.Message}");
+        }
     }
 
     private async Task LoadDivisionCicloMateriaAlumnos()
@@ -131,7 +280,7 @@
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error loading divisionCicloMateriaAlumnos: {ex.Message}");
+            Console.WriteLine($"Error loading DivisionCicloMateriaAlumnos: {ex.Message}");
         }
     }
 
@@ -143,7 +292,19 @@
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error loading divisionCicloMaterias: {ex.Message}");
+            Console.WriteLine($"Error loading DivisionCicloMaterias: {ex.Message}");
+        }
+    }
+
+    private async Task LoadDivisionCiclos()
+    {
+        try
+        {
+            divisionCiclos = await Http.GetFromJsonAsync<List<DivisionCiclo>>("api/DivisionCiclo");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading DivisionCiclos: {ex.Message}");
         }
     }
 
@@ -155,7 +316,7 @@
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error loading alumnos: {ex.Message}");
+            Console.WriteLine($"Error loading Alumnos: {ex.Message}");
         }
     }
 
@@ -167,51 +328,172 @@
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error loading libros: {ex.Message}");
+            Console.WriteLine($"Error loading Libros: {ex.Message}");
         }
+    }
+
+    private async Task LoadMaterias()
+    {
+        try
+        {
+            materias = await Http.GetFromJsonAsync<List<Materias>>("api/Materias");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading Materias: {ex.Message}");
+        }
+    }
+
+    private async Task LoadProfesores()
+    {
+        try
+        {
+            profesores = await Http.GetFromJsonAsync<List<Profesor>>("api/Profesor");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading Profesores: {ex.Message}");
+        }
+    }
+
+    private string GetDivisionCicloNombre(int idDivisionCiclo)
+    {
+        var divisionCiclo = divisionCiclos.FirstOrDefault(d => d.IdDivCic == idDivisionCiclo);
+        if (divisionCiclo == null)
+            return "N/A";
+
+        var division = divisiones.FirstOrDefault(d => d.IdDivision == divisionCiclo.DivisionesIdDivision);
+        var ciclo = ciclos.FirstOrDefault(c => c.IdCiclo == divisionCiclo.CicloIdCiclo);
+
+        if (division == null || ciclo == null)
+            return "N/A";
+
+        return $"{division.NombreDiv}-{ciclo.Fecha}";
     }
 
     private string GetDivisionCicloMateriaNombre(int idDivisionCicloMateria)
     {
-        var divisionCicloMateria = divisionCicloMaterias.FirstOrDefault(dc => dc.IdDivCicMat == idDivisionCicloMateria);
-        return divisionCicloMateria != null ? $"{divisionCicloMateria.DivisionCiclo}" : "DivisionCicloMateria no encontrado";
+        var divisionCicloMateria = divisionCicloMaterias.FirstOrDefault(d => d.IdDivCicMat == idDivisionCicloMateria);
+        if (divisionCicloMateria == null)
+            return "N/A";
+
+        var materia = materias.FirstOrDefault(m => m.IdMateria == divisionCicloMateria.MateriasIdMateria);
+        var profesor = profesores.FirstOrDefault(p => p.IdProfesor == divisionCicloMateria.ProfesorIdProfesor);
+        var divisionCiclo = divisionCiclos.FirstOrDefault(dc => dc.IdDivCic == divisionCicloMateria.DivisionCicloIdDivCic);
+
+        if (materia == null || profesor == null || divisionCiclo == null)
+            return "N/A";
+
+        var division = divisiones.FirstOrDefault(d => d.IdDivision == divisionCiclo.DivisionesIdDivision);
+        var ciclo = ciclos.FirstOrDefault(c => c.IdCiclo == divisionCiclo.CicloIdCiclo);
+
+        if (division == null || ciclo == null)
+            return "N/A";
+
+        return $"{division.NombreDiv}-{ciclo.Fecha}-{materia.Nombre}-{profesor.Nombre_Prof}";
     }
 
     private string GetAlumnoNombre(int idAlumno)
     {
         var alumno = alumnos.FirstOrDefault(a => a.IdAlumno == idAlumno);
-        return alumno != null ? $"{alumno.Nombre} {alumno.Apellido}" : "Alumno no encontrado";
+        if (alumno == null)
+            return "N/A";
+
+        return $"{alumno.Nombre} {alumno.Apellido}";
     }
 
     private string GetLibroNombre(int idLibro)
     {
         var libro = libros.FirstOrDefault(l => l.Id_Libro == idLibro);
-        return libro != null ? $"{libro.Nombre_Lib}" : "Libro no encontrado";
+        if (libro == null)
+            return "N/A";
+
+        return libro.Nombre_Lib;
     }
 
+    private string GetMateriaNombre(int idMateria)
+    {
+        var materia = materias.FirstOrDefault(m => m.IdMateria == idMateria);
+        if (materia == null)
+            return "N/A";
+
+        return materia.Nombre;
+    }
+
+    private string GetProfesorNombre(int idProfesor)
+    {
+        var profesor = profesores.FirstOrDefault(p => p.IdProfesor == idProfesor);
+        if (profesor == null)
+            return "N/A";
+
+        return profesor.Nombre_Prof;
+    }
+
+    private void OpenModalToAddDivisionCicloMateria()
+    {
+        currentDivisionCicloMateria = new DTODivisionCicloMateria();
+        isModalOpen = true;
+        isEdit = false;
+    }
+
+    private void OpenModalToAddDivisionCicloMateriaAlumno()
+    {
+        currentDivisionCicloMateriaAlumno = new DivsionCiclosMateriaAlumnos();
+        isModalOpen = true;
+        isEdit = false;
+    }
+
+    private void OpenModalToEditDivisionCicloMateria(DivisionCicloMateria divisionCicloMateria, int id)
+    {
+        currentDivisionCicloMateria = new DTODivisionCicloMateria
+        {
+            DivisionCicloIdDivCic = divisionCicloMateria.DivisionCicloIdDivCic,
+            MateriasIdMateria = divisionCicloMateria.MateriasIdMateria,
+            ProfesorIdProfesor = divisionCicloMateria.ProfesorIdProfesor
+           
+        };
+        idActual = id;
+        isModalOpen = true;
+        isEdit = true;
+    }
+
+    private void OpenModalToEditDivisionCicloMateriaAlumno(DivsionCiclosMateriaAlumnos divisionCicloMateriaAlumno)
+    {
+        currentDivisionCicloMateriaAlumno = divisionCicloMateriaAlumno;
+        idActual = divisionCicloMateriaAlumno.IdDivCicMatAlum;
+        isModalOpen = true;
+        isEdit = true;
+    }
+
+    private void OpenConfirmDeleteModalDivisionCicloMateria(int id)
+    {
+        idActual = id;
+        isConfirmDeleteModalOpen = true;
+    }
+
+    private void OpenConfirmDeleteModalDivisionCicloMateriaAlumno(int id)
+    {
+        idActual = id;
+        isConfirmDeleteModalOpen = true;
+    }
     private void OpenModalToAdd()
     {
-        currentDivisionCicloMateriaAlumno = new DTODivisionCicloMateriaAlumno();
+        currentDivisionCicloMateria = new DTODivisionCicloMateria();
         isEdit = false;
         isModalOpen = true;
     }
 
-    private void OpenModalToEdit(DivsionCiclosMateriaAlumnos divisionCicloMateriaAlumno, int id)
+    private void OpenModalToEdit(DivisionCicloMateria divisionCicloMateria, int id)
     {
-        currentDivisionCicloMateriaAlumno = new DTODivisionCicloMateriaAlumno
+        currentDivisionCicloMateria = new DTODivisionCicloMateria
             {
-                DivisionCicloMateriaIdDivCicMat = divisionCicloMateriaAlumno.DivisionCicloMateriaIdDivCicMat,
-                AlumnosIdAlumno = divisionCicloMateriaAlumno.AlumnosIdAlumno,
-                LibrosId_Libro = divisionCicloMateriaAlumno.LibrosId_Libro
+                DivisionCicloIdDivCic = divisionCicloMateria.DivisionCicloIdDivCic,
+                MateriasIdMateria = divisionCicloMateria.MateriasIdMateria,
+                ProfesorIdProfesor = divisionCicloMateria.ProfesorIdProfesor
             };
+        idactual = id;
         isEdit = true;
         isModalOpen = true;
-    }
-
-    private void OpenConfirmDeleteModal(int id)
-    {
-        idDivisionCicloMateriaAlumnoToDelete = id;
-        isConfirmDeleteModalOpen = true;
     }
 
     private void CloseModal()
@@ -219,9 +501,113 @@
         isModalOpen = false;
     }
 
+    private void OpenConfirmDeleteModal(int id)
+    {
+        idDivisionCicloMateriaToDelete = id;
+        isConfirmDeleteModalOpen = true;
+    }
+
     private void CloseConfirmDeleteModal()
     {
         isConfirmDeleteModalOpen = false;
+    }
+
+    private async Task AddDivisionCicloMateria()
+    {
+        try
+        {
+            var response = await Http.PostAsJsonAsync("api/DivisionCicloMateria", currentDivisionCicloMateria);
+            if (response.IsSuccessStatusCode)
+            {
+                await LoadDivisionCicloMaterias();
+                CloseModal();
+            }
+            else
+            {
+                Console.WriteLine($"Error adding divisionCicloMateria: {response.ReasonPhrase}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Exception adding divisionCicloMateria: {ex.Message}");
+        }
+    }
+
+    private async Task EditDivisionCicloMateria()
+    {
+        try
+        {
+            var response = await Http.PutAsJsonAsync($"api/DivisionCicloMateria/{idactual}", currentDivisionCicloMateria);
+            if (response.IsSuccessStatusCode)
+            {
+                await LoadDivisionCicloMaterias();
+                CloseModal();
+            }
+            else
+            {
+                Console.WriteLine($"Error editing divisionCicloMateria: {response.ReasonPhrase}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Exception editing divisionCicloMateria: {ex.Message}");
+        }
+    }
+
+    private async Task DeleteDivisionCicloMateria()
+    {
+        try
+        {
+            var response = await Http.DeleteAsync($"api/DivisionCicloMateria/{idDivisionCicloMateriaToDelete}");
+            if (response.IsSuccessStatusCode)
+            {
+                await LoadDivisionCicloMaterias();
+                CloseConfirmDeleteModal();
+            }
+            else
+            {
+                Console.WriteLine($"Error deleting divisionCicloMateria: {response.ReasonPhrase}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Exception deleting divisionCicloMateria: {ex.Message}");
+        }
+    }
+    private void OpenModalToAddAlumno()
+    {
+        currentDivisionCicloMateriaAlumno = new DivsionCiclosMateriaAlumnos();
+        isEditAlumno = false;
+        isModalOpenAlumno = true;
+    }
+
+    private void OpenModalToEditAlumno(DivsionCiclosMateriaAlumnos divisionCicloMateriaAlumno, int id)
+    {
+        currentDivisionCicloMateriaAlumno = new DivsionCiclosMateriaAlumnos
+            {
+                DivisionCicloMateriaIdDivCicMat = divisionCicloMateriaAlumno.DivisionCicloMateriaIdDivCicMat,
+                AlumnosIdAlumno = divisionCicloMateriaAlumno.AlumnosIdAlumno,
+                LibrosId_Libro = divisionCicloMateriaAlumno.LibrosId_Libro
+            };
+        idActualAlumno = id;
+        isEditAlumno = true;
+        isModalOpenAlumno = true;
+    }
+
+    private void CloseModalAlumno()
+    {
+        isModalOpenAlumno = false;
+    }
+
+    private void OpenConfirmDeleteModalAlumno(int id)
+    {
+        idDivisionCicloMateriaAlumnoToDelete = id;
+        isConfirmDeleteModalOpenAlumno = true;
+    }
+
+    private void CloseConfirmDeleteModalAlumno()
+    {
+        isConfirmDeleteModalOpenAlumno = false;
     }
 
     private async Task AddDivisionCicloMateriaAlumno()
@@ -232,12 +618,16 @@
             if (response.IsSuccessStatusCode)
             {
                 await LoadDivisionCicloMateriaAlumnos();
-                CloseModal();
+                CloseModalAlumno();
+            }
+            else
+            {
+                Console.WriteLine($"Error adding DivisionCicloMateriaAlumno: {response.ReasonPhrase}");
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error adding divisionCicloMateriaAlumno: {ex.Message}");
+            Console.WriteLine($"Exception adding DivisionCicloMateriaAlumno: {ex.Message}");
         }
     }
 
@@ -245,16 +635,20 @@
     {
         try
         {
-            var response = await Http.PutAsJsonAsync($"api/DivisionCicloMateriaAlumnos/{currentDivisionCicloMateriaAlumno.DivisionCicloMateriaIdDivCicMat}", currentDivisionCicloMateriaAlumno);
+            var response = await Http.PutAsJsonAsync($"api/DivisionCicloMateriaAlumnos/{idActualAlumno}", currentDivisionCicloMateriaAlumno);
             if (response.IsSuccessStatusCode)
             {
                 await LoadDivisionCicloMateriaAlumnos();
-                CloseModal();
+                CloseModalAlumno();
+            }
+            else
+            {
+                Console.WriteLine($"Error editing DivisionCicloMateriaAlumno: {response.ReasonPhrase}");
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error editing divisionCicloMateriaAlumno: {ex.Message}");
+            Console.WriteLine($"Exception editing DivisionCicloMateriaAlumno: {ex.Message}");
         }
     }
 
@@ -266,13 +660,27 @@
             if (response.IsSuccessStatusCode)
             {
                 await LoadDivisionCicloMateriaAlumnos();
-                CloseConfirmDeleteModal();
+                CloseConfirmDeleteModalAlumno();
+            }
+            else
+            {
+                Console.WriteLine($"Error deleting DivisionCicloMateriaAlumno: {response.ReasonPhrase}");
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error deleting divisionCicloMateriaAlumno: {ex.Message}");
+            Console.WriteLine($"Exception deleting DivisionCicloMateriaAlumno: {ex.Message}");
         }
     }
 }
+
+
+
+
+
+
+
+
+
+
 

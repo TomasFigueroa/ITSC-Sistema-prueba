@@ -26,7 +26,7 @@ namespace INTITUTO1.Server.Controllers
         {
             return await _context.DivisionCicloMaterias.ToListAsync();
         }
-
+       
         // GET: api/DivisionCicloMateria/{id}
         [HttpGet("{id:int}")]
         public async Task<ActionResult<DivisionCicloMateria>> Get(int id)

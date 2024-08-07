@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace INSTITUTO.Bdat.Migrations
 {
     [DbContext(typeof(Context))]
-    [Migration("20240701022950_1212011")]
-    partial class _1212011
+    [Migration("20240806120046_assp")]
+    partial class assp
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -89,7 +89,7 @@ namespace INSTITUTO.Bdat.Migrations
                     b.ToTable("Carreras");
                 });
 
-            modelBuilder.Entity("INSTITUTO.Bdat.Data.Entity.Ciclo", b =>
+            modelBuilder.Entity("INSTITUTO.Bdat.Data.Entity.Ciclos", b =>
                 {
                     b.Property<int>("IdCiclo")
                         .ValueGeneratedOnAdd()
@@ -234,9 +234,6 @@ namespace INSTITUTO.Bdat.Migrations
                     b.Property<int>("IdCarrera")
                         .HasColumnType("int");
 
-                    b.Property<int>("Iddivision")
-                        .HasColumnType("int");
-
                     b.Property<string>("Nombre")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -321,7 +318,7 @@ namespace INSTITUTO.Bdat.Migrations
 
             modelBuilder.Entity("INSTITUTO.Bdat.Data.Entity.DivisionCiclo", b =>
                 {
-                    b.HasOne("INSTITUTO.Bdat.Data.Entity.Ciclo", "Ciclo")
+                    b.HasOne("INSTITUTO.Bdat.Data.Entity.Ciclos", "Ciclo")
                         .WithMany("divisionCiclos")
                         .HasForeignKey("CicloIdCiclo")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -432,7 +429,7 @@ namespace INSTITUTO.Bdat.Migrations
                     b.Navigation("divisions");
                 });
 
-            modelBuilder.Entity("INSTITUTO.Bdat.Data.Entity.Ciclo", b =>
+            modelBuilder.Entity("INSTITUTO.Bdat.Data.Entity.Ciclos", b =>
                 {
                     b.Navigation("divisionCiclos");
                 });
