@@ -13,9 +13,10 @@ namespace INSTITUTO.Bdat.Data.Entity
 
     
         public int IdCarrera { get; set; }
-
-
-
+        
+        //Genera Ciclos
+        //public int IdDivision { get; set; }
+        //public Divisiones divisiones { get; set; }
 
         public List<DivisionCicloMateria> DivisionCicloMateria { get; set; }
        

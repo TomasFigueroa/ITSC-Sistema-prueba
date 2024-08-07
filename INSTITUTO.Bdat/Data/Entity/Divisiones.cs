@@ -15,8 +15,9 @@ namespace INSTITUTO.Bdat.Data.Entity
         public int CarrerassIdCarrera { get; set; }
         public Carrerass Carrerass { get; set; }
 
-  
+        //Genera ciclos
         //public List<Materias> materias { get; set; }
+
         public List<DivisionCiclo> divisionCiclos { get; set; }
 
     }

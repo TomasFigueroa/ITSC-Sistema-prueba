@@ -1,29 +1,33 @@
-﻿@page "/Notas"
+﻿@page "/Notass"
+@using Microsoft.EntityFrameworkCore
 
-@using System.ComponentModel.DataAnnotations
+@inject HttpClient Http
 
+<PageTitle>DivisionCicloMateriaAlumnos</PageTitle>
+<button class="btn btn-success" @onclick="OpenModalToAddAlumno">Cargar DivisionCicloMateriaAlumno</button>
 <div class="table-container" style="overflow: hidden; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); margin-bottom: 20px;">
     <div style="border-top-left-radius: 12px; border-top-right-radius: 12px; background-color: #f2f2f2; padding: 10px;">
-        <button class="btn btn-success" @onclick="OpenModalToAdd">Agregar Nota</button>
-        <table class="table" style="border-collapse: collapse; width: 100%; border: 2px solid #ddd; margin-top: 10px;">
+        <table class="table" style="border-collapse: collapse; width: 100%; border: 2px solid #E6E6FA;">
             <thead>
                 <tr style="border-bottom: 2px solid #ddd;">
-                    <th rowspan="2" style="border-right: 2px solid #ddd; border-bottom: 2px solid #ddd;">Instancia</th>
-                    <th style="border-right: 2px solid #ddd;">Nota</th>
-                    <th style="border-right: 2px solid #ddd;">Fecha</th>
-                    <th>Acciones</th>
+                    <th style="border-right: 2px solid #ddd;">Division-Ciclo Materia</th>
+                    <th style="border-right: 2px solid #ddd;">Alumno</th>
+                    <th style="border-right: 2px solid #ddd;">Libro</th>
+                    <th style="border-right: 2px solid #ddd;">Acción</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach (var nota in notas)
+                @foreach (var divisionCicloMateriaAlumno in divisionCicloMateriaAlumnos)
                 {
                     <tr>
-                        <td style="border-right: 2px solid #ddd; border-bottom: 2px solid #ddd;">@nota.Instancia</td>
-                        <td style="border-right: 2px solid #ddd; border-bottom: 2px solid #ddd;">@nota.Valor</td>
-                        <td style="border-right: 2px solid #ddd; border-bottom: 2px solid #ddd;">@nota.Fecha.ToShortDateString()</td>
-                        <td style="border-bottom: 2px solid #ddd;">
-                            <button class="btn btn-primary me-2" @onclick="() => OpenModalToEdit(nota)">Editar</button>
-                            <button class="btn btn-danger" @onclick="() => OpenConfirmDeleteModal(nota)">Eliminar</button>
+                        <td style="border-right: 2px solid #ddd;">@GetDivisionCicloMateriaNombre(divisionCicloMateriaAlumno.DivisionCicloMateriaIdDivCicMat)</td>
+                        <td style="border-right: 2px solid #ddd;">@GetAlumnoNombre(divisionCicloMateriaAlumno.AlumnosIdAlumno)</td>
+                        <td style="border-right: 2px solid #ddd;">@GetLibroNombre(divisionCicloMateriaAlumno.LibrosId_Libro)</td>
+                        <td>
+                            <div class="action-buttons m-1">
+                                <button class="btn btn-primary me-2" @onclick="() => OpenModalToEditAlumno(divisionCicloMateriaAlumno, divisionCicloMateriaAlumno.IdDivCicMatAlum)"><i class="oi oi-pencil"></i></button>
+                                <button class="btn btn-danger" @onclick="() => OpenConfirmDeleteModalAlumno(divisionCicloMateriaAlumno.IdDivCicMatAlum)"><i class="oi oi-trash"></i></button>
+                            </div>
                         </td>
                     </tr>
                 }
@@ -32,54 +36,46 @@
     </div>
 </div>
 
-<div class="table-container" style="overflow: hidden; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); margin-bottom: 20px;">
-    <div style="border-top-left-radius: 12px; border-top-right-radius: 12px; background-color: #f2f2f2; padding: 10px;">
-        <table class="table" style="border-collapse: collapse; width: 100%; border: 2px solid #ddd;">
-            <thead>
-                <tr style="border-bottom: 2px solid #ddd;">
-                    <th colspan="2" style="border-right: 2px solid #ddd;">Estado de la materia</th>
-                </tr>
-                <tr>
-                    <th style="border-right: 2px solid #ddd;">Condición</th>
-                    <th style="border-right: 2px solid #ddd;">Promedio</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td style="border-right: 2px solid #dee2e6;">@estadoMateria.Condicion</td>
-                    <td>@estadoMateria.Promedio</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-</div>
-
-<!-- Modal para agregar y editar notas -->
-@if (isModalOpen)
+@if (isModalOpenAlumno)
 {
     <div class="modal fade show d-block" style="background-color: rgba(0, 0, 0, 0.5);">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">@(isEdit ? "Editar Nota" : "Agregar Nota")</h5>
-                    <button type="button" class="btn-close" @onclick="CloseModal"></button>
+                    <h5 class="modal-title">@(isEditAlumno ? "Editar DivisionCicloMateriaAlumno" : "Agregar DivisionCicloMateriaAlumno")</h5>
+                    <button type="button" class="btn-close" @onclick="CloseModalAlumno"></button>
                 </div>
                 <div class="modal-body">
-                    <EditForm Model="@currentNota" OnValidSubmit="@(isEdit ? EditNota : AddNota)">
+                    <EditForm Model="@currentDivisionCicloMateriaAlumno" OnValidSubmit="@(isEditAlumno ? EditDivisionCicloMateriaAlumno : AddDivisionCicloMateriaAlumno)">
                         <DataAnnotationsValidator />
                         <div class="mb-3">
-                            <label class="form-label">Instancia</label>
-                            <InputText class="form-control" @bind-Value="currentNota.Instancia" />
+                            <label class="form-label">DivisionCicloMateria</label>
+                            <InputSelect class="form-control" @bind-Value="currentDivisionCicloMateriaAlumno.DivisionCicloMateriaIdDivCicMat">
+                                @foreach (var divisionCicloMateria in divisionCicloMaterias)
+                                {
+                                    <option value="@divisionCicloMateria.IdDivCicMat">@GetDivisionCicloMateriaNombre(divisionCicloMateria.IdDivCicMat)</option>
+                                }
+                            </InputSelect>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Nota</label>
-                            <InputNumber class="form-control" @bind-Value="currentNota.Valor" />
+                            <label class="form-label">Alumno</label>
+                            <InputSelect class="form-control" @bind-Value="currentDivisionCicloMateriaAlumno.AlumnosIdAlumno">
+                                @foreach (var alumno in alumnos)
+                                {
+                                    <option value="@alumno.IdAlumno">@GetAlumnoNombre(alumno.IdAlumno)</option>
+                                }
+                            </InputSelect>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Fecha</label>
-                            <InputDate class="form-control" @bind-Value="currentNota.Fecha" />
+                            <label class="form-label">Libro</label>
+                            <InputSelect class="form-control" @bind-Value="currentDivisionCicloMateriaAlumno.LibrosId_Libro">
+                                @foreach (var libro in libros)
+                                {
+                                    <option value="@libro.Id_Libro">@GetLibroNombre(libro.Id_Libro)</option>
+                                }
+                            </InputSelect>
                         </div>
-                        <button type="submit" class="btn btn-primary">@((isEdit) ? "Guardar Cambios" : "Agregar Nota")</button>
+                        <button type="submit" class="btn btn-primary">@((isEditAlumno) ? "Guardar Cambios" : "Agregar DivisionCicloMateriaAlumno")</button>
                     </EditForm>
                 </div>
             </div>
@@ -87,157 +83,210 @@
     </div>
 }
 
-<!-- Modal para confirmar eliminación -->
-@if (isConfirmDeleteModalOpen)
+@if (isConfirmDeleteModalOpenAlumno)
 {
     <div class="modal fade show d-block" style="background-color: rgba(0, 0, 0, 0.5);">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Confirmar Eliminación</h5>
-                    <button type="button" class="btn-close" @onclick="CloseConfirmDeleteModal"></button>
+                    <button type="button" class="btn-close" @onclick="CloseConfirmDeleteModalAlumno"></button>
                 </div>
                 <div class="modal-body">
-                    ¿Estás seguro de que deseas eliminar esta nota?
+                    ¿Estás seguro de que deseas eliminar este registro?
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" @onclick="CloseConfirmDeleteModal">Cancelar</button>
-                    <button type="button" class="btn btn-danger" @onclick="DeleteNota">Eliminar</button>
+                    <button type="button" class="btn btn-secondary" @onclick="CloseConfirmDeleteModalAlumno">Cancelar</button>
+                    <button type="button" class="btn btn-danger" @onclick="DeleteDivisionCicloMateriaAlumno">Eliminar</button>
                 </div>
             </div>
         </div>
     </div>
 }
 
-@code {
-    private List<Nota> notas = new List<Nota>
+
+@code{
+    private List<DivsionCiclosMateriaAlumnos> divisionCicloMateriaAlumnos = new List<DivsionCiclosMateriaAlumnos>();
+    private List<DivisionCicloMateria> divisionCicloMaterias = new List<DivisionCicloMateria>();
+    private List<Alumnos> alumnos = new List<Alumnos>();
+    private List<LIbros> libros = new List<LIbros>();
+    private DivsionCiclosMateriaAlumnos currentDivisionCicloMateriaAlumno = new DivsionCiclosMateriaAlumnos();
+    private bool isModalOpenAlumno = false;
+    private bool isEditAlumno = false;
+    private int idDivisionCicloMateriaAlumnoToDelete;
+    private bool isConfirmDeleteModalOpenAlumno = false;
+    private int idActualAlumno;
+
+    protected override async Task OnInitializedAsync()
     {
-        new Nota { Instancia = "Instancia evaluativa 1", Valor = 8.5, Fecha = new DateTime(2024, 4, 20) },
-        new Nota { Instancia = "Instancia evaluativa 2", Valor = 7, Fecha = new DateTime(2024, 5, 20) }
-    };
-
-    private EstadoMateria estadoMateria = new EstadoMateria { Condicion = "Regular", Promedio = 8.5 };
-
-    private Alumno alumno = new Alumno { Nombre = "Juan", Apellido = "Perez", CUIL = "20-12345678-9" };
-
-    private string carreraSeleccionada;
-    private string divisionSeleccionada;
-
-    private bool isModalOpen = false;
-    private bool isEdit = false;
-    private Nota currentNota = new Nota();
-    private Nota notaToDelete;
-    private bool isConfirmDeleteModalOpen = false;
-
-    private void OpenModalToAdd()
-    {
-        currentNota = new Nota();
-        isEdit = false;
-        isModalOpen = true;
+        await LoadDivisionCicloMateriaAlumnos();
+        await LoadDivisionCicloMaterias();
+        await LoadAlumnos();
+        await LoadLibros();
     }
 
-    private void OpenModalToEdit(Nota nota)
+    private async Task LoadDivisionCicloMateriaAlumnos()
     {
-        currentNota = new Nota
+        try
         {
-            Instancia = nota.Instancia,
-            Valor = nota.Valor,
-            Fecha = nota.Fecha
-        };
-        isEdit = true;
-        isModalOpen = true;
-    }
-
-    private void CloseModal()
-    {
-        isModalOpen = false;
-    }
-
-    private void AddNota()
-    {
-        notas.Add(currentNota);
-        CloseModal();
-        ActualizarPromedio();
-    }
-
-    private void EditNota()
-    {
-        var nota = notas.FirstOrDefault(n => n.Instancia == currentNota.Instancia && n.Fecha == currentNota.Fecha);
-        if (nota != null)
-        {
-            nota.Valor = currentNota.Valor;
-            nota.Fecha = currentNota.Fecha;
+            divisionCicloMateriaAlumnos = await Http.GetFromJsonAsync<List<DivsionCiclosMateriaAlumnos>>("api/DivisionCicloMateriaAlumnos");
         }
-        CloseModal();
-        ActualizarPromedio();
-    }
-
-    private void OpenConfirmDeleteModal(Nota nota)
-    {
-        notaToDelete = nota;
-        isConfirmDeleteModalOpen = true;
-    }
-
-    private void CloseConfirmDeleteModal()
-    {
-        isConfirmDeleteModalOpen = false;
-    }
-
-    private void DeleteNota()
-    {
-        notas.Remove(notaToDelete);
-        CloseConfirmDeleteModal();
-        ActualizarPromedio();
-    }
-
-    private void ActualizarPromedio()
-    {
-        if (notas.Count > 0)
+        catch (Exception ex)
         {
-            estadoMateria.Promedio = notas.Average(n => n.Valor);
-            estadoMateria.Condicion = estadoMateria.Promedio < 4 ? "Libre" : "Regular";
-        }
-        else
-        {
-            estadoMateria.Promedio = 0;
-            estadoMateria.Condicion = "Libre";
+            Console.WriteLine($"Error loading DivisionCicloMateriaAlumnos: {ex.Message}");
         }
     }
 
-    private void CargarNotas()
+    private async Task LoadDivisionCicloMaterias()
     {
-        // Aquí puedes cargar las notas según la carrera y división seleccionada.
-        // Actualmente se usa una lista de notas de ejemplo.
-        notas = new List<Nota>
+        try
         {
-            new Nota { Instancia = "Parcial 1", Valor = 8, Fecha = new DateTime(2024, 4, 1) },
-            new Nota { Instancia = "Parcial 2", Valor = 6, Fecha = new DateTime(2024, 5, 1) }
-        };
-        ActualizarPromedio();
+            divisionCicloMaterias = await Http.GetFromJsonAsync<List<DivisionCicloMateria>>("api/DivisionCicloMateria");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading DivisionCicloMaterias: {ex.Message}");
+        }
     }
 
-    public class Nota
+    private async Task LoadAlumnos()
     {
-        [Required(ErrorMessage = "La instancia es requerida.")]
-        public string Instancia { get; set; }
-
-        [Range(0, 10, ErrorMessage = "La nota debe estar entre 0 y 10.")]
-        public double Valor { get; set; }
-
-        [Required(ErrorMessage = "La fecha es requerida.")]
-        public DateTime Fecha { get; set; }
+        try
+        {
+            alumnos = await Http.GetFromJsonAsync<List<Alumnos>>("api/Alumnos");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading Alumnos: {ex.Message}");
+        }
     }
 
-    public class EstadoMateria
+    private async Task LoadLibros()
     {
-        public string Condicion { get; set; }
-        public double Promedio { get; set; }
+        try
+        {
+            libros = await Http.GetFromJsonAsync<List<LIbros>>("api/Libros");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading Libros: {ex.Message}");
+        }
     }
 
-    public class Alumno
+    private string GetDivisionCicloMateriaNombre(int id)
     {
-        public string Nombre { get; set; }
-        public string Apellido { get; set; }
-        public string CUIL { get; set; }
+        var divisionCicloMateria = divisionCicloMaterias.FirstOrDefault(dcm => dcm.IdDivCicMat == id);
+        return divisionCicloMateria != null ? $"Division: {divisionCicloMateria.DivisionCicloIdDivCic} - Materia: {divisionCicloMateria.MateriasIdMateria}" : "N/A";
     }
-}
+
+    private string GetAlumnoNombre(int id)
+    {
+        var alumno = alumnos.FirstOrDefault(a => a.IdAlumno == id);
+        return alumno != null ? $"{alumno.Nombre} {alumno.Apellido}" : "N/A";
+    }
+
+    private string GetLibroNombre(int id)
+    {
+        var libro = libros.FirstOrDefault(l => l.Id_Libro == id);
+        return libro != null ? libro.Nombre_Lib : "N/A";
+    }
+
+    private void OpenModalToAddAlumno()
+    {
+        currentDivisionCicloMateriaAlumno = new DivsionCiclosMateriaAlumnos();
+        isEditAlumno = false;
+        isModalOpenAlumno = true;
+    }
+
+    private void OpenModalToEditAlumno(DivsionCiclosMateriaAlumnos divisionCicloMateriaAlumno, int id)
+    {
+        currentDivisionCicloMateriaAlumno = new DivsionCiclosMateriaAlumnos
+            {
+                DivisionCicloMateriaIdDivCicMat = divisionCicloMateriaAlumno.DivisionCicloMateriaIdDivCicMat,
+                AlumnosIdAlumno = divisionCicloMateriaAlumno.AlumnosIdAlumno,
+                LibrosId_Libro = divisionCicloMateriaAlumno.LibrosId_Libro
+            };
+        idActualAlumno = id;
+        isEditAlumno = true;
+        isModalOpenAlumno = true;
+    }
+
+    private void CloseModalAlumno()
+    {
+        isModalOpenAlumno = false;
+    }
+
+    private void OpenConfirmDeleteModalAlumno(int id)
+    {
+        idDivisionCicloMateriaAlumnoToDelete = id;
+        isConfirmDeleteModalOpenAlumno = true;
+    }
+
+    private void CloseConfirmDeleteModalAlumno()
+    {
+        isConfirmDeleteModalOpenAlumno = false;
+    }
+
+    private async Task AddDivisionCicloMateriaAlumno()
+    {
+        try
+        {
+            var response = await Http.PostAsJsonAsync("api/DivisionCicloMateriaAlumnos", currentDivisionCicloMateriaAlumno);
+            if (response.IsSuccessStatusCode)
+            {
+                await LoadDivisionCicloMateriaAlumnos();
+                CloseModalAlumno();
+            }
+            else
+            {
+                Console.WriteLine($"Error adding DivisionCicloMateriaAlumno: {response.ReasonPhrase}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Exception adding DivisionCicloMateriaAlumno: {ex.Message}");
+        }
+    }
+
+    private async Task EditDivisionCicloMateriaAlumno()
+    {
+        try
+        {
+            var response = await Http.PutAsJsonAsync($"api/DivisionCicloMateriaAlumnos/{idActualAlumno}", currentDivisionCicloMateriaAlumno);
+            if (response.IsSuccessStatusCode)
+            {
+                await LoadDivisionCicloMateriaAlumnos();
+                CloseModalAlumno();
+            }
+            else
+            {
+                Console.WriteLine($"Error editing DivisionCicloMateriaAlumno: {response.ReasonPhrase}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Exception editing DivisionCicloMateriaAlumno: {ex.Message}");
+        }
+    }
+
+    private async Task DeleteDivisionCicloMateriaAlumno()
+    {
+        try
+        {
+            var response = await Http.DeleteAsync($"api/DivisionCicloMateriaAlumnos/{idDivisionCicloMateriaAlumnoToDelete}");
+            if (response.IsSuccessStatusCode)
+            {
+                await LoadDivisionCicloMateriaAlumnos();
+                CloseConfirmDeleteModalAlumno();
+            }
+            else
+            {
+                Console.WriteLine($"Error deleting DivisionCicloMateriaAlumno: {response.ReasonPhrase}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Exception deleting DivisionCicloMateriaAlumno: {ex.Message}");
+        }
+    }
+  }

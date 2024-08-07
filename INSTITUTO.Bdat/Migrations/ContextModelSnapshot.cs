@@ -86,7 +86,7 @@ namespace INSTITUTO.Bdat.Migrations
                     b.ToTable("Carreras");
                 });
 
-            modelBuilder.Entity("INSTITUTO.Bdat.Data.Entity.Ciclo", b =>
+            modelBuilder.Entity("INSTITUTO.Bdat.Data.Entity.Ciclos", b =>
                 {
                     b.Property<int>("IdCiclo")
                         .ValueGeneratedOnAdd()
@@ -315,7 +315,7 @@ namespace INSTITUTO.Bdat.Migrations
 
             modelBuilder.Entity("INSTITUTO.Bdat.Data.Entity.DivisionCiclo", b =>
                 {
-                    b.HasOne("INSTITUTO.Bdat.Data.Entity.Ciclo", "Ciclo")
+                    b.HasOne("INSTITUTO.Bdat.Data.Entity.Ciclos", "Ciclo")
                         .WithMany("divisionCiclos")
                         .HasForeignKey("CicloIdCiclo")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -426,7 +426,7 @@ namespace INSTITUTO.Bdat.Migrations
                     b.Navigation("divisions");
                 });
 
-            modelBuilder.Entity("INSTITUTO.Bdat.Data.Entity.Ciclo", b =>
+            modelBuilder.Entity("INSTITUTO.Bdat.Data.Entity.Ciclos", b =>
                 {
                     b.Navigation("divisionCiclos");
                 });
