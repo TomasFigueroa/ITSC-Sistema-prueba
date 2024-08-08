@@ -26,43 +26,45 @@ namespace INTITUTO1.Server.Controllers
             return await _context.DivsionCiclosMateriaAlumnos.ToListAsync();
         }
 
-        // GET: api/DivsionCicloMateriaAlumnos/{id}
+        // GET: api/DivisionCicloMateriaAlumnos/{id}
         [HttpGet("{id:int}")]
         public async Task<ActionResult<DivsionCiclosMateriaAlumnos>> Get(int id)
         {
-            var carrera = await _context.DivsionCiclosMateriaAlumnos.FirstOrDefaultAsync(c => c.IdDivCicMatAlum == id);
+            var divisionCicloMateriaAlumno = await _context.DivsionCiclosMateriaAlumnos
+                .FirstOrDefaultAsync(c => c.IdDivCicMatAlum == id);
 
-            if (carrera == null)
+            if (divisionCicloMateriaAlumno == null)
             {
-                return BadRequest($"No se encontró la DivisionCiclo con id: {id}");
+                return NotFound($"No se encontró la DivisionCicloMateriaAlumno con id: {id}");
             }
 
-            return carrera;
+            return divisionCicloMateriaAlumno;
         }
 
-        // POST: api/CiclosMateriaAlumnos
+        // POST: api/DivisionCicloMateriaAlumnos
         [HttpPost]
-        public async Task<ActionResult<DivsionCiclosMateriaAlumnos>> Post(DTODivisionCicloMateriaAlumno dtoDivisionCicloMateriaAlumno)
+        public async Task<ActionResult<ResponseAPI<int>>> Post(DTODivisionCicloMateriaAlumno dtoDivisionCicloMateriaAlumno)
         {
             var responseApi = new ResponseAPI<int>();
-            var mdDivCicMatAlu = new DivsionCiclosMateriaAlumnos
+            var newDivCicMatAlu = new DivsionCiclosMateriaAlumnos
             {
                 DivisionCicloMateriaIdDivCicMat = dtoDivisionCicloMateriaAlumno.DivisionCicloMateriaIdDivCicMat,
                 AlumnosIdAlumno = dtoDivisionCicloMateriaAlumno.AlumnosIdAlumno,
                 LibrosId_Libro = dtoDivisionCicloMateriaAlumno.LibrosId_Libro,
-
             };
-            _context.DivsionCiclosMateriaAlumnos.Add(mdDivCicMatAlu);
-            await _context.SaveChangesAsync();
-            return Ok(responseApi);
 
+            _context.DivsionCiclosMateriaAlumnos.Add(newDivCicMatAlu);
+            await _context.SaveChangesAsync();
+            responseApi.EsCorrecto = true;
+            responseApi.Mensaje = "Registro creado con éxito";
+            responseApi.Valor = newDivCicMatAlu.IdDivCicMatAlum;
+
+            return Ok(responseApi);
         }
 
-
-
-        // PUT: api/DivisionCiclosMateriaAlumnos/{id}
+        // PUT: api/DivisionCicloMateriaAlumnos/{id}
         [HttpPut("{id:int}")]
-        public async Task<IActionResult> Put(int id, DTODivisionCicloMateriaAlumno dtoDivisionCicloMateriaAlumno)
+        public async Task<ActionResult<ResponseAPI<int>>> Put(int id, DTODivisionCicloMateriaAlumno dtoDivisionCicloMateriaAlumno)
         {
             var responseApi = new ResponseAPI<int>();
 
@@ -72,15 +74,15 @@ namespace INTITUTO1.Server.Controllers
 
                 if (dbDivCicMatAlu != null)
                 {
-
-                    dbDivCicMatAlu.DivisionCicloMateriaIdDivCicMat = dbDivCicMatAlu.DivisionCicloMateriaIdDivCicMat;
-                    dbDivCicMatAlu.AlumnosIdAlumno = dbDivCicMatAlu.AlumnosIdAlumno;
-                    dbDivCicMatAlu.LibrosId_Libro = dbDivCicMatAlu.LibrosId_Libro;
+                    dbDivCicMatAlu.DivisionCicloMateriaIdDivCicMat = dtoDivisionCicloMateriaAlumno.DivisionCicloMateriaIdDivCicMat;
+                    dbDivCicMatAlu.AlumnosIdAlumno = dtoDivisionCicloMateriaAlumno.AlumnosIdAlumno;
+                    dbDivCicMatAlu.LibrosId_Libro = dtoDivisionCicloMateriaAlumno.LibrosId_Libro;
 
                     _context.DivsionCiclosMateriaAlumnos.Update(dbDivCicMatAlu);
                     await _context.SaveChangesAsync();
                     responseApi.EsCorrecto = true;
-
+                    responseApi.Mensaje = "Registro actualizado con éxito";
+                    responseApi.Valor = dbDivCicMatAlu.IdDivCicMatAlum;
                 }
                 else
                 {
@@ -91,20 +93,20 @@ namespace INTITUTO1.Server.Controllers
             catch (Exception ex)
             {
                 responseApi.EsCorrecto = false;
-                responseApi.Mensaje = ex.InnerException.Message;
+                responseApi.Mensaje = ex.Message;
             }
+
             return Ok(responseApi);
         }
 
-        // DELETE: api/DivisionCicloMateriaAlumno/{id}
+        // DELETE: api/DivisionCicloMateriaAlumnos/{id}
         [HttpDelete("{id:int}")]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<ActionResult<ResponseAPI<int>>> Delete(int id)
         {
             var responseApi = new ResponseAPI<int>();
 
             try
             {
-
                 var dbDivCicMatAlu = await _context.DivsionCiclosMateriaAlumnos.FirstOrDefaultAsync(e => e.IdDivCicMatAlum == id);
 
                 if (dbDivCicMatAlu != null)
@@ -112,20 +114,23 @@ namespace INTITUTO1.Server.Controllers
                     _context.DivsionCiclosMateriaAlumnos.Remove(dbDivCicMatAlu);
                     await _context.SaveChangesAsync();
                     responseApi.EsCorrecto = true;
+                    responseApi.Mensaje = "Registro eliminado con éxito";
+                    responseApi.Valor = id;
                 }
                 else
                 {
                     responseApi.EsCorrecto = false;
-                    responseApi.Mensaje = "Carrera no encontrada";
+                    responseApi.Mensaje = "DivisionCicloMateriaAlumno no encontrada";
                 }
             }
             catch (Exception ex)
             {
                 responseApi.EsCorrecto = false;
-                responseApi.Mensaje = ex.InnerException.Message;
+                responseApi.Mensaje = ex.Message;
             }
+
             return Ok(responseApi);
         }
-
     }
+
 }

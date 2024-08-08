@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace INSTITUTO.Bdat.Migrations
 {
     /// <inheritdoc />
-    public partial class _12120 : Migration
+    public partial class assp : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -78,7 +78,8 @@ namespace INSTITUTO.Bdat.Migrations
                 {
                     IdMateria = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Nombre = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Nombre = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    IdCarrera = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -121,7 +122,6 @@ namespace INSTITUTO.Bdat.Migrations
                     IdDivision = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     NombreDiv = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    NombreCarrera = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CarrerassIdCarrera = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
