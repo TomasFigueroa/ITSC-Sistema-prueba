@@ -54,7 +54,7 @@ namespace INTITUTO1.Server.Controllers
             _context.Ciclos.Add(mdCiclo);
             await _context.SaveChangesAsync();
             return Ok(responseApi);
-  
+
         }
 
         //// PUT: api/Ciclo
@@ -63,50 +63,59 @@ namespace INTITUTO1.Server.Controllers
         {
             var responseApi = new ResponseAPI<int>();
 
-        //    try
-        //    {
-        //        var dbCiclo = await _context.Ciclos.FirstOrDefaultAsync(e => e.IdCiclo == id);
-
-        //        if (dbCiclo == null)
-        //        {
-        //            dbCiclo.Fecha = dtoCiclo.Fecha;
-
-        //            _context.Ciclos.Update(dbCiclo);
-        //            await _context.SaveChangesAsync();
-        //            responseApi.EsCorrecto = true;
-        //        }
-        //    }
-        //}
-
-        // DELETE: api/Ciclo/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
-        {
-            var responseApi = new ResponseAPI<int>();
-
             try
             {
                 var dbCiclo = await _context.Ciclos.FirstOrDefaultAsync(e => e.IdCiclo == id);
 
-                if(dbCiclo != null)
+                if (dbCiclo == null)
                 {
-                    _context.Ciclos.Remove(dbCiclo);
+                    dbCiclo.Fecha = dtoCiclo.Fecha;
+
+                    _context.Ciclos.Update(dbCiclo);
                     await _context.SaveChangesAsync();
                     responseApi.EsCorrecto = true;
                 }
-                else
-                {
-                    responseApi.EsCorrecto = false;
-                    responseApi.Mensaje = "Ciclo no encontrado";
-                }
             }
-            catch (Exception ex)
+            catch (Exception ex) 
             {
+
                 responseApi.EsCorrecto = false;
                 responseApi.Mensaje = ex.InnerException.Message;
+
+
             }
             return Ok(responseApi);
-
         }
-    }
-}
+
+        // DELETE: api/Ciclo/5
+        [HttpDelete("{id}")]
+            public async Task<IActionResult> Delete(int id)
+            {
+                var responseApi = new ResponseAPI<int>();
+
+                try
+                {
+                    var dbCiclo = await _context.Ciclos.FirstOrDefaultAsync(e => e.IdCiclo == id);
+
+                    if (dbCiclo != null)
+                    {
+                        _context.Ciclos.Remove(dbCiclo);
+                        await _context.SaveChangesAsync();
+                        responseApi.EsCorrecto = true;
+                    }
+                    else
+                    {
+                        responseApi.EsCorrecto = false;
+                        responseApi.Mensaje = "Ciclo no encontrado";
+                    }
+                }
+                catch (Exception ex)
+                {
+                    responseApi.EsCorrecto = false;
+                    responseApi.Mensaje = ex.InnerException.Message;
+                }
+                return Ok(responseApi);
+
+            }
+        
+    } }
