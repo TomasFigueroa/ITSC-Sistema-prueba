@@ -3,7 +3,25 @@
 
 @inject HttpClient Http
 
+
+
 <PageTitle>Carrera</PageTitle>
+
+<!-- ordenar por a-z o z-a -->
+
+<button class="btn btn-outline-dark" @onclick="SortByNombre">
+   Ordenar alfabeticamente (Nombre)
+    @if (sortOrder == "asc")
+    {
+        <i class="oi oi-arrow-thick-top"></i>
+    }
+    else
+    {
+        <i class="oi oi-arrow-thick-bottom"></i>
+    }
+</button>
+
+
 <button class="btn btn-success" @onclick="OpenModalToAdd">Cargar Carrera</button>
 <div class="table-container" style="overflow: hidden; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); margin-bottom: 20px;">
     <div style="border-top-left-radius: 12px; border-top-right-radius: 12px; background-color: #f2f2f2; padding: 10px;">
@@ -100,6 +118,7 @@
     private DTOSCarreras currentCarrera = new DTOSCarreras();
     private Carrerass carreraToDelete;
     private bool isConfirmDeleteModalOpen = false;
+    private string sortOrder = "asc";
 
     protected override async Task OnInitializedAsync()
     {
@@ -110,7 +129,15 @@
     {
         try
         {
-            carreras = await Http.GetFromJsonAsync<List<Carrerass>>("api/Carrera");
+            var response = await Http.GetFromJsonAsync<List<Carrerass>>("api/Carrera");
+            if (sortOrder == "asc")
+            {
+                carreras = response.OrderBy(c => c.Nombre).ToList();
+            }
+            else
+            {
+                carreras = response.OrderByDescending(c => c.Nombre).ToList();
+            }
         }
         catch (Exception ex)
         {
@@ -218,7 +245,20 @@
             Console.WriteLine($"Exception deleting carrera: {ex.Message}");
         }
     }
-
+    
+    //ordenar por nombre
+    private void SortByNombre()
+    {
+        if (sortOrder == "asc")
+        {
+            sortOrder = "desc";
+        }
+        else
+        {
+            sortOrder = "asc";
+        }
+        LoadCarreras();
+    }
    
 }
 
