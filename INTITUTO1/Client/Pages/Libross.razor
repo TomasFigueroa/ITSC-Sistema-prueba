@@ -1,0 +1,205 @@
+﻿@page "/Libros"
+
+@inject HttpClient Http
+
+<PageTitle>Libros</PageTitle>
+<button class="btn btn-success" @onclick="OpenModalToAdd">Cargar Libro</button>
+<div class="table-container" style="overflow: hidden; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); margin-bottom: 20px;">
+    <div style="border-top-left-radius: 12px; border-top-right-radius: 12px; background-color: #f2f2f2; padding: 10px;">
+        <table class="table" style="border-collapse: collapse; width: 100%; border: 2px solid #E6E6FA;">
+            <thead>
+                <tr style="border-bottom: 2px solid #ddd;">
+                    <th style="border-right: 2px solid #ddd;">Nombre</th>
+                    <th style="border-right: 2px solid #ddd;">Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var libro in libros)
+                {
+                    <tr>
+                        <td style="border-right: 2px solid #ddd;">@libro.Nombre_Lib</td>
+                        <td>
+                            <div class="action-buttons m-1">
+                                <button class="btn btn-primary me-2" @onclick="() => OpenModalToEdit(libro, libro.Id_Libro)"><i class="oi oi-pencil"></i></button>
+                                <button class="btn btn-danger" @onclick="() => OpenConfirmDeleteModal(libro, libro.Id_Libro)"><i class="oi oi-trash"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal para agregar y editar libros -->
+@if (isModalOpen)
+{
+    <div class="modal fade show d-block" style="background-color: rgba(0, 0, 0, 0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@(isEdit ? "Editar Libro" : "Agregar Libro")</h5>
+                    <button type="button" class="btn-close" @onclick="CloseModal"></button>
+                </div>
+                <div class="modal-body">
+                    <EditForm Model="@currentLibro" OnValidSubmit="@(isEdit ? EditLibro : AddLibro)">
+                        <DataAnnotationsValidator />
+                        <div class="mb-3">
+                            <label class="form-label">Nombre</label>
+                            <InputText class="form-control" @bind-Value="currentLibro.Nombre_Lib" />
+                        </div>
+                        <button type="submit" class="btn btn-primary">@((isEdit) ? "Guardar Cambios" : "Agregar Libro")</button>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Modal para confirmar eliminación -->
+@if (isConfirmDeleteModalOpen)
+{
+    <div class="modal fade show d-block" style="background-color: rgba(0, 0, 0, 0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmar Eliminación</h5>
+                    <button type="button" class="btn-close" @onclick="CloseConfirmDeleteModal"></button>
+                </div>
+                <div class="modal-body">
+                    ¿Estás seguro de que deseas eliminar este libro?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseConfirmDeleteModal">Cancelar</button>
+                    <button type="button" class="btn btn-danger" @onclick="DeleteLibro">Eliminar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    int idLibroLocal;
+    LIbros Libros = new LIbros();
+    List<LIbros> libros = new List<LIbros>();
+    private bool isModalOpen = false;
+    private bool isEdit = false;
+    private DTOLibros currentLibro = new DTOLibros();
+    private LIbros libroToDelete;
+    private bool isConfirmDeleteModalOpen = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadLibros();
+    }
+
+    private async Task LoadLibros()
+    {
+        try
+        {
+            libros = await Http.GetFromJsonAsync<List<LIbros>>("api/Libros");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading libros: {ex.Message}");
+        }
+    }
+
+    private void OpenModalToAdd()
+    {
+        currentLibro = new DTOLibros();
+        isEdit = false;
+        isModalOpen = true;
+    }
+
+    private void OpenModalToEdit(LIbros libro, int id)
+    {
+        currentLibro = new DTOLibros
+            {
+                Nombre_Lib = libro.Nombre_Lib,
+            };
+        idLibroLocal = id;
+        isEdit = true;
+        isModalOpen = true;
+    }
+
+    private void CloseModal()
+    {
+        isModalOpen = false;
+    }
+
+    private async Task AddLibro()
+    {
+        try
+        {
+            var response = await Http.PostAsJsonAsync("api/Libros", currentLibro);
+            if (response.IsSuccessStatusCode)
+            {
+                await LoadLibros();
+                CloseModal();
+            }
+            else
+            {
+                Console.WriteLine($"Error adding libro: {response.ReasonPhrase}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Exception adding libro: {ex.Message}");
+        }
+    }
+
+    private async Task EditLibro()
+    {
+        try
+        {
+            var response = await Http.PutAsJsonAsync($"api/Libros/{idLibroLocal}", currentLibro);
+            if (response.IsSuccessStatusCode)
+            {
+                await LoadLibros();
+                CloseModal();
+            }
+            else
+            {
+                Console.WriteLine($"Error editing libro: {response.ReasonPhrase}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Exception editing libro: {ex.Message}");
+        }
+    }
+
+    private void OpenConfirmDeleteModal(LIbros libro, int id)
+    {
+        idLibroLocal = id;
+        libroToDelete = libro;
+        isConfirmDeleteModalOpen = true;
+    }
+
+    private void CloseConfirmDeleteModal()
+    {
+        isConfirmDeleteModalOpen = false;
+    }
+
+    private async Task DeleteLibro()
+    {
+        try
+        {
+            var response = await Http.DeleteAsync($"api/Libros/{idLibroLocal}");
+            if (response.IsSuccessStatusCode)
+            {
+                await LoadLibros();
+                CloseConfirmDeleteModal();
+            }
+            else
+            {
+                Console.WriteLine($"Error deleting libro: {response.ReasonPhrase}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Exception deleting libro: {ex.Message}");
+        }
+    }
+}

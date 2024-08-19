@@ -26,7 +26,7 @@ namespace INTITUTO1.Server.Controllers
         {
             return await _context.notas.ToListAsync();
         }
-
+      
         // GET: api/Notas/{id}
         [HttpGet("{id:int}")]
         public async Task<ActionResult<Notas>> Get(int id)
@@ -35,7 +35,7 @@ namespace INTITUTO1.Server.Controllers
 
             if (nota == null)
             {
-                return BadRequest($"No se encontró la nota con id: {id}");
+                return NotFound($"No se encontró la nota con id: {id}");
             }
 
             return nota;
@@ -50,17 +50,16 @@ namespace INTITUTO1.Server.Controllers
             {
                 Nota = dtoNotas.Nota,
                 Fecha = dtoNotas.Fecha,
+                DivsionCiclosMateriaAlumnosIdDivCicMatAlum = dtoNotas.Materias,
                 TipoEvaluacionIdTipoEva = dtoNotas.TipoEvaluacionIdTipoEva,
                 //TipoEvaluacion = dtoNotas.TipoEvaluacion (desmarcala si va esta)
-                
             };
             _context.notas.Add(mdNota);
             await _context.SaveChangesAsync();
+            responseApi.EsCorrecto = true;
+            responseApi.Mensaje = "Nota creada correctamente";
             return Ok(responseApi);
-
         }
-
-
 
         // PUT: api/Notas/{id}
         [HttpPut("{id:int}")]
@@ -74,25 +73,26 @@ namespace INTITUTO1.Server.Controllers
 
                 if (dbNotas != null)
                 {
-
                     dbNotas.Nota = dtoNotas.Nota;
-
+                    dbNotas.Fecha = dtoNotas.Fecha;
+                    dbNotas.DivsionCiclosMateriaAlumnosIdDivCicMatAlum = dtoNotas.Materias;
+                    dbNotas.TipoEvaluacionIdTipoEva = dtoNotas.TipoEvaluacionIdTipoEva;
 
                     _context.notas.Update(dbNotas);
                     await _context.SaveChangesAsync();
                     responseApi.EsCorrecto = true;
-
+                    responseApi.Mensaje = "Nota actualizada correctamente";
                 }
                 else
                 {
                     responseApi.EsCorrecto = false;
-                    responseApi.Mensaje = "Materia no encontrada";
+                    responseApi.Mensaje = "Nota no encontrada";
                 }
             }
             catch (Exception ex)
             {
                 responseApi.EsCorrecto = false;
-                responseApi.Mensaje = ex.InnerException.Message;
+                responseApi.Mensaje = ex.InnerException?.Message ?? ex.Message;
             }
             return Ok(responseApi);
         }
@@ -105,7 +105,6 @@ namespace INTITUTO1.Server.Controllers
 
             try
             {
-
                 var dbNotas = await _context.notas.FirstOrDefaultAsync(e => e.IdNotas == id);
 
                 if (dbNotas != null)
@@ -113,6 +112,7 @@ namespace INTITUTO1.Server.Controllers
                     _context.notas.Remove(dbNotas);
                     await _context.SaveChangesAsync();
                     responseApi.EsCorrecto = true;
+                    responseApi.Mensaje = "Nota eliminada correctamente";
                 }
                 else
                 {
@@ -123,10 +123,10 @@ namespace INTITUTO1.Server.Controllers
             catch (Exception ex)
             {
                 responseApi.EsCorrecto = false;
-                responseApi.Mensaje = ex.InnerException.Message;
+                responseApi.Mensaje = ex.InnerException?.Message ?? ex.Message;
             }
             return Ok(responseApi);
         }
-
     }
+
 }
