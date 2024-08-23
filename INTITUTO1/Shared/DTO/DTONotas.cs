@@ -10,6 +10,7 @@ namespace INTITUTO1.Shared.DTO
     {
         public int Nota {  get; set; }
         public DateTime Fecha { get; set; }
+        public int Materias { get; set; }
         public int TipoEvaluacionIdTipoEva {  get; set; }
 
         //agrega tipo de evaluacion si hace falta aca

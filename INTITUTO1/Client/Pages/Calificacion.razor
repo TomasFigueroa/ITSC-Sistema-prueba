@@ -1,86 +1,49 @@
 ﻿@page "/Notas"
-@using INTITUTO1.Shared
+@using Microsoft.EntityFrameworkCore
 @inject HttpClient Http
 
-<PageTitle>Calificaciones</PageTitle>
+<PageTitle>Notas</PageTitle>
 
-<h1>CALIFICACIONES</h1>
+<button class="btn btn-success" @onclick="OpenModalToAdd">Agregar Nota</button>
 
-<!-- Select para filtrar por carrera -->
+<!-- Filtros -->
 <div class="mb-3">
-    <label class="form-label">Filtrar por Carrera</label>
-    <select class="form-control" @onchange="ActualizarDivisiones">
-        <option value="">Seleccione una carrera</option>
-        @foreach (var carrera in carreras)
-        {
-            <option value="@carrera">@carrera</option>
-        }
-    </select>
+    <label class="form-label">Filtrar por Alumno (DNI)</label>
+    <input type="text" class="form-control" @bind="filtroDNI" placeholder="DNI del Alumno" />
 </div>
+<select class="form-control" @bind="FiltroMateriaId">
+    <option value="">Seleccione una materia</option>
+    @foreach (var materia in materias)
+    {
+        <option value="@materia.IdMateria">@materia.Nombre</option>
+    }
+</select>
 
-<!-- Select para filtrar por división -->
-<div class="mb-3">
-    <label class="form-label">Filtrar por División</label>
-    <select class="form-control" @onchange="ActualizarMaterias">
-        <option value="">Seleccione una división</option>
-        @foreach (var division in filteredDivisiones)
-        {
-            <option value="@division">@division</option>
-        }
-    </select>
-</div>
-
-<!-- Select para filtrar por materia -->
-<div class="mb-3">
-    <label class="form-label">Filtrar por Materia</label>
-    <select class="form-control" @onchange="FiltrarPorMateria">
-        <option value="">Seleccione una materia</option>
-        @foreach (var materia in filteredMaterias)
-        {
-            <option value="@materia">@materia</option>
-        }
-    </select>
-</div>
-
-<!-- Select para filtrar por ciclo lectivo -->
-<div class="mb-3">
-    <label class="form-label">Filtrar por Ciclo Lectivo</label>
-    <select class="form-control" @onchange="FiltrarPorCicloLectivo">
-        <option value="">Seleccione un ciclo lectivo</option>
-        @foreach (var ciclo in ciclosLectivos)
-        {
-            <option value="@ciclo">@ciclo</option>
-        }
-    </select>
-</div>
-
+<!-- Tabla de Notas -->
 <div class="table-container" style="overflow: hidden; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); margin-bottom: 20px;">
     <div style="border-top-left-radius: 12px; border-top-right-radius: 12px; background-color: #f2f2f2; padding: 10px;">
-        <table class="table" style="border-collapse: collapse; width: 100%; border: 2px solid #ddd;">
+        <table class="table" style="border-collapse: collapse; width: 100%; border: 2px solid #E6E6FA;">
             <thead>
                 <tr style="border-bottom: 2px solid #ddd;">
-                    <th style="border-right: 2px solid #ddd;">DNI</th>
-                    <th style="border-right: 2px solid #ddd;">Nombre</th>
-                    <th style="border-right: 2px solid #ddd;">Materia</th>
-                    <th style="border-right: 2px solid #ddd;">Carrera</th>
-                    <th style="border-right: 2px solid #ddd;">División</th>
-                    <th style="border-right: 2px solid #ddd;">Ciclo Lectivo</th>
+                    <th style="border-right: 2px solid #ddd;">Alumno</th>
+                    <th style="border-right: 2px solid #ddd;">Nota</th>
+                    <th style="border-right: 2px solid #ddd;">Fecha</th>
+                    <th style="border-right: 2px solid #ddd;">Tipo Evaluación</th>
                     <th style="border-right: 2px solid #ddd;">Acción</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach (var item in calificacionesFiltradas)
+                @foreach (var nota in notasFiltradas)
                 {
                     <tr>
-                        <td style="border-right: 2px solid #ddd;">@item.DNI</td>
-                        <td style="border-right: 2px solid #ddd;">@item.Nombre</td>
-                        <td style="border-right: 2px solid #ddd;">@item.Materia</td>
-                        <td style="border-right: 2px solid #ddd;">@item.Carrera</td>
-                        <td style="border-right: 2px solid #ddd;">@item.Division</td>
-                        <td style="border-right: 2px solid #ddd;">@item.CicloLectivo</td>
+                        <td style="border-right: 2px solid #ddd;">@GetNombreAlumno(nota.DivsionCiclosMateriaAlumnosIdDivCicMatAlum)</td>
+                        <td style="border-right: 2px solid #ddd;">@nota.Nota</td>
+                        <td style="border-right: 2px solid #ddd;">@nota.Fecha.ToShortDateString()</td>
+                        <td style="border-right: 2px solid #ddd;">@GetNombreEvaluacion(nota.TipoEvaluacionIdTipoEva)</td>
                         <td>
                             <div class="action-buttons m-1">
-                                <a class="btn btn-primary" href="Notas"><i class="oi oi-book" aria-hidden="true"></i></a>
+                                <button class="btn btn-primary me-2" @onclick="() => OpenModalToEdit(nota, nota.IdNotas)"><i class="oi oi-pencil"></i></button>
+                                <button class="btn btn-danger" @onclick="() => OpenConfirmDeleteModal(nota.IdNotas)"><i class="oi oi-trash"></i></button>
                             </div>
                         </td>
                     </tr>
@@ -90,103 +53,387 @@
     </div>
 </div>
 
+<!-- Modal para agregar y editar notas -->
+@if (isModalOpen)
+{
+    <div class="modal fade show d-block" style="background-color: rgba(0, 0, 0, 0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@(isEdit ? "Editar Nota" : "Agregar Nota")</h5>
+                    <button type="button" class="btn-close" @onclick="CloseModal"></button>
+                </div>
+                <div class="modal-body">
+                    <EditForm Model="@currentNota" OnValidSubmit="@(isEdit ? EditNota : AddNota)">
+                        <DataAnnotationsValidator />
+
+                      @*   <div class="mb-3">
+                            <label class="form-label">Materia</label>
+                            <select class="form-control" @bind="selectedMateriaId" @oninput="FiltrarAlumnosPorMateria">
+                                <option value="">Seleccione una materia</option>
+                                @foreach (var materia in materias)
+                                {
+                                    <option value="@materia.IdMateria">@materia.Nombre</option>
+                                }
+                            </select>
+                        </div> *@
+
+                        <div class="mb-3">
+                            <label class="form-label">Alumno</label>
+                            <select class="form-control" @bind="currentNota.Materias">
+                                <option value="">Seleccione un alumno</option>
+                                @foreach (var alumno in DivsionCiclosMateriaAlumnos)
+                                {
+                                    <option value="@alumno.IdDivCicMatAlum">@GetNombreAlumno(alumno.IdDivCicMatAlum)</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Nota</label>
+                            <InputNumber class="form-control" @bind-Value="currentNota.Nota" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Fecha</label>
+                            <InputDate class="form-control" @bind-Value="currentNota.Fecha" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Tipo de Evaluación</label>
+                            <select class="form-control" @bind="currentNota.TipoEvaluacionIdTipoEva">
+                                <option value="">Seleccione un tipo de evaluación</option>
+                                @foreach (var evaluacion in tipoEvaluaciones)
+                                {
+                                    <option value="@evaluacion.IdTipoEva">@evaluacion.NombreEva</option>
+                                }
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">@((isEdit) ? "Guardar Cambios" : "Agregar Nota")</button>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Modal para confirmar eliminación -->
+@if (isConfirmDeleteModalOpen)
+{
+    <div class="modal fade show d-block" style="background-color: rgba(0, 0, 0, 0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmar Eliminación</h5>
+                    <button type="button" class="btn-close" @onclick="CloseConfirmDeleteModal"></button>
+                </div>
+                <div class="modal-body">
+                    ¿Estás seguro de que deseas eliminar esta nota?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseConfirmDeleteModal">Cancelar</button>
+                    <button type="button" class="btn btn-danger" @onclick="DeleteNota">Eliminar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
 @code {
-    private List<string> carreras = new List<string> { "Ingeniería Informática", "Medicina", "Derecho", "Arquitectura" };
-    private string selectedCarrera = string.Empty;
+    private List<Notas> notas = new();
+    private List<Alumnos> alumnos = new();
+    private List<Alumnos> alumnosFiltrados = new();
+    private List<Materias> materias = new();
+    private List<TipoEvaluacion> tipoEvaluaciones = new();
+    private List<DivsionCiclosMateriaAlumnos> DivsionCiclosMateriaAlumnos = new();
+    private bool isModalOpen = false;
+    private bool isEdit = false;
+    private DTONotas currentNota = new();
+    private bool isConfirmDeleteModalOpen = false;
+    private int idToDelete;
+    private Context _context;
+    // Filtros
+    private string filtroDNI = string.Empty;
+    private int _filtroMateriaId;
+    private int notaFiltro = 0; // Filtro para nota
+    private List<Notas> notasFiltradas = new();
+    private int selectedMateriaId;
 
-    private List<string> divisiones = new List<string> { "A", "B", "C", "D" };
-    private string selectedDivision = string.Empty;
-    private List<string> filteredDivisiones = new List<string>();
-
-    private List<string> materias = new List<string> { "Matemáticas", "Física", "Química", "Historia" };
-    private string selectedMateria = string.Empty;
-    private List<string> filteredMaterias = new List<string>();
-
-    private List<int> ciclosLectivos = new List<int> { 2024, 2025, 2026 };
-    private int selectedCicloLectivo = 0;
-
-    private List<Calificaciones> calificaciones = new List<Calificaciones>
+    private int FiltroMateriaId
     {
-        new Calificaciones { DNI = "12345678", Nombre = "Juan Gonzalez", Materia = "Matemáticas", Calificacion = 9, Carrera = "Ingeniería Informática", Division = "A", CicloLectivo = 2024 },
-        new Calificaciones { DNI = "87654321", Nombre = "Ana López", Materia = "Física", Calificacion = 8, Carrera = "Medicina", Division = "B", CicloLectivo = 2025 },
-        new Calificaciones { DNI = "11223344", Nombre = "Luis García", Materia = "Química", Calificacion = 7, Carrera = "Derecho", Division = "C", CicloLectivo = 2026 },
-        new Calificaciones { DNI = "55667788", Nombre = "María Rodríguez", Materia = "Historia", Calificacion = 10, Carrera = "Arquitectura", Division = "D", CicloLectivo = 2024 }
-    };
+        get => _filtroMateriaId;
+        set
+        {
+            if (_filtroMateriaId != value)
+            {
+                _filtroMateriaId = value;
+                FiltrarAlumnos();
+            }
+        }
+    }
 
-    // Propiedad calculada para obtener las calificaciones filtradas
-    private List<Calificaciones> calificacionesFiltradas => calificaciones
-        .Where(c => (string.IsNullOrEmpty(selectedCarrera) || c.Carrera == selectedCarrera) &&
-                    (string.IsNullOrEmpty(selectedDivision) || c.Division == selectedDivision) &&
-                    (string.IsNullOrEmpty(selectedMateria) || c.Materia == selectedMateria) &&
-                    (selectedCicloLectivo == 0 || c.CicloLectivo == selectedCicloLectivo))
-        .ToList();
-
-    // Método para actualizar la lista de divisiones según la carrera seleccionada
-    private void ActualizarDivisiones(ChangeEventArgs e)
+    protected override async Task OnInitializedAsync()
     {
-        selectedCarrera = e.Value.ToString();
-        filteredDivisiones = calificaciones
-            .Where(calificacion => string.IsNullOrEmpty(selectedCarrera) || calificacion.Carrera == selectedCarrera)
-            .Select(calificacion => calificacion.Division)
-            .Distinct()
+        await LoadNotas();
+        await LoadAlumnos();
+        await LoadMaterias();
+        await LoadTipoEvaluaciones();
+        await LoadDivisionCicloMateriaAlumno();
+        FiltrarAlumnos();
+    }
+
+    private async Task LoadNotas()
+    {
+        try
+        {
+            notas = await Http.GetFromJsonAsync<List<Notas>>("api/Notas");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading notas: {ex.Message}");
+        }
+    }
+    private async Task LoadDivisionCicloMateriaAlumno()
+    {
+        try
+        {
+            DivsionCiclosMateriaAlumnos = await Http.GetFromJsonAsync<List<DivsionCiclosMateriaAlumnos>>("api/DivisionCicloMateriaAlumnos");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading notas: {ex.Message}");
+        }
+    }
+    private async Task LoadAlumnos()
+    {
+        try
+        {
+            alumnos = await Http.GetFromJsonAsync<List<Alumnos>>("api/Alumnos");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading alumnos: {ex.Message}");
+        }
+    }
+
+    private async Task LoadMaterias()
+    {
+        try
+        {
+            materias = await Http.GetFromJsonAsync<List<Materias>>("api/Materias");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading materias: {ex.Message}");
+        }
+    }
+
+    private async Task LoadTipoEvaluaciones()
+    {
+        try
+        {
+            tipoEvaluaciones = await Http.GetFromJsonAsync<List<TipoEvaluacion>>("api/TipoNota");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading tipoEvaluaciones: {ex.Message}");
+        }
+    }
+
+    private void FiltrarAlumnos()
+    {
+        alumnosFiltrados = alumnos
+            .Where(a =>
+                (string.IsNullOrWhiteSpace(filtroDNI) || a.DNI_Alum.ToString().Contains(filtroDNI)) &&
+                (_filtroMateriaId == 0 || a.DivsionCiclosMateriaAlumnos.Any(d => d.AlumnosIdAlumno == _filtroMateriaId)))
             .ToList();
 
-        // Reset selected Division if it's not in the filtered list
-        if (!filteredDivisiones.Contains(selectedDivision))
-        {
-            selectedDivision = string.Empty;
-        }
-
-        // También actualizamos las materias en caso de que la división esté seleccionada
-        ActualizarMaterias(null);
+        FiltrarNotas();
     }
 
-    // Método para actualizar la lista de materias según la división seleccionada
-    private void ActualizarMaterias(ChangeEventArgs e)
+    private async Task FiltrarAlumnosPorMateria(ChangeEventArgs e)
     {
-        if (e != null)
+        if (!int.TryParse(e.Value?.ToString(), out int materiaId))
         {
-            selectedDivision = e.Value.ToString();
+            selectedMateriaId = 0;
+            alumnosFiltrados.Clear();
+            return;
         }
 
-        filteredMaterias = calificaciones
-            .Where(calificacion => (string.IsNullOrEmpty(selectedCarrera) || calificacion.Carrera == selectedCarrera) &&
-                                   (string.IsNullOrEmpty(selectedDivision) || calificacion.Division == selectedDivision))
-            .Select(calificacion => calificacion.Materia)
-            .Distinct()
+        selectedMateriaId = materiaId;
+
+        alumnosFiltrados = await ObtenerAlumnosPorMateria(selectedMateriaId);
+        if (alumnosFiltrados == null || !alumnosFiltrados.Any())
+        {
+            alumnosFiltrados.Clear();
+            return;
+        }
+
+        FiltrarNotas();
+    }
+
+    private async Task<List<Alumnos>> ObtenerAlumnosPorMateria(int materiaId)
+    {
+        // Aquí deberías implementar la lógica para obtener los alumnos relacionados con la materia específica.
+        // Esto dependerá de cómo tengas estructurada la relación en tu base de datos.
+        return await Task.FromResult(alumnos.Where(a => a.DivsionCiclosMateriaAlumnos.Any(d => d.DivisionCicloMateriaIdDivCicMat == materiaId)).ToList());
+    }
+    private void FiltrarNotas()
+    {
+        if (notas == null || !notas.Any())
+        {
+            notasFiltradas.Clear();
+            return;
+        }
+
+        notasFiltradas = notas
+            .Where(n =>
+            {
+                var nombreAlumno = GetNombreAlumno(n.DivsionCiclosMateriaAlumnosIdDivCicMatAlum);
+
+                bool filtroDNIValido = string.IsNullOrWhiteSpace(filtroDNI) || nombreAlumno.Contains(filtroDNI);
+                bool filtroMateriaValido = selectedMateriaId == 0 || n.DivsionCiclosMateriaAlumnosIdDivCicMatAlum == selectedMateriaId;
+
+                return filtroDNIValido && filtroMateriaValido;
+            })
             .ToList();
 
-        // Reset selected Materia if it's not in the filtered list
-        if (!filteredMaterias.Contains(selectedMateria))
+        if (!notasFiltradas.Any())
         {
-            selectedMateria = string.Empty;
+            notasFiltradas.Clear();
         }
     }
 
-    // Método para filtrar por materia
-    private void FiltrarPorMateria(ChangeEventArgs e)
+
+    private void OpenModalToAdd()
     {
-        selectedMateria = e.Value.ToString();
+        currentNota = new DTONotas();
+        isEdit = false;
+        isModalOpen = true;
     }
 
-    // Método para filtrar por ciclo lectivo
-    private void FiltrarPorCicloLectivo(ChangeEventArgs e)
+    private void OpenModalToEdit(Notas nota, int id)
     {
-        selectedCicloLectivo = int.Parse(e.Value.ToString());
+        currentNota = new DTONotas
+        {
+            Materias = nota.DivsionCiclosMateriaAlumnosIdDivCicMatAlum,
+            Nota = nota.Nota,
+            Fecha = nota.Fecha,
+            TipoEvaluacionIdTipoEva = nota.TipoEvaluacionIdTipoEva
+
+
+
+        };
+        idToDelete = id;
+        isEdit = true;
+        isModalOpen = true;
     }
 
-    // Clase para representar una calificación
-    public class Calificaciones
+    private void CloseModal()
     {
-        public string DNI { get; set; }
-        public string Nombre { get; set; }
-        public string Materia { get; set; }
-        public int Calificacion { get; set; }
-        public string Carrera { get; set; }
-        public string Division { get; set; }
-        public int CicloLectivo { get; set; }
+        isModalOpen = false;
+
+    }
+
+    private void OpenConfirmDeleteModal(int id)
+    {
+        idToDelete = id;
+        isConfirmDeleteModalOpen = true;
+    }
+
+    private void CloseConfirmDeleteModal()
+    {
+        isConfirmDeleteModalOpen = false;
+    }
+
+    private async Task AddNota()
+    {
+        try
+        {
+            try
+            {
+                await Http.PostAsJsonAsync("api/Notas", currentNota);
+                await LoadNotas();
+                await LoadAlumnos();
+                await LoadMaterias();
+                await LoadTipoEvaluaciones();
+                await LoadDivisionCicloMateriaAlumno();
+                FiltrarAlumnos();
+                CloseModal();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error adding nota: {ex.Message}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error adding nota: {ex.Message}");
+        }
+
+    }
+
+    private async Task EditNota()
+    {
+        try
+        {
+            await Http.PutAsJsonAsync($"api/Notas/{idToDelete}", currentNota);
+            await LoadNotas();
+            await LoadAlumnos();
+            await LoadMaterias();
+            await LoadTipoEvaluaciones();
+            await LoadDivisionCicloMateriaAlumno();
+            FiltrarAlumnos();
+            CloseModal();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error editing nota: {ex.Message}");
+        }
+    }
+
+    private async Task DeleteNota()
+    {
+        try
+        {
+            await Http.DeleteAsync($"api/Notas/{idToDelete}");
+            await LoadNotas();
+            await LoadAlumnos();
+            await LoadMaterias();
+            await LoadTipoEvaluaciones();
+            await LoadDivisionCicloMateriaAlumno();
+            FiltrarAlumnos();
+            CloseConfirmDeleteModal();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error deleting nota: {ex.Message}");
+        }
+    }
+
+    private string GetNombreAlumno(int idDivCicMatAlum)
+    {
+        var divCicloMatAlumno = DivsionCiclosMateriaAlumnos.FirstOrDefault(d => d.IdDivCicMatAlum == idDivCicMatAlum);
+        if (divCicloMatAlumno == null)
+            return "N/A";
+
+        var alumno = alumnos.FirstOrDefault(a => a.IdAlumno == divCicloMatAlumno.AlumnosIdAlumno);
+        if (alumno == null)
+            return "N/A";
+
+        var nombre = string.IsNullOrWhiteSpace(alumno.Nombre) ? "Nombre no disponible" : alumno.Nombre;
+        var apellido = string.IsNullOrWhiteSpace(alumno.Apellido) ? "Apellido no disponible" : alumno.Apellido;
+
+        return $"{nombre} {apellido}";
+    }
+
+
+
+    private string GetNombreEvaluacion(int evaluacionId)
+    {
+        var evaluacion = tipoEvaluaciones.FirstOrDefault(e => e.IdTipoEva == evaluacionId);
+        return evaluacion != null ? evaluacion.NombreEva : "Desconocido";
     }
 }
+
 
 
 

@@ -1,0 +1,182 @@
+﻿@page "/TipoEvaluaciones"
+@using Microsoft.EntityFrameworkCore
+@inject HttpClient Http
+
+<PageTitle>Tipo de Evaluaciones</PageTitle>
+
+<button class="btn btn-success" @onclick="OpenModalToAdd">Agregar Tipo de Evaluación</button>
+
+<!-- Tabla de Tipo de Evaluaciones -->
+<div class="table-container" style="overflow: hidden; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); margin-bottom: 20px;">
+    <div style="border-top-left-radius: 12px; border-top-right-radius: 12px; background-color: #f2f2f2; padding: 10px;">
+        <table class="table" style="border-collapse: collapse; width: 100%; border: 2px solid #E6E6FA;">
+            <thead>
+                <tr style="border-bottom: 2px solid #ddd;">
+                    <th style="border-right: 2px solid #ddd;">ID</th>
+                    <th style="border-right: 2px solid #ddd;">Nombre</th>
+                    <th style="border-right: 2px solid #ddd;">Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var tipoEvaluacion in tipoEvaluaciones)
+                {
+                    <tr>
+                        <td style="border-right: 2px solid #ddd;">@tipoEvaluacion.IdTipoEva</td>
+                        <td style="border-right: 2px solid #ddd;">@tipoEvaluacion.NombreEva</td>
+                        <td>
+                            <div class="action-buttons m-1">
+                                <button class="btn btn-primary me-2" @onclick="() => OpenModalToEdit(tipoEvaluacion)"><i class="oi oi-pencil"></i></button>
+                                <button class="btn btn-danger" @onclick="() => OpenConfirmDeleteModal(tipoEvaluacion.IdTipoEva)"><i class="oi oi-trash"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal para agregar y editar tipos de evaluación -->
+@if (isModalOpen)
+{
+    <div class="modal fade show d-block" style="background-color: rgba(0, 0, 0, 0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@(isEdit ? "Editar Tipo de Evaluación" : "Agregar Tipo de Evaluación")</h5>
+                    <button type="button" class="btn-close" @onclick="CloseModal"></button>
+                </div>
+                <div class="modal-body">
+                    <EditForm Model="@currentTipoEvaluacion" OnValidSubmit="@(isEdit ? EditTipoEvaluacion : AddTipoEvaluacion)">
+                        <DataAnnotationsValidator />
+                        <div class="mb-3">
+                            <label class="form-label">Nombre</label>
+                            <InputText class="form-control" @bind-Value="currentTipoEvaluacion.NombreEva" />
+                        </div>
+                        <button type="submit" class="btn btn-primary">@((isEdit) ? "Guardar Cambios" : "Agregar Tipo de Evaluación")</button>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Modal para confirmar eliminación -->
+@if (isConfirmDeleteModalOpen)
+{
+    <div class="modal fade show d-block" style="background-color: rgba(0, 0, 0, 0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmar Eliminación</h5>
+                    <button type="button" class="btn-close" @onclick="CloseConfirmDeleteModal"></button>
+                </div>
+                <div class="modal-body">
+                    ¿Estás seguro de que deseas eliminar este tipo de evaluación?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseConfirmDeleteModal">Cancelar</button>
+                    <button type="button" class="btn btn-danger" @onclick="DeleteTipoEvaluacion">Eliminar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<TipoEvaluacionDTO> tipoEvaluaciones = new();
+    private bool isModalOpen = false;
+    private bool isEdit = false;
+    private TipoEvaluacionDTO currentTipoEvaluacion = new();
+    private bool isConfirmDeleteModalOpen = false;
+    private int idToDelete;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadTipoEvaluaciones();
+    }
+
+    private async Task LoadTipoEvaluaciones()
+    {
+        try
+        {
+            tipoEvaluaciones = await Http.GetFromJsonAsync<List<TipoEvaluacionDTO>>("api/TipoNota");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading tipo de evaluaciones: {ex.Message}");
+        }
+    }
+
+    private void OpenModalToAdd()
+    {
+        isModalOpen = true;
+        isEdit = false;
+        currentTipoEvaluacion = new TipoEvaluacionDTO();
+    }
+
+    private void OpenModalToEdit(TipoEvaluacionDTO tipoEvaluacion)
+    {
+        isModalOpen = true;
+        isEdit = true;
+        currentTipoEvaluacion = tipoEvaluacion;
+    }
+
+    private void CloseModal()
+    {
+        isModalOpen = false;
+    }
+
+    private void OpenConfirmDeleteModal(int id)
+    {
+        isConfirmDeleteModalOpen = true;
+        idToDelete = id;
+    }
+
+    private void CloseConfirmDeleteModal()
+    {
+        isConfirmDeleteModalOpen = false;
+    }
+
+    private async Task AddTipoEvaluacion()
+    {
+        try
+        {
+            await Http.PostAsJsonAsync("api/TipoNota", currentTipoEvaluacion);
+            await LoadTipoEvaluaciones();
+            CloseModal();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error adding tipo de evaluación: {ex.Message}");
+        }
+    }
+
+    private async Task EditTipoEvaluacion()
+    {
+        try
+        {
+            await Http.PutAsJsonAsync($"api/TipoNota/{currentTipoEvaluacion.IdTipoEva}", currentTipoEvaluacion);
+            await LoadTipoEvaluaciones();
+            CloseModal();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error editing tipo de evaluación: {ex.Message}");
+        }
+    }
+
+    private async Task DeleteTipoEvaluacion()
+    {
+        try
+        {
+            await Http.DeleteAsync($"api/TipoNota/{idToDelete}");
+            await LoadTipoEvaluaciones();
+            CloseConfirmDeleteModal();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error deleting tipo de evaluación: {ex.Message}");
+        }
+    }
+}

@@ -27,6 +27,7 @@ namespace INSTITUTO.Bdat
 
         }
 
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
 
