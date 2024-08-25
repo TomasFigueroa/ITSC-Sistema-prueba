@@ -1,4 +1,5 @@
 using INSTITUTO.Bdat;
+using INTITUTO1.Server.Servicios;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
@@ -19,6 +20,9 @@ builder.Services.AddCors(options =>
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 builder.Services.AddDbContext<Context>(opciones => opciones.UseSqlServer("name=Conn"));
+
+//Subir Excel (dudo q sirva pero por las dudas xd)
+builder.Services.AddScoped<ExcelService>();
 
 
 builder.Services.AddSwaggerGen(c =>
