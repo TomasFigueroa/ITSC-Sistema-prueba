@@ -2,12 +2,284 @@
 @inject HttpClient Http
 @using Microsoft.EntityFrameworkCore
 
+<h4 class="page-title">Seleccionar Alumnos</h4>
 
+@if (mostrarMensajeExito)
+{
+    <div class="alert alert-success" role="alert">
+        ¡Alumnos cargados correctamente!
+    </div>
+}
 
-<h3>Cargar Archivo Excel</h3>
+<div class="file-upload-container">
+    <InputFile OnChange="HandleSelected" class="custom-input-file" />
+    <button @onclick="CargarAlumnos" class="btn btn-primary custom-button">Cargar</button>
+</div>
 
+@if (alumnos.Count > 0)
+{
+    <h3 style="text-align:center">Alumnos Cargados</h3>
+    <EditForm Model="@selectedAlumnos" OnValidSubmit="EnviarAlumnosSeleccionados">
+        <div class="card-container">
+            @foreach (var alumno in alumnos)
+            {
+                <div class="card">
+                    <div class="card-header">
+                        @alumno.Nombre @alumno.Apellido
+                    </div>
+                    <div class="card-content">
+                        <p><strong>DNI:</strong> @alumno.DNI_Alum</p>
+                        <p><strong>Cuil:</strong> @alumno.Cuil</p>
+                        <p><strong>Fecha Nac:</strong> @alumno.Fecha_Nac.ToString("yyyy-MM-dd")</p>
+                        <p><strong>Tbase:</strong> @alumno.Tbase</p>
+                        <p><strong>Nacionalidad:</strong> @alumno.Nacionalidad</p>
+                        <p><strong>Estado:</strong> @(alumno.Estado ? "Activo" : "Inactivo")</p>
+                    </div>
+                    <div class="card-actions">
+                        <InputCheckbox @bind-Value="alumno.IsSelected" /> Seleccionar
+                        <button type="button" class="delete-button" @onclick="() => EliminarAlumno(alumno)">Eliminar</button>
+                    </div>
+                </div>
+            }
+        </div>
+        <button type="submit" class="btn-submit">Enviar Alumnos Seleccionados</button>
+    </EditForm>
+}
+
+<style>
+    .page-title {
+        text-align: center;
+        color: #4B0082;
+        margin-bottom: 20px;
+    }
+
+    .file-upload-container {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 20px;
+    }
+
+    .custom-input-file {
+        margin-right: 10px;
+        padding: 5px;
+        font-size: 1em;
+        color: #4B0082;
+        border: 2px solid #E6E6FA;
+        border-radius: 5px;
+        background-color: #f2f2f2;
+        cursor: pointer;
+        transition: border-color 0.3s ease;
+    }
+
+        .custom-input-file:hover {
+            border-color: #4B0082;
+        }
+
+    .custom-button {
+        background-color: #4B0082;
+        color: white;
+        border: none;
+        padding: 5px 15px;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.2s ease-in-out;
+    }
+
+        .custom-button:hover {
+            background-color: #36006a;
+        }
+
+    .card-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        padding: 20px;
+        justify-content: center;
+    }
+
+    .card {
+        overflow: hidden;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+        border-radius: 12px;
+        background-color: #f2f2f2;
+        padding: 10px;
+        width: 280px;
+        border: 2px solid #E6E6FA;
+    }
+
+    .card-header {
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+        background-color: #E6E6FA;
+        padding: 10px;
+        font-weight: bold;
+        font-size: 1.2em;
+        color: #4B0082;
+        text-align: center;
+    }
+
+    .card-content {
+        padding: 10px;
+        font-size: 1em;
+        color: #333;
+    }
+
+        .card-content p {
+            margin: 5px 0;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
+        }
+
+    .card-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 10px;
+    }
+
+    .delete-button {
+        background-color: #FF6347;
+        border: none;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.2s ease-in-out;
+    }
+
+        .delete-button:hover {
+            background-color: #FF4500;
+        }
+
+    .btn-submit {
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.2s ease-in-out;
+        margin-top: 20px;
+    }
+
+        .btn-submit:hover {
+            background-color: #45a049;
+        }
+
+    .alert {
+        margin: 20px;
+        padding: 15px;
+        border-radius: 5px;
+        color: white;
+        background-color: #4CAF50; /* Green for success */
+        text-align: center;
+    }
+</style>
 
 @code {
-    
+    private List<AlumnoViewModel> alumnos = new();
+    private List<DTOAlumnos> selectedAlumnos = new();
+    private IBrowserFile selectedFile;
+    private bool mostrarMensajeExito = false;
+
+    private async Task HandleSelected(InputFileChangeEventArgs e)
+    {
+        selectedFile = e.File;
+        mostrarMensajeExito = false;
+    }
+
+    private async Task CargarAlumnos()
+    {
+        if (selectedFile != null)
+        {
+            var content = new MultipartFormDataContent();
+            content.Add(new StreamContent(selectedFile.OpenReadStream()), "file", selectedFile.Name);
+
+            var response = await Http.PostAsync("api/CargarExcel/Cargar", content);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var result = await response.Content.ReadFromJsonAsync<List<DTOAlumnos>>();
+                alumnos = result.Select(a => new AlumnoViewModel(a)).ToList();
+                mostrarMensajeExito = false;
+                // Mostrar el mensaje de éxito
+            }
+            else
+            {
+                // Manejar el error
+                Console.WriteLine("Error al cargar el archivo.");
+                mostrarMensajeExito = false; // Ocultar el mensaje de éxito si ocurre un error
+            }
+        }
+    }
+
+    private async Task EnviarAlumnosSeleccionados()
+    {
+        selectedAlumnos = alumnos.Where(a => a.IsSelected).Select(a => a.ToAlumnoDto()).ToList();
+
+        if (selectedAlumnos.Any())
+        {
+            var response = await Http.PostAsJsonAsync("api/Alumnos/crear-alumnos", selectedAlumnos);
+
+            if (response.IsSuccessStatusCode)
+            {
+                // Manejar el éxito
+                Console.WriteLine("Alumnos enviados con éxito.");
+                mostrarMensajeExito = true;
+
+            }
+            else
+            {
+                // Manejar el error
+                Console.WriteLine("Error al enviar los alumnos.");
+            }
+        }
+    }
+
+    private void EliminarAlumno(AlumnoViewModel alumno)
+    {
+        alumnos.Remove(alumno);
+    }
+
+    private class AlumnoViewModel
+    {
+        public bool IsSelected { get; set; }
+        public string Nombre { get; set; }
+        public string Apellido { get; set; }
+        public int DNI_Alum { get; set; }
+        public int Cuil { get; set; }
+        public DateTime Fecha_Nac { get; set; }
+        public string Tbase { get; set; }
+        public string Nacionalidad { get; set; }
+        public bool Estado { get; set; }
+
+        public AlumnoViewModel(DTOAlumnos dto)
+        {
+            Nombre = dto.Nombre;
+            Apellido = dto.Apellido;
+            DNI_Alum = dto.DNI_Alum;
+            Cuil = dto.Cuil;
+            Fecha_Nac = dto.Fecha_Nac;
+            Tbase = dto.Tbase;
+            Nacionalidad = dto.Nacionalidad;
+            Estado = dto.Estado;
+        }
+
+        public DTOAlumnos ToAlumnoDto()
+        {
+            return new DTOAlumnos
+                {
+                    Nombre = Nombre,
+                    Apellido = Apellido,
+                    DNI_Alum = DNI_Alum,
+                    Cuil = Cuil,
+                    Fecha_Nac = Fecha_Nac,
+                    Tbase = Tbase,
+                    Nacionalidad = Nacionalidad,
+                    Estado = Estado
+                };
+        }
+    }
 }
 

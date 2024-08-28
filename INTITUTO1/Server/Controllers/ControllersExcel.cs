@@ -23,12 +23,21 @@ namespace INTITUTO1.Server.Controllers
             if (file == null || file.Length == 0)
                 return BadRequest("Debe seleccionar un archivo.");
 
-            var alumnos = await _excelService.CargarDatosDesdeExcel(file.OpenReadStream());
+            try
+            {
+                var alumnos = await _excelService.CargarDatosDesdeExcel(file.OpenReadStream());
 
-            if (alumnos == null || alumnos.Count == 0)
-                return NotFound("No se encontraron datos en el archivo.");
+                if (alumnos == null || alumnos.Count == 0)
+                    return NotFound("No se encontraron datos en el archivo.");
 
-            return Ok(alumnos);
+                return Ok(alumnos);
+            }
+            catch (Exception ex)
+            {
+                // Log the error
+                Console.WriteLine($"Error al procesar el archivo: {ex.Message}");
+                return StatusCode(500, "Ocurrió un error al procesar el archivo.");
+            }
         }
     }
 }
