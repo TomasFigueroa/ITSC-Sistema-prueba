@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.IO;
 
 namespace INTITUTO1.Server.Servicios
-
 {
     public class ExcelService
     {
@@ -99,3 +98,4 @@ namespace INTITUTO1.Server.Servicios
         public bool Estado { get; set; }
     }
 }
+

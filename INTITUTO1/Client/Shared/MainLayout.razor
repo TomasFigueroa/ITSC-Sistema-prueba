@@ -1,17 +1,33 @@
 ﻿@inherits LayoutComponentBase
+@inject NavigationManager Navigation
 
 <div class="page">
     <div style="background-color: #212529;">
-        <NavMenu />
+       @*  condicional *@
+        @if (!IsLoginPage)
+        {
+            <NavMenu />
+        }
     </div>
 
     <main>
         <div class="top-row px-4" style="background-color: #212529;">
         </div>
 
-
         <article class="content px-4">
             @Body
         </article>
     </main>
 </div>
+
+@code {
+    private bool IsLoginPage;
+
+    protected override void OnParametersSet()
+    {
+        //verifica si estamos en la página de login y actualiza IsLoginPage
+        IsLoginPage = Navigation.Uri.EndsWith("/");
+    }
+}
+
+

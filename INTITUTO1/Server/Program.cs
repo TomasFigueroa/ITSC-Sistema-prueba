@@ -1,9 +1,11 @@
 using INSTITUTO.Bdat;
 using INTITUTO1.Server.Servicios;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Components.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,6 +22,9 @@ builder.Services.AddCors(options =>
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 builder.Services.AddDbContext<Context>(opciones => opciones.UseSqlServer("name=Conn"));
+
+//autenticacion
+builder.Services.AddScoped<AutenticacionService>();
 
 //Subir Excel (dudo q sirva pero por las dudas xd)
 builder.Services.AddScoped<ExcelService>();
@@ -49,6 +54,8 @@ app.UseHttpsRedirection();
 
 app.UseBlazorFrameworkFiles();
 app.UseStaticFiles();
+
+
 
 app.UseRouting();
 
