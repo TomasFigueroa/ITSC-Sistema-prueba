@@ -1,5 +1,8 @@
 ﻿@inherits LayoutComponentBase
-@inject NavigationManager Navigation
+@using INTITUTO1.Client.Auth;
+@using Microsoft.AspNetCore.Components.Authorization;
+@inject AuthenticationStateProvider autenticacionProvider
+@inject NavigationManager navManager
 
 <div class="page">
     <div style="background-color: #212529;">
@@ -12,6 +15,8 @@
 
     <main>
         <div class="top-row px-4" style="background-color: #212529;">
+            
+            <a @onclick="CerrarSesion" href="javascript:void(0)">Salir</a>
         </div>
 
         <article class="content px-4">
@@ -25,8 +30,13 @@
 
     protected override void OnParametersSet()
     {
-        //verifica si estamos en la página de login y actualiza IsLoginPage
-        IsLoginPage = Navigation.Uri.EndsWith("/");
+       
+    }
+    private async Task CerrarSesion()
+    {
+        var autenticacionExt = (AutenticacionExtension)autenticacionProvider;
+        await autenticacionExt.ActualizarEstadoAutenticacion(null);
+        navManager.NavigateTo("/", true);
     }
 }
 

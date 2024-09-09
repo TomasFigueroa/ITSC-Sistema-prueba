@@ -6,6 +6,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+
+
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,28 +19,35 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowLocalhost", builder =>
     {
-        builder.WithOrigins("https://localhost:7265") // localhost permitido
+        builder.WithOrigins("https://localhost:7265")
                .AllowAnyHeader()
                .AllowAnyMethod();
     });
 });
+
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 builder.Services.AddDbContext<Context>(opciones => opciones.UseSqlServer("name=Conn"));
 
-//autenticacion
-builder.Services.AddScoped<AutenticacionService>();
+// Registrar HttpClient
+builder.Services.AddHttpClient();
 
-//Subir Excel (dudo q sirva pero por las dudas xd)
+
+
+// Subir Excel
 builder.Services.AddScoped<ExcelService>();
 
-
+// Swagger
 builder.Services.AddSwaggerGen(c =>
-c.SwaggerDoc("v1", new OpenApiInfo { Title = "ITSC", Version = "v1" })
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "ITSC", Version = "v1" })
 );
+
 builder.Services.AddControllersWithViews().AddJsonOptions(x =>
-x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
+    x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles
+);
+
 var app = builder.Build();
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -46,22 +58,18 @@ if (app.Environment.IsDevelopment())
 else
 {
     app.UseExceptionHandler("/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
 app.UseHttpsRedirection();
-
 app.UseBlazorFrameworkFiles();
 app.UseStaticFiles();
 
-
-
 app.UseRouting();
-
 
 app.MapRazorPages();
 app.MapControllers();
 app.MapFallbackToFile("index.html");
 
 app.Run();
+

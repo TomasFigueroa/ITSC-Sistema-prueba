@@ -1,4 +1,6 @@
 ﻿using INSTITUTO.Bdat.Data.Entity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
@@ -42,7 +44,7 @@ namespace INSTITUTO.Bdat
             {
                 o.HasKey(b => b.IdDivision);
                 o.Property(b => b.NombreDiv);
-                
+
 
             });
             modelBuilder.Entity<Materias>(o =>
@@ -119,8 +121,10 @@ namespace INSTITUTO.Bdat
                 o.Property(b => b.NombreEva);
 
             });
-           
+
         }
     }
-
+       
 }
+
+

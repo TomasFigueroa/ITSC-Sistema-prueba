@@ -1,4 +1,8 @@
 ﻿@page "/Alumno"
+@attribute [Authorize]
+
+
+@inject NavigationManager Navigation
 @using Microsoft.EntityFrameworkCore
 @inject HttpClient Http
 
@@ -137,6 +141,7 @@
 
     protected override async Task OnInitializedAsync()
     {
+
         await LoadAlumnos();
     }
 
