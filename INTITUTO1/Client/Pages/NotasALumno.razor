@@ -1,86 +1,98 @@
-﻿@page "/Calificaciones"
-@attribute [Authorize]
-@using INTITUTO1.Shared
+﻿@page "/cargar-notas"
 @inject HttpClient Http
+@inject NavigationManager Navigation
 
-<PageTitle>Alumnos</PageTitle>
+<h3>Gestión de Notas</h3>
 
-<th>ALUMNOS</th>
+<!-- Botón para abrir el modal -->
+<button class="btn btn-primary" @onclick="AbrirModal">Cargar Nota</button>
 
-<div class="table-container" style="overflow: hidden; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); margin-bottom: 20px;">
-    <div style="border-top-left-radius: 12px; border-top-right-radius: 12px; background-color: #f2f2f2; padding: 10px;">
-        <table class="table" style="border-collapse: collapse; width: 100%; border: 2px solid #ddd;">
-            <thead>
-                <tr style="border-bottom: 2px solid #ddd;">
-                    <th style="border-right: 2px solid #ddd;">CUIL</th>
-                    <th style="border-right: 2px solid #ddd;">Apellidos</th>
-                    <th style="border-right: 2px solid #ddd;">Nombres</th>
-                    <th style="border-right: 2px solid #ddd;">Correo</th>
-                    <th style="border-right: 2px solid #ddd;">Cohorte</th>
-                    <th style="border-right: 2px solid #ddd;">Estado</th>
-                    <th style="border-right: 2px solid #ddd;">Carrera</th>
-                 
-                  
-                    <th>Acción</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var item in items)
-                {
-                    <tr>
-                        <td style="border-right: 2px solid #ddd;">@item.CUIL</td>
-                        <td style="border-right: 2px solid #ddd;">@item.Apellidos</td>
-                        <td style="border-right: 2px solid #ddd;">@item.Nombres</td>
-                        <td style="border-right: 2px solid #ddd;">@item.Correo</td>
-                        <td style="border-right: 2px solid #ddd;">@item.Cohorte</td>
-                        <td style="border-right: 2px solid #ddd;">@item.Estado</td>
-                        <td style="border-right: 2px solid #ddd;">@item.Carrera</td>
-                      
-                        <td>
-                            <div class="action-buttons m-1">
+<!-- Modal -->
+<div class="modal fade" id="notaModal" tabindex="-1" aria-labelledby="notaModalLabel" aria-hidden="true" style="display:@(mostrarModal ? "block" : "none");">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="notaModalLabel">Cargar Nota</h5>
+                <button type="button" class="btn-close" @onclick="CerrarModal"></button>
+            </div>
+            <div class="modal-body">
+                <EditForm Model="@nota" OnValidSubmit="@GuardarNota">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary />
 
-                                <a class="btn btn-primary" href="Notas"><i class="oi oi-book" aria-hidden="true"></i></a>
-                            </div>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+                    <div class="form-group">
+                        <label for="alumno">Alumno</label>
+                        <select id="alumno" class="form-control" @bind="nota.DivsionCiclosMateriaAlumnosIdDivCicMatAlum">
+                            <option value="">Seleccione un alumno</option>
+                            @foreach (var alumno in alumnos)
+                            {
+                                <option value="@alumno.IdDivCicMatAlum">@alumno.Alumnos.Nombre</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="tipoEvaluacion">Tipo de Evaluación</label>
+                        <select id="tipoEvaluacion" class="form-control" @bind="nota.TipoEvaluacionIdTipoEva">
+                            <option value="">Seleccione una evaluación</option>
+                            @foreach (var tipoEva in tipoEvaluaciones)
+                            {
+                                <option value="@tipoEva.IdTipoEva">@tipoEva.NombreEva</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="nota">Nota</label>
+                        <input type="number" id="nota" class="form-control" @bind="nota.Nota" min="0" max="10" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="fecha">Fecha</label>
+                        <input type="date" id="fecha" class="form-control" @bind="nota.Fecha" />
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Guardar Nota</button>
+                </EditForm>
+            </div>
+        </div>
     </div>
 </div>
 
-
-
 @code {
-    List<Item> items = new List<Item>();
+    private Notas nota = new Notas();
+    private List<DivsionCiclosMateriaAlumnos> alumnos = new List<DivsionCiclosMateriaAlumnos>();
+    private List<TipoEvaluacion> tipoEvaluaciones = new List<TipoEvaluacion>();
+    private bool mostrarModal = false;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        // Aquí puedes inicializar tu lista de elementos (items)
-        items = new List<Item>
+        alumnos = await Http.GetFromJsonAsync<List<DivsionCiclosMateriaAlumnos>>("api/DivisionCicloMateriaAlumnos");
+        tipoEvaluaciones = await Http.GetFromJsonAsync<List<TipoEvaluacion>>("api/TipoNota");
+    }
+
+    private void AbrirModal()
+    {
+        mostrarModal = true;
+    }
+
+    private void CerrarModal()
+    {
+        mostrarModal = false;
+    }
+
+    private async Task GuardarNota()
+    {
+        var response = await Http.PostAsJsonAsync("api/Notas", nota);
+        if (response.IsSuccessStatusCode)
         {
-            new Item { DNI = "12345678", CUIL = "20-12345678-9", Apellidos = "Gonzalez", Nombres = "Juan", Correo = "juan.gonzalez@example.com", Cohorte = 2021, Estado = "Activo", Carrera = "Desarrollo de Software", Legajo = "DS-2021-01", Tbase = "Bachiller en Economia y Administracion-I.P.E.M. N° 123 'BLANCA ETCEMENDY'-Plan de estudio: Decreto 141/96 Resol min N° 344/11 y N°668/11" }
-            // Agrega más elementos si es necesario
-        };
-    }
-
-    void ToggleTbase(Item item)
-    {
-        item.ShowTbase = !item.ShowTbase;
-    }
-
-    public class Item
-    {
-        public string DNI { get; set; }
-        public string CUIL { get; set; }
-        public string Apellidos { get; set; }
-        public string Nombres { get; set; }
-        public string Correo { get; set; }
-        public int Cohorte { get; set; }
-        public string Estado { get; set; }
-        public string Carrera { get; set; }
-        public string Legajo { get; set; }
-        public string Tbase { get; set; }
-        public bool ShowTbase { get; set; }
+            CerrarModal();
+            Navigation.NavigateTo("/notas");
+        }
+        else
+        {
+            // Manejar errores
+        }
     }
 }
+

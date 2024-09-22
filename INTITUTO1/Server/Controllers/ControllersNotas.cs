@@ -26,19 +26,68 @@ namespace INTITUTO1.Server.Controllers
         {
             return await _context.notas.ToListAsync();
         }
-      
+
+        [HttpGet("GetNotas")]
+        public IActionResult GetNotas()
+        {
+            var query = from nota in _context.notas
+                        join divCicMatAlum in _context.DivsionCiclosMateriaAlumnos on nota.DivsionCiclosMateriaAlumnosIdDivCicMatAlum equals divCicMatAlum.IdDivCicMatAlum
+                        join alumno in _context.alumnos on divCicMatAlum.AlumnosIdAlumno equals alumno.IdAlumno
+                        join divCicMat in _context.DivisionCicloMaterias on divCicMatAlum.DivisionCicloMateriaIdDivCicMat equals divCicMat.IdDivCicMat
+                        join divisionCiclo in _context.DivisionCiclos on divCicMat.DivisionCicloIdDivCic equals divisionCiclo.IdDivCic
+                        join ciclo in _context.Ciclos on divisionCiclo.CicloIdCiclo equals ciclo.IdCiclo
+                        join materia in _context.Materia on divCicMat.MateriasIdMateria equals materia.IdMateria
+                        select new
+                        {
+                            AlumnoNombre = alumno.Nombre,
+                            Materia = materia.Nombre,
+                            Ciclo = ciclo.Fecha,
+                            Nota = nota.Nota
+                        };
+
+            return Ok(query.ToList());
+        }
+
         // GET: api/Notas/{id}
         [HttpGet("{id:int}")]
-        public async Task<ActionResult<Notas>> Get(int id)
+        public async Task<ActionResult> Get(int id)
         {
-            var nota = await _context.notas.FirstOrDefaultAsync(c => c.IdNotas == id);
+            var nota = await (from n in _context.notas
+                              join divCicMatAlum in _context.DivsionCiclosMateriaAlumnos
+                              on n.DivsionCiclosMateriaAlumnosIdDivCicMatAlum equals divCicMatAlum.IdDivCicMatAlum
+
+                              join alumno in _context.alumnos
+                              on divCicMatAlum.AlumnosIdAlumno equals alumno.IdAlumno
+
+                              join divCicMat in _context.DivisionCicloMaterias
+                              on divCicMatAlum.DivisionCicloMateriaIdDivCicMat equals divCicMat.IdDivCicMat
+
+                              join divisionCiclo in _context.DivisionCiclos
+                              on divCicMat.DivisionCicloIdDivCic equals divisionCiclo.IdDivCic
+
+                              join ciclo in _context.Ciclos
+                              on divisionCiclo.CicloIdCiclo equals ciclo.IdCiclo
+
+                              join materia in _context.Materia
+                              on divCicMat.MateriasIdMateria equals materia.IdMateria
+
+                              where n.IdNotas == id
+
+                              select new
+                              {
+                                  AlumnoNombre = alumno.Nombre,
+                                  AlumnoApellido = alumno.Apellido,
+                                  Materia = materia.Nombre,
+                                  Ciclo = ciclo.Fecha,
+                                  Nota = n.Nota
+                              }).FirstOrDefaultAsync();
 
             if (nota == null)
             {
                 return NotFound($"No se encontró la nota con id: {id}");
             }
 
-            return nota;
+            return Ok(nota);
         }
 
         // POST: api/Notas
