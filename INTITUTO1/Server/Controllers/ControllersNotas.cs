@@ -21,14 +21,14 @@ namespace INTITUTO1.Server.Controllers
         }
 
         // GET: api/Notas
-        [HttpGet]
+        [HttpGet("api/Notas")]
         public async Task<ActionResult<List<Notas>>> Get()
         {
             return await _context.notas.ToListAsync();
         }
 
         [HttpGet("GetNotas")]
-        public IActionResult GetNotas()
+        public async Task<IActionResult> GetNotas()
         {
             var query = from nota in _context.notas
                         join divCicMatAlum in _context.DivsionCiclosMateriaAlumnos on nota.DivsionCiclosMateriaAlumnosIdDivCicMatAlum equals divCicMatAlum.IdDivCicMatAlum
@@ -92,34 +92,41 @@ namespace INTITUTO1.Server.Controllers
 
         // POST: api/Notas
         [HttpPost]
-        public async Task<ActionResult<ResponseAPI<int>>> Post(DTONotas dtoNotas)
+        public async Task<IActionResult> Post(DTONotas dtoNotas)
         {
-            var responseApi = new ResponseAPI<int>();
+            // Valida que el Materias exista en la tabla DivisionCicloMaterias
+            var divisionCicloMateria = await _context.DivisionCicloMaterias
+                .FirstOrDefaultAsync(dcm => dcm.IdDivCicMat == dtoNotas.Materias);
 
+            // Si no existe, devolver un error 400 BadRequest
+            if (divisionCicloMateria == null)
+            {
+                return BadRequest("El ID de DivisionCicloMateria no es válido.");
+            }
+
+            // Crear una nueva nota utilizando el DTO
+            var nuevaNota = new Notas
+            {
+                Nota = dtoNotas.Nota,
+                Fecha = dtoNotas.Fecha,
+                DivsionCiclosMateriaAlumnosIdDivCicMatAlum = dtoNotas.Materias, // Ajusta esto si el nombre de la propiedad es diferente
+                TipoEvaluacionIdTipoEva = dtoNotas.TipoEvaluacionIdTipoEva
+            };
+
+            // Agrega la entidad al contexto
+            _context.notas.Add(nuevaNota);
+
+            // Guarda los cambios
             try
             {
-                var nuevaNota = new Notas
-                {
-                    Nota = dtoNotas.Nota,
-                    Fecha = dtoNotas.Fecha,
-                    DivsionCiclosMateriaAlumnosIdDivCicMatAlum = dtoNotas.Materias,
-                    TipoEvaluacionIdTipoEva = dtoNotas.TipoEvaluacionIdTipoEva
-                };
-
-                _context.notas.Add(nuevaNota);
                 await _context.SaveChangesAsync();
-
-                responseApi.EsCorrecto = true;
-                responseApi.Mensaje = "Nota creada correctamente";
-                responseApi.Valor = nuevaNota.IdNotas;  // Devuelvo el ID de la nueva nota creada
+                return CreatedAtAction(nameof(Get), new { id = nuevaNota.IdNotas }, nuevaNota); // Devuelve el recurso creado
             }
-            catch (Exception ex)
+            catch (DbUpdateException ex)
             {
-                responseApi.EsCorrecto = false;
-                responseApi.Mensaje = ex.InnerException?.Message ?? ex.Message;
+                // Manejo del error específico de claves foráneas
+                return StatusCode(500, "Ocurrió un error al guardar los datos: " + ex.InnerException?.Message);
             }
-
-            return Ok(responseApi);
         }
 
         // PUT: api/Notas/{id}
