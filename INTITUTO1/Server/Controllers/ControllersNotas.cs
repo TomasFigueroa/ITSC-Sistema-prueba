@@ -92,21 +92,33 @@ namespace INTITUTO1.Server.Controllers
 
         // POST: api/Notas
         [HttpPost]
-        public async Task<ActionResult<Notas>> Post(DTONotas dtoNotas)
+        public async Task<ActionResult<ResponseAPI<int>>> Post(DTONotas dtoNotas)
         {
             var responseApi = new ResponseAPI<int>();
-            var mdNota = new Notas
+
+            try
             {
-                Nota = dtoNotas.Nota,
-                Fecha = dtoNotas.Fecha,
-                DivsionCiclosMateriaAlumnosIdDivCicMatAlum = dtoNotas.Materias,
-                TipoEvaluacionIdTipoEva = dtoNotas.TipoEvaluacionIdTipoEva,
-                //TipoEvaluacion = dtoNotas.TipoEvaluacion (desmarcala si va esta)
-            };
-            _context.notas.Add(mdNota);
-            await _context.SaveChangesAsync();
-            responseApi.EsCorrecto = true;
-            responseApi.Mensaje = "Nota creada correctamente";
+                var nuevaNota = new Notas
+                {
+                    Nota = dtoNotas.Nota,
+                    Fecha = dtoNotas.Fecha,
+                    DivsionCiclosMateriaAlumnosIdDivCicMatAlum = dtoNotas.Materias,
+                    TipoEvaluacionIdTipoEva = dtoNotas.TipoEvaluacionIdTipoEva
+                };
+
+                _context.notas.Add(nuevaNota);
+                await _context.SaveChangesAsync();
+
+                responseApi.EsCorrecto = true;
+                responseApi.Mensaje = "Nota creada correctamente";
+                responseApi.Valor = nuevaNota.IdNotas;  // Devuelvo el ID de la nueva nota creada
+            }
+            catch (Exception ex)
+            {
+                responseApi.EsCorrecto = false;
+                responseApi.Mensaje = ex.InnerException?.Message ?? ex.Message;
+            }
+
             return Ok(responseApi);
         }
 
