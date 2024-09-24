@@ -76,12 +76,7 @@
         <div class="mb-3 text-center">
             <img src="Logo ITSC.png" alt="Logo" class="loginlogo" style="width: 90px">
         </div>
-
-        @if (!string.IsNullOrEmpty(errorMessage))
-        {
-            <div class="error-message">@errorMessage</div>
-        }
-
+        
         <div class="mb-3">
             <label for="correo">Correo</label>
             <input id="correo" @bind="login.Correo" class="form-control" placeholder="Ingrese su correo" />
@@ -95,6 +90,11 @@
         <div class="mb-3">
             <button @onclick="IniciarSesion" class="btn btn-primary">Iniciar Sesión</button>
         </div>
+
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="error-message">@errorMessage</div>
+        }
 
     </div>
 </div>

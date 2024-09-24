@@ -31,6 +31,7 @@ namespace INTITUTO1.Server.Controllers
         public async Task<ActionResult<DivsionCiclosMateriaAlumnos>> Get(int id)
         {
             var divisionCicloMateriaAlumno = await _context.DivsionCiclosMateriaAlumnos
+                .Include(d => d.Alumnos) // Incluye la entidad Alumnos relacionada
                 .FirstOrDefaultAsync(c => c.IdDivCicMatAlum == id);
 
             if (divisionCicloMateriaAlumno == null)
@@ -38,7 +39,14 @@ namespace INTITUTO1.Server.Controllers
                 return NotFound($"No se encontró la DivisionCicloMateriaAlumno con id: {id}");
             }
 
-            return divisionCicloMateriaAlumno;
+            return Ok(new
+            {
+                divisionCicloMateriaAlumno.IdDivCicMatAlum,
+                divisionCicloMateriaAlumno.DivisionCicloMateriaIdDivCicMat,
+                AlumnosIdAlumno = divisionCicloMateriaAlumno.Alumnos.IdAlumno,
+                NombreAlumno = divisionCicloMateriaAlumno.Alumnos.Nombre,  //aca hehe
+                divisionCicloMateriaAlumno.LibrosId_Libro
+            });
         }
 
         // POST: api/DivisionCicloMateriaAlumnos

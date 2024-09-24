@@ -31,7 +31,7 @@
                             <option value="0">Seleccione un alumno</option>
                             @foreach (var alumno in alumnos)
                             {
-                                <option value="@alumno.IdDivCicMatAlum">@alumno.AlumnosIdAlumno @alumno.DivisionCicloMateriaIdDivCicMat</option>
+                                <option value="@alumno.IdDivCicMatAlum">@alumno.Alumnos.Nombre @alumno.DivisionCicloMateriaIdDivCicMat</option>
                             }
                         </select>
                     </div>
@@ -147,6 +147,7 @@
     private async Task LoadAlumnos()
     {
         alumnos = await Http.GetFromJsonAsync<List<DivsionCiclosMateriaAlumnos>>("api/DivisionCicloMateriaAlumnos");
+        Console.WriteLine($"Número de alumnos cargados: {alumnos.Count}");
     }
 
     private async Task LoadMaterias()

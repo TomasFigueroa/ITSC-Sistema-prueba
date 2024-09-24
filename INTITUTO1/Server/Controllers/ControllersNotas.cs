@@ -94,44 +94,84 @@ namespace INTITUTO1.Server.Controllers
             return Ok(nota);
         }
 
+        #region post viejo
         // POST: api/Notas
+        //[HttpPost]
+        //public async Task<IActionResult> Post(DTONotas dtoNotas)
+        //{
+        //    // Valida que el Materias exista en la tabla DivisionCicloMaterias
+        //    var divisionCicloMateria = await _context.DivsionCiclosMateriaAlumnos
+        //        .FirstOrDefaultAsync(dcm => dcm.IdDivCicMatAlum == dtoNotas.Materias);
+
+        //    // Si no existe, devolver un error 400 BadRequest
+        //    if (divisionCicloMateria == null)
+        //    {
+        //        return BadRequest("El ID de DivisionCicloMateria no es válido.");
+        //    }
+
+        //    // Crear una nueva nota utilizando el DTO
+        //    var nuevaNota = new Notas
+        //    {
+        //        Nota = dtoNotas.Nota,
+        //        Fecha = dtoNotas.Fecha,
+        //        DivsionCiclosMateriaAlumnosIdDivCicMatAlum = dtoNotas.Materias, // Ajusta esto si el nombre de la propiedad es diferente
+        //        TipoEvaluacionIdTipoEva = dtoNotas.TipoEvaluacionIdTipoEva
+        //    };
+
+        //    // Agrega la entidad al contexto
+        //    _context.notas.Add(nuevaNota);
+
+        //    // Guarda los cambios
+        //    try
+        //    {
+        //        await _context.SaveChangesAsync();
+        //        return CreatedAtAction(nameof(Get), new { id = nuevaNota.IdNotas }, nuevaNota); // Devuelve el recurso creado
+        //    }
+        //    catch (DbUpdateException ex)
+        //    {
+        //        // Manejo del error específico de claves foráneas
+        //        return StatusCode(500, "Ocurrió un error al guardar los datos: " + ex.InnerException?.Message);
+        //    }
+        //}
+        #endregion
         [HttpPost]
         public async Task<IActionResult> Post(DTONotas dtoNotas)
         {
-            // Valida que el Materias exista en la tabla DivisionCicloMaterias
+            //validaciones
+            if (dtoNotas == null || dtoNotas.Materias == 0 || dtoNotas.Nota < 0)
+            {
+                return BadRequest("Datos inválidos en la solicitud.");
+            }
+
             var divisionCicloMateria = await _context.DivsionCiclosMateriaAlumnos
                 .FirstOrDefaultAsync(dcm => dcm.IdDivCicMatAlum == dtoNotas.Materias);
 
-            // Si no existe, devolver un error 400 BadRequest
             if (divisionCicloMateria == null)
             {
                 return BadRequest("El ID de DivisionCicloMateria no es válido.");
             }
 
-            // Crear una nueva nota utilizando el DTO
             var nuevaNota = new Notas
             {
                 Nota = dtoNotas.Nota,
                 Fecha = dtoNotas.Fecha,
-                DivsionCiclosMateriaAlumnosIdDivCicMatAlum = dtoNotas.Materias, // Ajusta esto si el nombre de la propiedad es diferente
+                DivsionCiclosMateriaAlumnosIdDivCicMatAlum = dtoNotas.Materias,
                 TipoEvaluacionIdTipoEva = dtoNotas.TipoEvaluacionIdTipoEva
             };
 
-            // Agrega la entidad al contexto
             _context.notas.Add(nuevaNota);
 
-            // Guarda los cambios
             try
             {
                 await _context.SaveChangesAsync();
-                return CreatedAtAction(nameof(Get), new { id = nuevaNota.IdNotas }, nuevaNota); // Devuelve el recurso creado
+                return CreatedAtAction(nameof(Get), new { id = nuevaNota.IdNotas }, nuevaNota);
             }
             catch (DbUpdateException ex)
             {
-                // Manejo del error específico de claves foráneas
-                return StatusCode(500, "Ocurrió un error al guardar los datos: " + ex.InnerException?.Message);
+                return StatusCode(500, "Error al guardar los datos: " + ex.InnerException?.Message);
             }
         }
+
 
         // PUT: api/Notas/{id}
         [HttpPut("{id:int}")]
