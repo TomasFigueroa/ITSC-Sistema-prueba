@@ -17,7 +17,7 @@
                 <div class="modal-body">
                     <div class="mb-3">
                         <label for="notaInput" class="form-label">Nota:</label>
-                        <input type="number" class="form-control" id="notaInput" @bind="currentNota.Nota" min="0" max="10" step="0.1" />
+                        <input type="number" class="form-control" id="notaInput" @bind="currentNota.Nota" min="1" max="10"  />
                     </div>
 
                     <div class="mb-3">
@@ -26,12 +26,12 @@
                     </div>
 
                     <div class="mb-3">
-                        <label for="materiaSelect" class="form-label">Materia:</label>
-                        <select class="form-select" id="materiaSelect" @bind="currentNota.DivsionCiclosMateriaAlumnosIdDivCicMatAlum">
-                            <option value="0">Seleccione una materia</option>
-                            @foreach (var materia in materias)
+                        <label for="alumnoSelect" class="form-label">Alumno:</label>
+                        <select class="form-select" id="alumnoSelect" @bind="currentNota.DivsionCiclosMateriaAlumnosIdDivCicMatAlum">
+                            <option value="0">Seleccione un alumno</option>
+                            @foreach (var alumno in alumnos)
                             {
-                                <option value="@materia.IdMateria">@materia.Nombre</option>
+                                <option value="@alumno.IdDivCicMatAlum">@alumno.AlumnosIdAlumno @alumno.DivisionCicloMateriaIdDivCicMat</option>
                             }
                         </select>
                     </div>
@@ -64,7 +64,8 @@
         <tr>
             <th>Alumno</th>
             <th>Materia</th>
-            <th>Ciclo</th>
+            <th>Tipo Evaluacion</th>
+            <th>Fecha</th>
             <th>Nota</th>
             <th>Acciones</th>
         </tr>
@@ -77,11 +78,11 @@
                 <tr>
                     <td>@nota.AlumnoNombre</td>
                     <td>@nota.Materia</td>
-                    <td>@nota.Ciclo</td>
+                    <td>@nota.TipoEvaluacion</td>
+                    <td>@nota.Fecha</td>
                     <td>@nota.Nota</td>
                     <td>
                         <button class="btn btn-sm btn-warning" @onclick="() => OpenModalToEdit(nota)">Editar</button>
-                        <button class="btn btn-sm btn-danger" @onclick="() => OpenConfirmDeleteModal(nota.IdNotas)">Eliminar</button>
                     </td>
                 </tr>
             }
@@ -121,8 +122,9 @@
 <button class="btn btn-primary" @onclick="OpenModalToAdd">Agregar Nota</button>
 
 @code {
-    private List<dynamic> notasFiltradas = new();
+    private List<NotasDto> notasFiltradas = new();
     private List<Materias> materias = new();
+    private List<DivsionCiclosMateriaAlumnos> alumnos = new();
     private List<TipoEvaluacion> tipoEvaluaciones = new();
     private Notas currentNota = new();
     private bool isModalOpen = false;
@@ -135,11 +137,16 @@
         await LoadNotas();
         await LoadMaterias();
         await LoadTipoEvaluaciones();
+        await LoadAlumnos();
     }
 
     private async Task LoadNotas()
     {
-        notasFiltradas = await Http.GetFromJsonAsync<List<dynamic>>("api/Notas/GetNotas");
+        notasFiltradas = await Http.GetFromJsonAsync<List<NotasDto>>("api/Notas/GetNotas");
+    }
+    private async Task LoadAlumnos()
+    {
+        alumnos = await Http.GetFromJsonAsync<List<DivsionCiclosMateriaAlumnos>>("api/DivisionCicloMateriaAlumnos");
     }
 
     private async Task LoadMaterias()
@@ -191,9 +198,21 @@
 
     private async Task AddNota()
     {
-        await Http.PostAsJsonAsync("api/Notas", currentNota);
-        CloseModal();
-        await LoadNotas();
+        // Lógica para realizar el POST de los datos actuales del formulario al servidor
+        var response = await Http.PostAsJsonAsync("api/Notas", currentNota);
+
+        if (response.IsSuccessStatusCode)
+        {
+            // Si el POST es exitoso, cierra el modal y actualiza la lista de notas
+            CloseModal();
+            await LoadNotas();
+        }
+        else
+        {
+            // Si falla, mostrar algún error al usuario
+            var error = await response.Content.ReadAsStringAsync();
+            Console.WriteLine("Error al agregar la nota: " + error);
+        }
     }
 
     private async Task EditNota()

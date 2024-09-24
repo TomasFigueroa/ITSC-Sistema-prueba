@@ -37,16 +37,20 @@ namespace INTITUTO1.Server.Controllers
                         join divisionCiclo in _context.DivisionCiclos on divCicMat.DivisionCicloIdDivCic equals divisionCiclo.IdDivCic
                         join ciclo in _context.Ciclos on divisionCiclo.CicloIdCiclo equals ciclo.IdCiclo
                         join materia in _context.Materia on divCicMat.MateriasIdMateria equals materia.IdMateria
-                        select new
+                        join tipoEvaluacion in _context.TipoEvaluacions on nota.TipoEvaluacionIdTipoEva equals tipoEvaluacion.IdTipoEva
+                        select new NotasDto
                         {
                             AlumnoNombre = alumno.Nombre,
                             Materia = materia.Nombre,
-                            Ciclo = ciclo.Fecha,
-                            Nota = nota.Nota
+                            Fecha = ciclo.Fecha,
+                            Nota = nota.Nota,
+                            TipoEvaluacion = tipoEvaluacion.NombreEva
                         };
 
-            return Ok(query.ToList());
+            return Ok(await query.ToListAsync());
         }
+
+
 
         // GET: api/Notas/{id}
         [HttpGet("{id:int}")]
@@ -95,8 +99,8 @@ namespace INTITUTO1.Server.Controllers
         public async Task<IActionResult> Post(DTONotas dtoNotas)
         {
             // Valida que el Materias exista en la tabla DivisionCicloMaterias
-            var divisionCicloMateria = await _context.DivisionCicloMaterias
-                .FirstOrDefaultAsync(dcm => dcm.IdDivCicMat == dtoNotas.Materias);
+            var divisionCicloMateria = await _context.DivsionCiclosMateriaAlumnos
+                .FirstOrDefaultAsync(dcm => dcm.IdDivCicMatAlum == dtoNotas.Materias);
 
             // Si no existe, devolver un error 400 BadRequest
             if (divisionCicloMateria == null)
