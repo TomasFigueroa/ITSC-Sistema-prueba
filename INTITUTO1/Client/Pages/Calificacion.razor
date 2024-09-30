@@ -4,7 +4,56 @@
 
 <h3>Gestión de Notas</h3>
 
-<!-- Modal para agregar/editar notas -->
+<button class="btn btn-success" @onclick="OpenModalToAdd">Agregar Nota</button>
+
+<!-- Filtros -->
+<div class="mb-3">
+    <label class="form-label">Filtrar por Alumno (DNI)</label>
+    <input type="text" class="form-control" @bind="filtroDNI" placeholder="DNI del Alumno" />
+</div>
+<select class="form-control" @bind="FiltroMateriaId">
+    <option value="">Seleccione una materia</option>
+    @foreach (var materia in materias)
+    {
+        <option value="@materia.IdMateria">@materia.Nombre</option>
+    }
+</select>
+
+<!-- Tabla de Notas -->
+<div class="table-container" style="overflow: hidden; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); margin-bottom: 20px;">
+    <div style="border-top-left-radius: 12px; border-top-right-radius: 12px; background-color: #f2f2f2; padding: 10px;">
+        <table class="table" style="border-collapse: collapse; width: 100%; border: 2px solid #E6E6FA;">
+            <thead>
+                <tr style="border-bottom: 2px solid #ddd;">
+                    <th style="border-right: 2px solid #ddd;">Alumno</th>
+                    <th style="border-right: 2px solid #ddd;">Nota</th>
+                    <th style="border-right: 2px solid #ddd;">Fecha</th>
+                    <th style="border-right: 2px solid #ddd;">Tipo Evaluación</th>
+                    <th style="border-right: 2px solid #ddd;">Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var nota in notasFiltradas)
+                {
+                    <tr>
+                        <td style="border-right: 2px solid #ddd;">@GetNombreAlumno(nota.DivsionCiclosMateriaAlumnosIdDivCicMatAlum)</td>
+                        <td style="border-right: 2px solid #ddd;">@nota.Nota</td>
+                        <td style="border-right: 2px solid #ddd;">@nota.Fecha.ToShortDateString()</td>
+                        <td style="border-right: 2px solid #ddd;">@GetNombreEvaluacion(nota.TipoEvaluacionIdTipoEva)</td>
+                        <td>
+                            <div class="action-buttons m-1">
+                                <button class="btn btn-primary me-2" @onclick="() => OpenModalToEdit(nota, nota.IdNotas)"><i class="oi oi-pencil"></i></button>
+                                <button class="btn btn-danger" @onclick="() => OpenConfirmDeleteModal(nota.IdNotas)"><i class="oi oi-trash"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal para agregar y editar notas -->
 @if (isModalOpen)
 {
     <div class="modal show d-block" tabindex="-1" role="dialog">
@@ -20,21 +69,27 @@
                         <input type="number" class="form-control" id="notaInput" @bind="currentNota.Nota" min="1" max="10"  />
                     </div>
 
-                    <div class="mb-3">
-                        <label for="fechaInput" class="form-label">Fecha:</label>
-                        <input type="date" class="form-control" id="fechaInput" @bind="currentNota.Fecha" />
-                    </div>
+                      @*   <div class="mb-3">
+                            <label class="form-label">Materia</label>
+                            <select class="form-control" @bind="selectedMateriaId" @oninput="FiltrarAlumnosPorMateria">
+                                <option value="">Seleccione una materia</option>
+                                @foreach (var materia in materias)
+                                {
+                                    <option value="@materia.IdMateria">@materia.Nombre</option>
+                                }
+                            </select>
+                        </div> *@
 
-                    <div class="mb-3">
-                        <label for="alumnoSelect" class="form-label">Alumno:</label>
-                        <select class="form-select" id="alumnoSelect" @bind="currentNota.DivsionCiclosMateriaAlumnosIdDivCicMatAlum">
-                            <option value="0">Seleccione un alumno</option>
-                            @foreach (var alumno in alumnos)
-                            {
-                                <option value="@alumno.IdDivCicMatAlum">@alumno.Alumnos.Nombre @alumno.DivisionCicloMateriaIdDivCicMat</option>
-                            }
-                        </select>
-                    </div>
+                        <div class="mb-3">
+                            <label class="form-label">Alumno</label>
+                            <select class="form-control" @bind="currentNota.Materias">
+                                <option value="">Seleccione un alumno</option>
+                                @foreach (var alumno in DivsionCiclosMateriaAlumnos)
+                                {
+                                    <option value="@alumno.IdDivCicMatAlum">@GetNombreAlumno(alumno.IdDivCicMatAlum)</option>
+                                }
+                            </select>
+                        </div>
 
                     <div class="mb-3">
                         <label for="tipoEvaluacionSelect" class="form-label">Tipo de Evaluación:</label>
@@ -129,6 +184,7 @@
     private Notas currentNota = new();
     private bool isModalOpen = false;
     private bool isEdit = false;
+    private Notas currentNota = new();
     private bool isConfirmDeleteModalOpen = false;
     private int idToDelete;
 
@@ -162,13 +218,17 @@
 
     private void OpenModalToAdd()
     {
+        currentNota = new Notas();
+        isEdit = false;
         isModalOpen = true;
         isEdit = false;
         currentNota = new Notas();
     }
 
-    private void OpenModalToEdit(dynamic nota)
+    private void OpenModalToEdit(Notas nota, int id)
     {
+        currentNota = nota;
+        isEdit = true;
         isModalOpen = true;
         isEdit = true;
         currentNota = new Notas
@@ -184,6 +244,7 @@
     private void CloseModal()
     {
         isModalOpen = false;
+
     }
 
     private void OpenConfirmDeleteModal(int id)
@@ -204,32 +265,66 @@
 
         if (response.IsSuccessStatusCode)
         {
-            // Si el POST es exitoso, cierra el modal y actualiza la lista de notas
-            CloseModal();
-            await LoadNotas();
+            try
+            {
+                await Http.PostAsJsonAsync("api/Notas", currentNota);
+                await LoadNotas();
+                await LoadAlumnos();
+                await LoadMaterias();
+                await LoadTipoEvaluaciones();
+                await LoadDivisionCicloMateriaAlumno();
+                FiltrarAlumnos();
+                CloseModal();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error adding nota: {ex.Message}");
+            }
         }
-        else
+        catch (Exception ex)
         {
-            // Si falla, mostrar algún error al usuario
-            var error = await response.Content.ReadAsStringAsync();
-            Console.WriteLine("Error al agregar la nota: " + error);
+            Console.WriteLine($"Error adding nota: {ex.Message}");
         }
+
     }
 
     private async Task EditNota()
     {
-        await Http.PutAsJsonAsync($"api/Notas/{currentNota.IdNotas}", currentNota);
-        CloseModal();
-        await LoadNotas();
+        try
+        {
+            await Http.PutAsJsonAsync($"api/Notas/{idToDelete}", currentNota);
+            await LoadNotas();
+            await LoadAlumnos();
+            await LoadMaterias();
+            await LoadTipoEvaluaciones();
+            await LoadDivisionCicloMateriaAlumno();
+            FiltrarAlumnos();
+            CloseModal();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error editing nota: {ex.Message}");
+        }
     }
 
     private async Task DeleteNota()
     {
-        await Http.DeleteAsync($"api/Notas/{idToDelete}");
-        CloseConfirmDeleteModal();
-        await LoadNotas();
+        try
+        {
+            await Http.DeleteAsync($"api/Notas/{idToDelete}");
+            await LoadNotas();
+            await LoadAlumnos();
+            await LoadMaterias();
+            await LoadTipoEvaluaciones();
+            await LoadDivisionCicloMateriaAlumno();
+            FiltrarAlumnos();
+            CloseConfirmDeleteModal();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error deleting nota: {ex.Message}");
+        }
     }
-}
 
 
 
