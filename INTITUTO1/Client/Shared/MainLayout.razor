@@ -5,8 +5,10 @@
 @inject NavigationManager navManager
 
 <div class="page">
+    
     <div style="background-color: #212529;">
-       @*  condicional *@
+        
+        @*  condicional *@
         @if (!IsLoginPage)
         {
             <NavMenu />
@@ -14,18 +16,22 @@
     </div>
 
     <main>
-        <div class="top-row px-4" style="background-color: #212529;">
-            
-            <a @onclick="CerrarSesion" href="javascript:void(0)">Salir</a>
+        <div class="top-row ps-4 px-3 navbar" style="background-color: #141619; display: flex; justify-content: flex-end; align-items: center;">
+            <div class="oi-account-logout px-4 text-center">
+                <a @onclick="CerrarSesion" href="javascript:void(0)" class="logout-link">Cerrar Sesión</a>
+            </div>
         </div>
 
         <article class="content px-4">
             @Body
         </article>
     </main>
+
 </div>
 
+
 @code {
+
     private bool IsLoginPage;
 
     protected override void OnParametersSet()
