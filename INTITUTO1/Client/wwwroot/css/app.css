@@ -1,7 +1,5 @@
 @import url('open-iconic/font/css/open-iconic-bootstrap.min.css');
 
-
-
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
@@ -14,12 +12,13 @@ a, .btn-link {
     color: #0071c1;
 }
 
-.loginlogo {
+/* Escalado de logos específico */
+.login-logo {
     transform: scale(1.8);
     width: 200px;
 }
 
-.logo {
+.page-logo {
     transform: scale(1.2);
 }
 
@@ -29,7 +28,12 @@ a, .btn-link {
     border-color: #1861ac;
 }
 
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+/* Ajuste de box-shadow para focos */
+.btn:focus,
+.btn:active:focus,
+.btn-link.nav-link:focus,
+.form-control:focus,
+.form-check-input:focus {
     box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
 }
 
@@ -37,6 +41,7 @@ a, .btn-link {
     padding-top: 1.1rem;
 }
 
+/* Validación de formularios */
 .valid.modified:not([type=checkbox]) {
     outline: 1px solid #26b050;
 }
@@ -49,6 +54,7 @@ a, .btn-link {
     color: red;
 }
 
+/* Estilo del error de Blazor */
 #blazor-error-ui {
     background: lightyellow;
     bottom: 0;
@@ -68,6 +74,7 @@ a, .btn-link {
         top: 0.5rem;
     }
 
+/* Indicador de error en componentes Blazor */
 .blazor-error-boundary {
     background: url(data:image/svg+xml;base64,...) no-repeat 1rem/1.8rem, #b32121;
     padding: 1rem 1rem 1rem 3.7rem;
@@ -78,6 +85,7 @@ a, .btn-link {
         content: "An error has occurred."
     }
 
+/* Estilo y animación del loading */
 .loading-progress {
     position: relative;
     display: block;
@@ -94,6 +102,7 @@ a, .btn-link {
         transform: rotate(-90deg);
     }
 
+        /* Animación del círculo de carga */
         .loading-progress circle:last-child {
             stroke: #1b6ec2;
             stroke-dasharray: calc(3.141 * var(--blazor-load-percentage, 0%) * 0.8), 500%;
@@ -111,6 +120,7 @@ a, .btn-link {
         content: var(--blazor-load-percentage-text, "Loading");
     }
 
+/* Estilo de tablas */
 .table-container {
     overflow-x: auto;
 }
@@ -147,6 +157,7 @@ a, .btn-link {
         border-radius: 0 8px 8px 0;
     }
 
+/* Estilo de botones */
 .button {
     background-color: #3498db;
     color: white;
@@ -161,6 +172,7 @@ a, .btn-link {
         background-color: #2980b9;
     }
 
+/* Contenedor centrado */
 .centred-container {
     position: absolute;
     top: 50%;
@@ -168,80 +180,154 @@ a, .btn-link {
     transform: translate(-50%, -50%);
 }
 
+/* Control de ancho máximo en tbase */
 .tbase-column {
     max-width: 300px;
     word-wrap: break-word;
 }
 
-.tbase-content.show {
-    display: block;
-}
-
+/* Botones de acción */
 .action-buttons {
     margin-right: 6px;
 }
 
+/* Colores lavanda */
 .colorlavanda {
     background-color: #E6E6FA;
 }
 
-.top-row {
-    background-color: #212529;
-}
-
-.container {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 20px;
-    border: 1px solid #ddd;
-    background-color: #fff;
-}
-
-.report-header {
-    text-align: center;
-    margin-bottom: 20px;
-}
-
-.logo {
-    max-height: 100px;
-    margin-bottom: 20px;
-}
-
-.report-title h3 {
-    margin: 0;
-}
-
-.student-info {
-    margin-bottom: 20px;
-}
-
-.footer {
-    margin-top: 20px;
-}
-
-    .footer p {
-        margin: 0;
-        font-weight: bold;
-    }
-
-.logout-link {
-    color: #007bff;
-    text-decoration: none;
-    font-size: 16px;
-    padding: 8px 12px;
-    border-radius: 4px;
-    transition: background-color 0.3s ease;
-}
-
-    .logout-link:hover {
-        background-color: #0056b3;
-        color: white;
-    }
-
+/* Estilo de la barra de navegación */
 .navbar {
     background-color: #141619;
-    height: 60px; /* Ajusta la altura */
+    height: 60px;
     display: flex;
     justify-content: flex-end;
     align-items: center;
 }
+
+/* Estilo de alertas */
+.alert-right {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    width: 300px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+}
+
+.animated-alert {
+    animation: slideInRight 0.5s ease-in-out, fadeOut 0.5s ease-out 4.5s forwards;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeOut {
+    to {
+        opacity: 0;
+    }
+}
+
+/* Animación del logo en el loading */
+/* Estilo para el contenedor principal */
+.loading-progress-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background-color: #f8fafc;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Estilo del logo */
+.loading-logo {
+    width: 140px;
+    margin-bottom: 30px;
+    animation: fadeIn 1.5s ease-in-out;
+    filter: drop-shadow(0px 4px 8px rgba(0, 0, 0, 0.2));
+}
+
+/* Animación del logo */
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Círculo de progreso de carga */
+.loading-progress {
+    width: 100px;
+    height: 100px;
+    margin-bottom: 30px;
+}
+
+.background-circle {
+    fill: none;
+    stroke-width: 10;
+    stroke: #e6e6e6; /* Color de fondo del círculo */
+}
+
+.progress-circle {
+    fill: none;
+    stroke-width: 10;
+    stroke-linecap: round;
+    stroke: #1b6ec2;
+    stroke-dasharray: 0 283; /* Radio del círculo, ajustado a SVG */
+    animation: progressFill 3s infinite ease-in-out;
+}
+
+/* Animación de progreso circular */
+@keyframes progressFill {
+    0% {
+        stroke-dasharray: 0 283;
+    }
+
+    50% {
+        stroke-dasharray: 141.5 283;
+    }
+
+    100% {
+        stroke-dasharray: 283 0;
+    }
+}
+
+/* Estilo del texto de carga */
+.loading-progress-text {
+    font-size: 1.4rem;
+    color: #333;
+    font-weight: 600;
+    animation: fadeInText 2.5s infinite ease-in-out;
+    letter-spacing: 0.05rem;
+    margin-top: 15px;
+}
+
+/* Animación del texto */
+@keyframes fadeInText {
+    0%, 100% {
+        opacity: 0;
+    }
+
+    50% {
+        opacity: 1;
+    }
+}
+
+
+

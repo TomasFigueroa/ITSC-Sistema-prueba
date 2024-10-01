@@ -5,6 +5,33 @@
 
 <!-- Botón para agregar nota -->
 <button class="btn btn-primary" @onclick="OpenModalToAdd">Agregar Nota</button>
+@if (mostrarAlerta)
+{
+
+    <div class="alert alert-success d-flex align-items-center alert-right animated-alert" role="alert">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-check-circle-fill me-2" viewBox="0 0 16 16">
+            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM6.97 11.03a.75.75 0 0 0 1.08.022L11.97 8a.75.75 0 1 0-1.08-1.04L7.5 10.21 5.646 8.354a.75.75 0 1 0-1.08 1.04l2 2z" />
+        </svg>
+        <div>
+            Alumno cargado correctamente.
+        </div>
+    </div>
+}
+@if(mostraError)
+{
+    <div class="alert alert-danger d-flex align-items-center alert-right animated-alert" role="alert">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-x-circle-fill me-2" viewBox="0 0 16 16">
+            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z" />
+        </svg>
+        <div>
+            No se cargó correctamente el alumno.
+        </div>
+    </div>
+    
+}
+
+
+
 
 <!-- Modal para agregar/editar notas -->
 @if (isModalOpen)
@@ -91,7 +118,7 @@
                                     <td style="border-right: 2px solid #ddd;">@nota.Fecha</td>
                                     <td style="border-right: 2px solid #ddd;">@nota.Nota</td>
                                     <td style="border-right: 2px solid #ddd;">
-                                        <button class="btn btn-sm btn-warning" @onclick="() => OpenModalToEdit(notasmod, notasmod.IdNotas)">Editar</button>
+                                        <button class="btn btn-primary me-2" @onclick="() => OpenModalToEdit(notasmod, notasmod.IdNotas)"><i class="oi oi-pencil"></i></button>
                                         <button class="btn btn-danger" @onclick="() => OpenConfirmDeleteModal(nota.Id)"><i class="oi oi-trash"></i></button>
                                     </td>
                                 </tr>
@@ -145,6 +172,8 @@
     private DTONotas currentNota = new();
     private List<Notas> Notas = new();
     private Notas Nota = new();
+    private bool mostrarAlerta = false;
+    private bool mostraError = false;
     private bool isModalOpen = false;
     private bool isEdit = false;
     private bool isConfirmDeleteModalOpen = false;
@@ -197,6 +226,34 @@
 
         return $"{alumn.DNI_Alum.ToString()}-{ alumn.Nombre.ToString()}-{alumn.Apellido}";
     }
+    private void MostrarError()
+    {
+        mostraError = true;
+
+        // Crear un temporizador para ocultar la alerta después de 5 segundos
+        var timer = new System.Timers.Timer(5000); // 5000 ms = 5 segundos
+        timer.Elapsed += (sender, e) =>
+        {
+            mostraError = false;
+            InvokeAsync(StateHasChanged); // Asegurar que el UI se actualice
+            timer.Dispose(); // Liberar el temporizador
+        };
+        timer.Start();
+    }
+    private void MostrarAlerta()
+    {
+        mostrarAlerta = true;
+
+        // Crear un temporizador para ocultar la alerta después de 5 segundos
+        var timer = new System.Timers.Timer(5000); // 5000 ms = 5 segundos
+        timer.Elapsed += (sender, e) =>
+        {
+            mostrarAlerta = false;
+            InvokeAsync(StateHasChanged); // Asegurar que el UI se actualice
+            timer.Dispose(); // Liberar el temporizador
+        };
+        timer.Start();
+    }
 
     private void OpenModalToAdd()
     {
@@ -244,7 +301,7 @@
     private async Task AddNota()
     {
         // Lógica para realizar el POST de los datos actuales del formulario al servidor
-        
+
         try
         {
             var response = await Http.PostAsJsonAsync("api/Notas", currentNota);
@@ -253,11 +310,15 @@
             {
                 // Si el POST es exitoso, cierra el modal y actualiza la lista de notas
                 CloseModal();
+                MostrarAlerta();
+                await LoadAlumnos();
+                await LoadAlumno();
                 await LoadNotas();
             }
             else
             {
                 // Si falla, mostrar algún error al usuario
+                MostrarError();
                 var error = await response.Content.ReadAsStringAsync();
                 Console.WriteLine("Error al agregar la nota: " + error);
             }
