@@ -40,6 +40,7 @@ namespace INTITUTO1.Server.Controllers
                         join tipoEvaluacion in _context.TipoEvaluacions on nota.TipoEvaluacionIdTipoEva equals tipoEvaluacion.IdTipoEva
                         select new NotasDto
                         {
+                            Id = nota.IdNotas,
                             AlumnoNombre = alumno.Nombre,
                             Materia = materia.Nombre,
                             Fecha = ciclo.Fecha,

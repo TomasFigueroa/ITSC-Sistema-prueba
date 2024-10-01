@@ -88,6 +88,7 @@
                     <td style="border-right: 2px solid #ddd;">@nota.Nota</td>
                     <td style="border-right: 2px solid #ddd;">
                         <button class="btn btn-sm btn-warning" @onclick="() => OpenModalToEdit(nota)">Editar</button>
+                        <button class="btn btn-danger" @onclick="() => OpenConfirmDeleteModal(nota.Id)"><i class="oi oi-trash"></i></button>
                     </td>
                 </tr>
             }

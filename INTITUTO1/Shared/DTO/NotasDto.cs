@@ -8,6 +8,7 @@ namespace INTITUTO1.Shared.DTO
 {
     public class NotasDto
     {
+        public int Id { get; set; }
         public string AlumnoNombre { get; set; }
         public string Materia { get; set; }
         public DateTime Fecha { get; set; }
