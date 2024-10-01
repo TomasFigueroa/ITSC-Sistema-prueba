@@ -33,7 +33,7 @@
                             <option value="0">Seleccione un alumno</option>
                             @foreach (var alumno in alumnos)
                             {
-                                <option value="@alumno.IdDivCicMatAlum">@alumno.AlumnosIdAlumno @alumno.IdDivCicMatAlum</option>
+                                <option value="@alumno.IdDivCicMatAlum">@GetAlumnoNombre(alumno.AlumnosIdAlumno)</option>
                             }
                         </InputSelect>
                     </div>
@@ -80,17 +80,25 @@
         {
             @foreach (var nota in notasFiltradas)
             {
-                <tr>
-                    <td style="border-right: 2px solid #ddd;">@nota.AlumnoNombre</td>
-                    <td style="border-right: 2px solid #ddd;">@nota.Materia</td>
-                    <td style="border-right: 2px solid #ddd;">@nota.TipoEvaluacion</td>
-                    <td style="border-right: 2px solid #ddd;">@nota.Fecha</td>
-                    <td style="border-right: 2px solid #ddd;">@nota.Nota</td>
-                    <td style="border-right: 2px solid #ddd;">
-                        <button class="btn btn-sm btn-warning" @onclick="() => OpenModalToEdit(nota)">Editar</button>
-                        <button class="btn btn-danger" @onclick="() => OpenConfirmDeleteModal(nota.Id)"><i class="oi oi-trash"></i></button>
-                    </td>
-                </tr>
+                @foreach (var notasmod in Notas)
+                        {
+                            @if (nota.Id == notasmod.IdNotas)
+                            {
+                                <tr>
+                                    <td style="border-right: 2px solid #ddd;">@nota.AlumnoNombre</td>
+                                    <td style="border-right: 2px solid #ddd;">@nota.Materia</td>
+                                    <td style="border-right: 2px solid #ddd;">@nota.TipoEvaluacion</td>
+                                    <td style="border-right: 2px solid #ddd;">@nota.Fecha</td>
+                                    <td style="border-right: 2px solid #ddd;">@nota.Nota</td>
+                                    <td style="border-right: 2px solid #ddd;">
+                                        <button class="btn btn-sm btn-warning" @onclick="() => OpenModalToEdit(notasmod, notasmod.IdNotas)">Editar</button>
+                                        <button class="btn btn-danger" @onclick="() => OpenConfirmDeleteModal(nota.Id)"><i class="oi oi-trash"></i></button>
+                                    </td>
+                                </tr>
+                            }
+                            
+                        }
+                       
             }
         }
         else
@@ -132,12 +140,15 @@
     private List<NotasDto> notasFiltradas = new();
     private List<Materias> materias = new();
     private List<DivsionCiclosMateriaAlumnos> alumnos = new();
+    private List<Alumnos> alumno = new();
     private List<TipoEvaluacion> tipoEvaluaciones = new();
     private DTONotas currentNota = new();
+    private List<Notas> Notas = new();
     private Notas Nota = new();
     private bool isModalOpen = false;
     private bool isEdit = false;
     private bool isConfirmDeleteModalOpen = false;
+    private int idactual;
     private int idToDelete;
 
     protected override async Task OnInitializedAsync()
@@ -146,6 +157,8 @@
         await LoadMaterias();
         await LoadTipoEvaluaciones();
         await LoadAlumnos();
+        await LoadAlumno();
+        await LoadNotasMOD();
     }
 
     private async Task LoadNotas()
@@ -157,15 +170,32 @@
         alumnos = await Http.GetFromJsonAsync<List<DivsionCiclosMateriaAlumnos>>("api/DivisionCicloMateriaAlumnos");
         Console.WriteLine($"Número de alumnos cargados: {alumnos.Count}");
     }
+    private async Task LoadAlumno()
+    {
+        alumno = await Http.GetFromJsonAsync<List<Alumnos>>("api/Alumnos");
+        Console.WriteLine($"Número de alumnos cargados: {alumnos.Count}");
+    }
 
     private async Task LoadMaterias()
     {
         materias = await Http.GetFromJsonAsync<List<Materias>>("api/Materias");
     }
+    private async Task LoadNotasMOD()
+    {
+        Notas = await Http.GetFromJsonAsync<List<Notas>>("api/Notas/api/Notas");
+    }
 
     private async Task LoadTipoEvaluaciones()
     {
         tipoEvaluaciones = await Http.GetFromJsonAsync<List<TipoEvaluacion>>("api/TipoNota");
+    }
+    private string GetAlumnoNombre(int idAlumno)
+    {
+        var alumn = alumno.FirstOrDefault(m => m.IdAlumno == idAlumno);
+        if (alumn == null)
+            return "N/A";
+
+        return $"{alumn.DNI_Alum.ToString()}-{ alumn.Nombre.ToString()}-{alumn.Apellido}";
     }
 
     private void OpenModalToAdd()
@@ -180,16 +210,17 @@
         currentNota = new DTONotas();
     }
 
-    private void OpenModalToEdit(dynamic nota)
+    private void OpenModalToEdit(Notas nota, int id)
     {
+        LoadNotasMOD();
         isModalOpen = true;
         isEdit = true;
-        Nota = new Notas
+        idactual = id;
+        currentNota = new DTONotas
             {
-                IdNotas = nota.IdNotas,
                 Nota = nota.Nota,
                 Fecha = nota.Fecha,
-                DivsionCiclosMateriaAlumnosIdDivCicMatAlum = nota.MateriasIdMateria,
+                Materias = nota.DivsionCiclosMateriaAlumnosIdDivCicMatAlum,
                 TipoEvaluacionIdTipoEva = nota.TipoEvaluacionIdTipoEva
             };
     }
@@ -239,7 +270,7 @@
 
     private async Task EditNota()
     {
-        await Http.PutAsJsonAsync($"api/Notas/{Nota.IdNotas}", currentNota);
+        await Http.PutAsJsonAsync($"api/Notas/{idactual}", currentNota);
         CloseModal();
         await LoadNotas();
     }
