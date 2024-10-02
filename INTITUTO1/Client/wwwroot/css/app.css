@@ -328,6 +328,71 @@ a, .btn-link {
         opacity: 1;
     }
 }
+/*Index*/
+/* Contenedor principal para alinear todo en el centro */
+.header-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 20px;
+    background-color: #fff; /* Fondo blanco */
+    font-family: 'Roboto', sans-serif; /* Fuente moderna */
+}
+
+/* Estilos para el título principal */
+.title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #2c3e50; /* Color moderno y elegante */
+    margin-bottom: 20px;
+    text-transform: uppercase; /* Transformación a mayúsculas para un look formal */
+    letter-spacing: 1.5px;
+}
+
+/* Estilo de la imagen del logo */
+.logo {
+    width: 150px; /* Ajuste del tamaño del logo */
+    margin: 20px 0;
+    filter: drop-shadow(0px 4px 10px rgba(0, 0, 0, 0.15)); /* Sombra para darle profundidad */
+    transition: transform 0.3s ease; /* Animación suave */
+}
+
+    .logo:hover {
+        transform: scale(1.05); /* Efecto hover para dar una sensación interactiva */
+    }
+
+/* Estilo para los subtítulos con negrita */
+.subtitle-bold {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #34495e; /* Color más oscuro para resaltar los subtítulos */
+    margin-top: 10px;
+}
+
+/* Estilo para los subtítulos normales */
+.subtitle {
+    font-size: 1rem;
+    font-weight: 400;
+    color: #7f8c8d; /* Color gris moderno */
+    margin-top: 5px;
+}
+
+/* Espaciado entre los diferentes elementos de texto */
+h5 {
+    margin-bottom: 10px;
+    letter-spacing: 1px; /* Aumenta el espaciado entre letras */
+}
+
+/* Animaciones suaves al hacer hover sobre el contenedor */
+.header-container:hover .title,
+.header-container:hover .subtitle-bold,
+.header-container:hover .subtitle {
+    transform: scale(1.01);
+    transition: transform 0.3s ease;
+}
+
 
 
 
