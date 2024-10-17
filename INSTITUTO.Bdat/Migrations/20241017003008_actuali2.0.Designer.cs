@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace INSTITUTO.Bdat.Migrations
 {
     [DbContext(typeof(Context))]
-    [Migration("20240806120046_assp")]
-    partial class assp
+    [Migration("20241017003008_actuali2.0")]
+    partial class actuali20
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -49,11 +49,21 @@ namespace INSTITUTO.Bdat.Migrations
                     b.Property<DateTime>("Fecha_Nac")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("Id_Carrera")
+                        .HasColumnType("int");
+
                     b.Property<string>("Nacionalidad")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Nombre")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Numero")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Sexo")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -232,6 +242,9 @@ namespace INSTITUTO.Bdat.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdMateria"));
 
                     b.Property<int>("IdCarrera")
+                        .HasColumnType("int");
+
+                    b.Property<int>("IdDivision")
                         .HasColumnType("int");
 
                     b.Property<string>("Nombre")

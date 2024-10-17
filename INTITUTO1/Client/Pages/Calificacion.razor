@@ -1,10 +1,13 @@
 ﻿@page "/notas"
 @attribute [Authorize]
 @inject HttpClient Http
+@inject IJSRuntime JS
 @using System.Net.Http.Json
 
 <!-- Botón para agregar nota -->
 <button class="btn btn-primary" @onclick="OpenModalToAdd">Agregar Nota</button>
+
+
 @if (mostrarAlerta)
 {
 
@@ -24,7 +27,7 @@
             <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z" />
         </svg>
         <div>
-            No se cargó correctamente el alumno.
+            No se cargó correctamente la nota.
         </div>
     </div>
     
@@ -120,19 +123,26 @@
                                     <td style="border-right: 2px solid #ddd;">
                                         <button class="btn btn-primary me-2" @onclick="() => OpenModalToEdit(notasmod, notasmod.IdNotas)"><i class="oi oi-pencil"></i></button>
                                         <button class="btn btn-danger" @onclick="() => OpenConfirmDeleteModal(nota.Id)"><i class="oi oi-trash"></i></button>
+                                        <button class="btn btn-danger" @onclick="() => GenerateReport(nota.Id)"><i>Reporte</i></button>
                                     </td>
                                 </tr>
                             }
                             
-                        }
+                }
                        
             }
-        }
-        else
+        }else
         {
-            <tr>
-                <td colspan="5">No se encontraron notas.</td>
-            </tr>
+                <tr >
+                    <td colspan="6" style="text-align: center; padding: 20px;">
+                        <div style="text-align: center;">
+                            <!-- Logo del Instituto -->
+                            <img src="Logo_IT.png" alt="Logo ITSC" style="max-width: 100px; margin-bottom: 20px; animation: fadeIn 1s ease-in-out;">
+                            <!-- Mensaje elegante -->
+                            <h5 style="color: #6c757d; font-style: italic;">No se encontraron notas.</h5>
+                        </div>
+                    </td>
+                </tr>
         }
     </tbody>
 </table>
@@ -160,7 +170,6 @@
         </div>
     </div>
 }
-
 
 
 @code {
@@ -342,4 +351,25 @@
         CloseConfirmDeleteModal();
         await LoadNotas();
     }
+    private async Task GenerateReport(int alumnoId)
+    {
+        // Realiza una solicitud GET al servidor para generar y descargar el reporte
+        var response = await Http.GetAsync($"api/Notas/GenerarReporte?alumnoId={alumnoId}");
+
+        if (response.IsSuccessStatusCode)
+        {
+            var content = await response.Content.ReadAsByteArrayAsync();
+            var fileName = "Certificado_Materias_Aprobadas.pdf";
+
+            // Descarga el archivo en el navegador
+            var mimeType = "application/pdf";
+            await JS.InvokeVoidAsync("BlazorDownloadFile", fileName, mimeType, content);
+        }
+        else
+        {
+            Console.WriteLine("Error al generar el reporte.");
+        }
+    }
+
+
 }

@@ -35,20 +35,36 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach (var carrera in carreras)
+                @if(carreras!=null && carreras.Any()){
+                    @foreach (var carrera in carreras)
+                    {
+                        <tr>
+                            <td style="border-right: 2px solid #ddd;">@carrera.Nombre</td>
+                            <td style="border-right: 2px solid #ddd;">@carrera.FechaInicio.ToShortDateString()</td>
+                            <td style="border-right: 2px solid #ddd;">@carrera.FechaFin.ToShortDateString()</td>
+                            <td>
+                                <div class="action-buttons m-1">
+                                    <button class="btn btn-primary me-2" @onclick="() => OpenModalToEdit(carrera, carrera.IdCarrera)"><i class="oi oi-pencil"></i></button>
+                                    <button class="btn btn-danger" @onclick="() => OpenConfirmDeleteModal(carrera, carrera.IdCarrera)"><i class="oi oi-trash"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
                 {
                     <tr>
-                        <td style="border-right: 2px solid #ddd;">@carrera.Nombre</td>
-                        <td style="border-right: 2px solid #ddd;">@carrera.FechaInicio.ToShortDateString()</td>
-                        <td style="border-right: 2px solid #ddd;">@carrera.FechaFin.ToShortDateString()</td>
-                        <td>
-                            <div class="action-buttons m-1">
-                                <button class="btn btn-primary me-2" @onclick="() => OpenModalToEdit(carrera, carrera.IdCarrera)"><i class="oi oi-pencil"></i></button>
-                                <button class="btn btn-danger" @onclick="() => OpenConfirmDeleteModal(carrera, carrera.IdCarrera)"><i class="oi oi-trash"></i></button>
+                        <td colspan="4" style="text-align: center; padding: 20px;">
+                            <div style="text-align: center;">
+                                <!-- Logo del Instituto -->
+                                <img src="Logo_IT.png" alt="Logo ITSC" style="max-width: 100px; margin-bottom: 20px; animation: fadeIn 1s ease-in-out;">
+                                <!-- Mensaje elegante -->
+                                <h5 style="color: #6c757d; font-style: italic;">No se encontraron Carreras.</h5>
                             </div>
                         </td>
                     </tr>
                 }
+
             </tbody>
         </table>
     </div>

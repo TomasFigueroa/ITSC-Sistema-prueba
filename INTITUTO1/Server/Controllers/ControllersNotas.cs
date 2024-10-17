@@ -43,7 +43,7 @@ namespace INTITUTO1.Server.Controllers
                             Id = nota.IdNotas,
                             AlumnoNombre = alumno.Nombre,
                             Materia = materia.Nombre,
-                            Fecha = ciclo.Fecha,
+                            Fecha = nota.Fecha,
                             Nota = nota.Nota,
                             TipoEvaluacion = tipoEvaluacion.NombreEva
                         };
@@ -240,6 +240,95 @@ namespace INTITUTO1.Server.Controllers
             }
             return Ok(responseApi);
         }
-    }
 
+        [HttpGet("GenerarReporte/{alumnoId}")]
+        public IActionResult GenerarReporte(int alumnoId)
+        {
+            // Consulta para obtener las notas del alumno
+            var query = from nota in _context.notas
+                        join divCicMatAlum in _context.DivsionCiclosMateriaAlumnos on nota.DivsionCiclosMateriaAlumnosIdDivCicMatAlum equals divCicMatAlum.IdDivCicMatAlum
+                        join alumno in _context.alumnos on divCicMatAlum.AlumnosIdAlumno equals alumno.IdAlumno
+                        join divCicMat in _context.DivisionCicloMaterias on divCicMatAlum.DivisionCicloMateriaIdDivCicMat equals divCicMat.IdDivCicMat
+                        join divisionCiclo in _context.DivisionCiclos on divCicMat.DivisionCicloIdDivCic equals divisionCiclo.IdDivCic
+                        join ciclo in _context.Ciclos on divisionCiclo.CicloIdCiclo equals ciclo.IdCiclo
+                        join materia in _context.Materia on divCicMat.MateriasIdMateria equals materia.IdMateria
+                        join tipoEvaluacion in _context.TipoEvaluacions on nota.TipoEvaluacionIdTipoEva equals tipoEvaluacion.IdTipoEva
+                        where alumno.IdAlumno == alumnoId  // Filtrar por el alumno específico
+                        select new NotasDto
+                        {
+                            Id = nota.IdNotas,
+                            AlumnoNombre = alumno.Nombre + " " + alumno.Apellido,
+                            Materia = materia.Nombre,
+                            Fecha = nota.Fecha,
+                            Nota = nota.Nota,
+                            TipoEvaluacion = tipoEvaluacion.NombreEva
+                        };
+
+            // Obtener el resultado de la consulta
+            var notasAlumno = query.ToList();
+
+            if (notasAlumno == null || !notasAlumno.Any())
+            {
+                return NotFound("No se encontraron notas para el alumno con el ID especificado.");
+            }
+
+            // Creamos un documento PDF en memoria
+            using (var ms = new MemoryStream())
+            {
+                // Inicializa el escritor de PDF
+                var writer = new iText.Kernel.Pdf.PdfWriter(ms);
+                var pdf = new iText.Kernel.Pdf.PdfDocument(writer);
+                var document = new iText.Layout.Document(pdf);
+
+                // Título del documento
+                var titulo = new iText.Layout.Element.Paragraph("Reporte de Notas del Alumno")
+                    .SetTextAlignment(iText.Layout.Properties.TextAlignment.CENTER)
+                    .SetFontSize(20);
+                document.Add(titulo);
+
+                // Información del alumno
+                var infoAlumno = new iText.Layout.Element.Paragraph($"Alumno: {notasAlumno.First().AlumnoNombre}\n" +
+                    $"Número de Alumno: {alumnoId}\n")
+                    .SetMarginTop(20);
+                document.Add(infoAlumno);
+
+                // Calificaciones
+                var tituloCalificaciones = new iText.Layout.Element.Paragraph("Calificaciones")
+                    .SetFontSize(16)
+                    .SetBold()
+                    .SetMarginTop(20);
+                document.Add(tituloCalificaciones);
+
+                // Tabla de calificaciones
+                var table = new iText.Layout.Element.Table(4); // 4 columnas: Asignatura, Nota, Tipo Evaluación, Fecha de aprobación
+                table.AddHeaderCell("Asignatura");
+                table.AddHeaderCell("Nota");
+                table.AddHeaderCell("Tipo Evaluación");
+                table.AddHeaderCell("Fecha Aprobado");
+
+                foreach (var nota in notasAlumno)
+                {
+                    table.AddCell(nota.Materia);
+                    table.AddCell(nota.Nota.ToString());
+                    table.AddCell(nota.TipoEvaluacion);
+                    table.AddCell(nota.Fecha.ToString("dd/MM/yyyy"));
+                }
+
+                document.Add(table);
+
+                // Cerrar el documento
+                document.Close();
+
+                // Enviar el PDF generado al cliente
+                var pdfBytes = ms.ToArray();
+                return File(pdfBytes, "application/pdf", "Reporte_Notas_Alumno.pdf");
+            }
+        }
+
+
+    }
 }
+   
+    
+
+

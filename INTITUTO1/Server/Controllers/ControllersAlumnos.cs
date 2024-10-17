@@ -69,6 +69,9 @@ namespace INTITUTO1.Server.Controllers
                         Tbase = dtoAlumno.Tbase,
                         Nacionalidad = dtoAlumno.Nacionalidad,
                         Estado = dtoAlumno.Estado,
+                        Numero = dtoAlumno.Numero,
+                        Sexo =dtoAlumno.Sexo,
+                        Id_Carrera = dtoAlumno.Id_Carrera
                     };
 
                     _context.alumnos.Add(mdAlumno);
@@ -112,6 +115,9 @@ namespace INTITUTO1.Server.Controllers
                     Tbase = dtoAlumno.Tbase,
                     Nacionalidad = dtoAlumno.Nacionalidad,
                     Estado = dtoAlumno.Estado,
+                    Numero = dtoAlumno.Numero,
+                    Sexo = dtoAlumno.Sexo,
+                    Id_Carrera = dtoAlumno.Id_Carrera
                 };
                 _context.alumnos.Add(mdAlumno);
                 await _context.SaveChangesAsync();
@@ -147,6 +153,9 @@ namespace INTITUTO1.Server.Controllers
                     dbAlumno.Tbase = dtoAlumnos.Tbase;
                     dbAlumno.Nacionalidad = dtoAlumnos.Nacionalidad;
                     dbAlumno.Estado = dtoAlumnos.Estado;
+                    dbAlumno.Numero = dtoAlumnos.Numero;
+                    dbAlumno.Sexo = dtoAlumnos.Sexo;
+                    dbAlumno.Id_Carrera = dtoAlumnos.Id_Carrera;
 
                     _context.alumnos.Update(dbAlumno);
                     await _context.SaveChangesAsync();
