@@ -42,6 +42,54 @@ namespace INTITUTO1.Server.Controllers
             return alumno;
         }
 
+        [HttpPost("crear-alumnos")]
+        public async Task<ActionResult<ResponseAPI<List<int>>>> Post(List<DTOAlumnos> dtoAlumnos)
+        {
+            var responseApi = new ResponseAPI<List<int>>();
+            var idsAlumnos = new List<int>();
+
+            try
+            {
+                if (dtoAlumnos == null || dtoAlumnos.Count == 0)
+                {
+                    responseApi.EsCorrecto = false;
+                    responseApi.Mensaje = "La lista de DTOs de alumnos está vacía o es nula.";
+                    return BadRequest(responseApi);
+                }
+
+                foreach (var dtoAlumno in dtoAlumnos)
+                {
+                    var mdAlumno = new Alumnos
+                    {
+                        Nombre = dtoAlumno.Nombre,
+                        Apellido = dtoAlumno.Apellido,
+                        DNI_Alum = dtoAlumno.DNI_Alum,
+                        Cuil = dtoAlumno.Cuil,
+                        Fecha_Nac = dtoAlumno.Fecha_Nac,
+                        Tbase = dtoAlumno.Tbase,
+                        Nacionalidad = dtoAlumno.Nacionalidad,
+                        Estado = dtoAlumno.Estado,
+                        Numero = dtoAlumno.Numero,
+                        Sexo =dtoAlumno.Sexo,
+                        Id_Carrera = dtoAlumno.Id_Carrera
+                    };
+
+                    _context.alumnos.Add(mdAlumno);
+                    await _context.SaveChangesAsync();
+                    idsAlumnos.Add(mdAlumno.IdAlumno);
+                }
+
+                responseApi.EsCorrecto = true;
+                responseApi.Valor = idsAlumnos; // Devolver los ids de los alumnos creados
+            }
+            catch (Exception ex)
+            {
+                responseApi.EsCorrecto = false;
+                responseApi.Mensaje = ex.Message;
+            }
+
+            return Ok(responseApi);
+        }
 
         // POST api/Alumnos
         [HttpPost]
@@ -67,6 +115,9 @@ namespace INTITUTO1.Server.Controllers
                     Tbase = dtoAlumno.Tbase,
                     Nacionalidad = dtoAlumno.Nacionalidad,
                     Estado = dtoAlumno.Estado,
+                    Numero = dtoAlumno.Numero,
+                    Sexo = dtoAlumno.Sexo,
+                    Id_Carrera = dtoAlumno.Id_Carrera
                 };
                 _context.alumnos.Add(mdAlumno);
                 await _context.SaveChangesAsync();
@@ -102,6 +153,9 @@ namespace INTITUTO1.Server.Controllers
                     dbAlumno.Tbase = dtoAlumnos.Tbase;
                     dbAlumno.Nacionalidad = dtoAlumnos.Nacionalidad;
                     dbAlumno.Estado = dtoAlumnos.Estado;
+                    dbAlumno.Numero = dtoAlumnos.Numero;
+                    dbAlumno.Sexo = dtoAlumnos.Sexo;
+                    dbAlumno.Id_Carrera = dtoAlumnos.Id_Carrera;
 
                     _context.alumnos.Update(dbAlumno);
                     await _context.SaveChangesAsync();

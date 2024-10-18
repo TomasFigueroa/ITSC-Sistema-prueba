@@ -1,7 +1,11 @@
 ﻿
 @inject IJSRuntime JSRuntime
 @page "/ReporteNotas"
+@attribute [Authorize]
 @using System.ComponentModel.DataAnnotations
+
+
+
 
 <div class="container mt-4">
     <div>
@@ -74,7 +78,12 @@
     }
 </div>
 
+
+
 @code {
+
+
+
     private List<Alumno> alumnos = new List<Alumno>
     {
         new Alumno
@@ -106,10 +115,14 @@
         alumnoSeleccionado = alumnos.FirstOrDefault(a => a.Id == alumnoId);
     }
 
-    private void PrintReport()
+    private async Task PrintReport()
     {
-        JSRuntime.InvokeVoidAsync("window.print");
+        JSRuntime.InvokeVoidAsync("print");
+        
+        
     }
+
+ 
 
     public class Alumno
     {

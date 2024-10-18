@@ -1,91 +1,84 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">ITSC</a>
-        <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-    </div>
-</div>
+﻿@using INTITUTO1.Client.Auth
+@using Microsoft.AspNetCore.Components.Authorization;
+@inject AuthenticationStateProvider autenticacionProvider
+@inject NavigationManager navManager
 
-<div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
-    <nav class="flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="oi oi-home" aria-hidden="true"></span> Inicio
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="Carrera">
-                <span class="oi oi-plus" aria-hidden="true"></span> Carreras
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="Materias">
-                <span class="oi oi-plus" aria-hidden="true"></span> Materias
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="Division">
-                <span class="oi oi-plus" aria-hidden="true"></span> Division
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="Ciclo">
-                <span class="oi oi-plus" aria-hidden="true"></span> Ciclo Electivo
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="DivisionCiclo">
-                <span class="oi oi-plus" aria-hidden="true"></span> Division Ciclo Electivo
-            </NavLink>
-        </div>
-        
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="Libros">
-                <span class="oi oi-plus" aria-hidden="true"></span> Libro de Actas
-            </NavLink>
-        </div>
-        
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="DivisionCicloMateriaAlumnos">
-                <span class="oi oi-plus" aria-hidden="true"></span> Inscribir Alumnos
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="Notas">
-                <span class="oi oi-list-rich" aria-hidden="true"></span> Calificaciones
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="TipoEvaluaciones">
-                <span class="oi oi-list-rich" aria-hidden="true"></span> Tipo De Evaluacion
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="Profesores">
-                <span class="oi oi-person" aria-hidden="true"></span> Profesores
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="Alumno">
-                <span class="oi oi-people" aria-hidden="true"></span> Datos Alumnos
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="ReporteNotas">
-                <span class="oi oi-file" aria-hidden="true"></span> Reporte
-            </NavLink>
-        </div>
+<div class="sidebar bg-dark vh-100" style="width: 250px; overflow-y: auto; position: fixed;">
+    <div class="navbar-brand p-3 text-center">
+        <a href="/Index">
+            <img src="Logo_itsc.png" alt="Logo" style="width: 60px;" />
+        </a>
+    </div>
+
+    <nav class="nav flex-column p-3">
+        <NavLink class="nav-link text-light mb-2" href="/Index" Match="NavLinkMatch.All">
+            <i class="bi bi-house-door"></i> Inicio
+        </NavLink>
+        <NavLink class="nav-link text-light mb-2" href="Carrera">
+            <i class="bi bi-briefcase"></i> Carreras
+        </NavLink>
+        <NavLink class="nav-link text-light mb-2" href="Materias">
+            <i class="bi bi-file-earmark"></i> Materias
+        </NavLink>
+        <NavLink class="nav-link text-light mb-2" href="Division">
+            <i class="bi bi-table"></i> Division
+        </NavLink>
+        <NavLink class="nav-link text-light mb-2" href="Ciclo">
+            <i class="bi bi-calendar"></i> Ciclos Lectivos
+        </NavLink>
+        <NavLink class="nav-link text-light mb-2" href="DivisionCiclo">
+            <i class="bi bi-plus-circle"></i> Division Ciclo Electivo
+        </NavLink>
+        <NavLink class="nav-link text-light mb-2" href="inscripcion">
+            <i class="bi bi-pencil"></i> Inscribir Alumnos
+        </NavLink>
+        <NavLink class="nav-link text-light mb-2" href="DivisionCicloMateriaAlumnos">
+            <i class="bi bi-pencil"></i> Alta Docente
+        </NavLink>
+        <NavLink class="nav-link text-light mb-2" href="Notas">
+            <i class="bi bi-card-list"></i> Calificaciones
+        </NavLink>
+        <NavLink class="nav-link text-light mb-2" href="Profesores">
+            <i class="bi bi-person"></i> Profesores
+        </NavLink>
+        <NavLink class="nav-link text-light mb-2" href="Alumno">
+            <i class="bi bi-people"></i> Registrar Alumnos
+        </NavLink>
+        <NavLink class="nav-link text-light mb-2" href="Libros">
+            <i class="bi bi-journal"></i> Libro de Actas
+        </NavLink>
+        <NavLink class="nav-link text-light mb-2" href="TipoEvaluaciones">
+            <i class="bi bi-list-check"></i> Tipo De Evaluacion
+        </NavLink>
+        <NavLink class="nav-link text-light mb-2" href="ReporteNotas">
+            <i class="bi bi-file-earmark-text"></i> Reporte
+        </NavLink>
+        <NavLink class="nav-link text-light mb-2" href="CargarDeExcel">
+            <i class="bi bi-upload"></i> Cargar alumnos desde Excel
+        </NavLink>
     </nav>
 </div>
 
 @code {
-    private bool collapseNavMenu = true;
-
-    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
-
-    private void ToggleNavMenu()
+    private async Task CerrarSesion()
     {
-        collapseNavMenu = !collapseNavMenu;
+        var autenticacionExt = (AutenticacionExtension)autenticacionProvider;
+        await autenticacionExt.ActualizarEstadoAutenticacion(null);
+        navManager.NavigateTo("/", true);
     }
 }
+<style>
+    /* Animación para los botones del menú */
+    .nav-link {
+        transition: background-color 0.3s ease, transform 0.3s ease;
+    }
+
+        .nav-link:hover {
+            background-color: #007bff; /* Cambia el color de fondo al pasar el ratón */
+            transform: scale(1.05); /* Aumenta ligeramente el tamaño del botón */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Añade una sombra */
+        }
+</style>
+
+
+

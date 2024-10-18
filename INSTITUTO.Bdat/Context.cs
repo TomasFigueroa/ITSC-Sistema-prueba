@@ -1,4 +1,6 @@
 ﻿using INSTITUTO.Bdat.Data.Entity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
@@ -43,13 +45,14 @@ namespace INSTITUTO.Bdat
             {
                 o.HasKey(b => b.IdDivision);
                 o.Property(b => b.NombreDiv);
-                
+
 
             });
             modelBuilder.Entity<Materias>(o =>
             {
                 o.HasKey(b => b.IdMateria);
                 o.Property(b => b.Nombre);
+                o.Property(b => b.IdCarrera);
 
             });
             modelBuilder.Entity<Ciclos>(o =>
@@ -87,6 +90,9 @@ namespace INSTITUTO.Bdat
                 o.Property(b => b.Nacionalidad);
                 o.Property(b => b.Estado);
                 o.Property(b => b.Tbase);
+                o.Property(b => b.Numero);
+                o.Property(b => b.Sexo);
+                o.Property(b => b.Id_Carrera);
 
             });
             modelBuilder.Entity<Profesor>(o =>
@@ -120,8 +126,10 @@ namespace INSTITUTO.Bdat
                 o.Property(b => b.NombreEva);
 
             });
-           
+
         }
     }
-
+       
 }
+
+

@@ -34,6 +34,7 @@ namespace INTITUTO1.Server.Controllers
 
             if (ciclo == null)
             {
+
                 return BadRequest($"No se encontro el ciclo con el id: {id}");
             }
 
@@ -53,7 +54,7 @@ namespace INTITUTO1.Server.Controllers
             _context.Ciclos.Add(mdCiclo);
             await _context.SaveChangesAsync();
             return Ok(responseApi);
-  
+
         }
 
         //// PUT: api/Ciclo
@@ -66,7 +67,7 @@ namespace INTITUTO1.Server.Controllers
             {
                 var dbCiclo = await _context.Ciclos.FirstOrDefaultAsync(e => e.IdCiclo == id);
 
-                if (dbCiclo != null)
+                if (dbCiclo == null)
                 {
                     dbCiclo.Fecha = dtoCiclo.Fecha;
 
@@ -74,50 +75,47 @@ namespace INTITUTO1.Server.Controllers
                     await _context.SaveChangesAsync();
                     responseApi.EsCorrecto = true;
                 }
-                else
-                {
-                    responseApi.EsCorrecto = false;
-                    responseApi.Mensaje = "Ciclo no encontrada";
-                }
-
             }
-            catch (Exception ex)
+            catch (Exception ex) 
             {
+
                 responseApi.EsCorrecto = false;
                 responseApi.Mensaje = ex.InnerException.Message;
+
+
             }
             return Ok(responseApi);
         }
 
         // DELETE: api/Ciclo/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
-        {
-            var responseApi = new ResponseAPI<int>();
-
-            try
+            public async Task<IActionResult> Delete(int id)
             {
-                var dbCiclo = await _context.Ciclos.FirstOrDefaultAsync(e => e.IdCiclo == id);
+                var responseApi = new ResponseAPI<int>();
 
-                if(dbCiclo != null)
+                try
                 {
-                    _context.Ciclos.Remove(dbCiclo);
-                    await _context.SaveChangesAsync();
-                    responseApi.EsCorrecto = true;
+                    var dbCiclo = await _context.Ciclos.FirstOrDefaultAsync(e => e.IdCiclo == id);
+
+                    if (dbCiclo != null)
+                    {
+                        _context.Ciclos.Remove(dbCiclo);
+                        await _context.SaveChangesAsync();
+                        responseApi.EsCorrecto = true;
+                    }
+                    else
+                    {
+                        responseApi.EsCorrecto = false;
+                        responseApi.Mensaje = "Ciclo no encontrado";
+                    }
                 }
-                else
+                catch (Exception ex)
                 {
                     responseApi.EsCorrecto = false;
-                    responseApi.Mensaje = "Ciclo no encontrado";
+                    responseApi.Mensaje = ex.InnerException.Message;
                 }
-            }
-            catch (Exception ex)
-            {
-                responseApi.EsCorrecto = false;
-                responseApi.Mensaje = ex.InnerException.Message;
-            }
-            return Ok(responseApi);
+                return Ok(responseApi);
 
-        }
-    }
-}
+            }
+        
+    } }

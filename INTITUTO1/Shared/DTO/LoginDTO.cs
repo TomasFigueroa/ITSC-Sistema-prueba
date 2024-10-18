@@ -6,10 +6,9 @@ using System.Threading.Tasks;
 
 namespace INTITUTO1.Shared.DTO
 {
-    public class DTOMaterias
+    public class LoginDTO
     {
-        public string Nombre { get; set; }
-        public int IdCarrera { get; set; }
-        public int IdDivision { get; set; }
+        public string Correo { get; set; }
+        public string Clave { get; set; }
     }
 }

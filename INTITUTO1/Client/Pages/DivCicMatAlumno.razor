@@ -1,4 +1,6 @@
 ﻿@page "/DivisionCicloMateriaAlumnos"
+@attribute [Authorize]
+
 @using Microsoft.EntityFrameworkCore
 
 @inject HttpClient Http
@@ -12,7 +14,7 @@
         <table class="table" style="border-collapse: collapse; width: 100%; border: 2px solid #E6E6FA;">
             <thead>
                 <tr style="border-bottom: 2px solid #ddd;">
-                    <th style="border-right: 2px solid #ddd;">Division-Ciclo Electivo</th>
+                    <th style="border-right: 2px solid #ddd;">Division - Ciclo Lectivo</th>
                     <th style="border-right: 2px solid #ddd;">Materia</th>
                     <th style="border-right: 2px solid #ddd;">Profesor</th>
                     <th style="border-right: 2px solid #ddd;">Acción</th>
@@ -43,7 +45,7 @@
         <table class="table" style="border-collapse: collapse; width: 100%; border: 2px solid #E6E6FA;">
             <thead>
                 <tr style="border-bottom: 2px solid #ddd;">
-                    <th style="border-right: 2px solid #ddd;">Division-Ciclo Materia</th>
+                    <th style="border-right: 2px solid #ddd;">Division - Ciclo Materia</th>
                     <th style="border-right: 2px solid #ddd;">Alumno</th>
                     <th style="border-right: 2px solid #ddd;">Libro</th>
                     <th style="border-right: 2px solid #ddd;">Acción</th>

@@ -1,4 +1,5 @@
 ﻿@page "/TipoEvaluaciones"
+@attribute [Authorize]
 @using Microsoft.EntityFrameworkCore
 @inject HttpClient Http
 
@@ -12,7 +13,7 @@
         <table class="table" style="border-collapse: collapse; width: 100%; border: 2px solid #E6E6FA;">
             <thead>
                 <tr style="border-bottom: 2px solid #ddd;">
-                    <th style="border-right: 2px solid #ddd;">ID</th>
+                    
                     <th style="border-right: 2px solid #ddd;">Nombre</th>
                     <th style="border-right: 2px solid #ddd;">Acción</th>
                 </tr>
@@ -21,7 +22,6 @@
                 @foreach (var tipoEvaluacion in tipoEvaluaciones)
                 {
                     <tr>
-                        <td style="border-right: 2px solid #ddd;">@tipoEvaluacion.IdTipoEva</td>
                         <td style="border-right: 2px solid #ddd;">@tipoEvaluacion.NombreEva</td>
                         <td>
                             <div class="action-buttons m-1">

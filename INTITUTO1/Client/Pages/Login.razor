@@ -1,0 +1,123 @@
+﻿@page "/"
+
+@layout LoginLayout
+
+
+@inject HttpClient httpClient
+@using INTITUTO1.Client.Auth
+@using INTITUTO1.Shared
+@using Microsoft.AspNetCore.Components.Authorization
+@inject AuthenticationStateProvider autenticacionProvider
+@inject NavigationManager navManager
+
+
+<style>
+    .login-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-color: #f8f9fa;
+    }
+
+    .login-box {
+        background-color: #ffffff;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        padding: 30px;
+        max-width: 400px;
+        width: 100%;
+    }
+
+    .login-box h3 {
+        font-weight: bold;
+        margin-bottom: 30px;
+        color: #343a40;
+    }
+
+    .form-control {
+        border-radius: 5px;
+        padding: 12px;
+        border: 1px solid #ced4da;
+        transition: border-color 0.3s ease;
+    }
+
+    .form-control:focus {
+        border-color: #80bdff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+
+    .btn-primary {
+        background-color: #007bff;
+        border-color: #007bff;
+        border-radius: 5px;
+        padding: 10px 15px;
+        font-size: 16px;
+        font-weight: bold;
+        transition: background-color 0.3s ease;
+        width: 100%;
+    }
+
+    .btn-primary:hover {
+        background-color: #0056b3;
+    }
+
+    .error-message {
+        color: #dc3545;
+        margin-bottom: 15px;
+        font-weight: bold;
+    }
+</style>
+
+<div class="login-container">
+
+    <div class="login-box">
+
+        <div class="mb-3 text-center">
+            <img src="Logo_IT.png" alt="Logo" class="loginlogo" style="width: 90px">
+        </div>
+        
+        <div class="mb-3">
+            <label for="correo">Correo</label>
+            <input id="correo" @bind="login.Correo" class="form-control" placeholder="Ingrese su correo" />
+        </div>
+
+        <div class="mb-3">
+            <label for="clave">Contraseña</label>
+            <input id="clave" type="password" @bind="login.Clave" class="form-control" placeholder="Ingrese su contraseña" />
+        </div>
+
+        <div class="mb-3">
+            <button @onclick="IniciarSesion" class="btn btn-primary">Iniciar Sesión</button>
+        </div>
+
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="error-message">@errorMessage</div>
+        }
+
+    </div>
+</div>
+
+
+@code {
+    private LoginDTO login = new LoginDTO();
+    private string errorMessage;
+    private async Task IniciarSesion()
+    {
+        var loginResponse = await httpClient.PostAsJsonAsync<LoginDTO>("api/Login/Login", login);
+        if (loginResponse.IsSuccessStatusCode)
+        {
+            var sesionUsuario = await loginResponse.Content.ReadFromJsonAsync<SesionDTO>();
+            var autenticacionExt = (AutenticacionExtension)autenticacionProvider;
+            await autenticacionExt.ActualizarEstadoAutenticacion(sesionUsuario);
+
+            navManager.NavigateTo("/Index");
+        }
+        else
+        {
+            errorMessage = "Usuario o contraseña incorrectos. Intente nuevamente.";
+        }
+    }
+
+}
