@@ -3,41 +3,64 @@
 @using Microsoft.AspNetCore.Components.Authorization;
 @inject AuthenticationStateProvider autenticacionProvider
 @inject NavigationManager navManager
+<div class="page" style="height: 100vh;">
 
-<div class="page">
-    
-    <div style="background-color: #212529;">
-        
-        @*  condicional *@
+    <!-- Barra superior, terminando antes de la barra lateral -->
+    <div class="top-row navbar" style="background-color: #212529; display: flex; justify-content: flex-end; align-items: center; height: 60px; position: fixed; top: 0; left: 250px; right: 0; z-index: 1000;">
+        <div class="oi-account-logout px-4 text-center">
+            <a @onclick="CerrarSesion" href="javascript:void(0)" class="logout-link text-light" style="text-decoration: none; font-weight: 500; padding: 10px 20px; border-radius: 5px; background-color: #212529; transition: background-color 0.3s ease;">
+                <i class="bi bi-box-arrow-right" style="margin-right: 8px;"></i> Cerrar Sesión
+            </a>
+        </div>
+    </div>
+
+    <!-- Barra lateral -->
+    <div class="nav-container" style="background-color: #212529; position: fixed; top: 0; bottom: 0; left: 0; width: 250px; z-index: 100;">
         @if (!IsLoginPage)
         {
             <NavMenu />
         }
     </div>
 
-    <main>
-        <div class="top-row ps-4 px-3 navbar" style="background-color: #141619; display: flex; justify-content: flex-end; align-items: center;">
-            <div class="oi-account-logout px-4 text-center">
-                <a @onclick="CerrarSesion" href="javascript:void(0)" class="logout-link">Cerrar Sesión</a>
-            </div>
-        </div>
-
-        <article class="content px-4">
+    <!-- Contenido principal -->
+    <main style="margin-left: 250px; padding-top: 60px; overflow-y: auto;">
+        <div class="content" style="padding: 20px;">
             @Body
-        </article>
+        </div>
     </main>
 
 </div>
 
+<style>
+    /* Estilos para la barra lateral y la barra superior */
+    .logout-link:hover {
+        background-color: #292b2e;
+    }
+
+    /* La barra lateral tiene el mismo color que la barra superior */
+    .nav-container {
+        background-color: #212529;
+        padding-top: 20px;
+    }
+
+    /* Asegura que el contenido principal no quede detrás de la barra superior */
+    main {
+        margin-left: 250px; /* Deja espacio para la barra lateral */
+    }
+
+    .content {
+        padding-top: 20px;
+    }
+</style>
 
 @code {
-
     private bool IsLoginPage;
 
     protected override void OnParametersSet()
     {
-       
+        // Detectar si es la página de login
     }
+
     private async Task CerrarSesion()
     {
         var autenticacionExt = (AutenticacionExtension)autenticacionProvider;
@@ -45,5 +68,8 @@
         navManager.NavigateTo("/", true);
     }
 }
+
+
+
 
 

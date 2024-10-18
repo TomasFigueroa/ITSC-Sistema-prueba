@@ -405,6 +405,15 @@ h5 {
 }
 
 }
+html {
+    scroll-behavior: smooth;
+}
+main {
+    margin-left: 250px;
+    padding-top: 60px;
+    overflow-y: auto;
+    scroll-behavior: smooth; /* Habilita el scroll suave solo en esta área */
+}
 
 
 

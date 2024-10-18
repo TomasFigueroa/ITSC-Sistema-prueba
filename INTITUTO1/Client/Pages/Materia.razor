@@ -22,6 +22,7 @@
                 <tr style="border-bottom: 2px solid #ddd;">
                     <th style="border-right: 2px solid #ddd;">Nombre</th>
                     <th style="border-right: 2px solid #ddd;">Carrera</th>
+                    <th style="border-right: 2px solid #ddd;">Division</th>
                     <th style="border-right: 2px solid #ddd;">Acción</th>
                 </tr>
             </thead>
@@ -31,6 +32,7 @@
                     <tr>
                         <td style="border-right: 2px solid #ddd;">@materia.Nombre</td>
                         <td style="border-right: 2px solid #ddd;">@GetNombreCarrera(materia.IdCarrera)</td>
+                        <td style="border-right: 2px solid #ddd;">@GetNombreDivision(materia.IdDivision)</td>
                         <td>
                             <div class="action-buttons m-1">
                                 <button class="btn btn-primary me-2" @onclick="() => OpenModalToEdit(materia, materia.IdMateria)"><i class="oi oi-pencil"></i></button>
@@ -74,6 +76,16 @@
                                 }
                             </InputSelect>
                         </div>
+                        <div class="mb-3">
+                            <label class="form-label">Division</label>
+                            <InputSelect class="form-control" @bind-Value="currentMateria.IdDivision">
+                                <option value="">Seleccione una division</option>
+                                @foreach (var divisiones in divisions)
+                                {
+                                    <option value="@divisiones.IdDivision">@divisiones.NombreDiv</option>
+                                }
+                            </InputSelect>
+                        </div>
                         <button type="submit" class="btn btn-primary">@((isEdit) ? "Guardar Cambios" : "Agregar Materia")</button>
                     </EditForm>
                 </div>
@@ -107,6 +119,7 @@
 @code {
     private List<Materias> materias = new List<Materias>();
     private List<Carrerass> carreras = new List<Carrerass>();
+    private List<Divisiones> divisions = new List<Divisiones>();
     private bool isModalOpen = false;
     private bool isEdit = false;
     private DTOMaterias currentMateria = new DTOMaterias();
@@ -122,6 +135,7 @@
     {
         await LoadMaterias();
         await LoadCarreras();
+        await LoadDivision();
         await FiltrarMaterias();
     }
 
@@ -130,6 +144,17 @@
         try
         {
             materias = await Http.GetFromJsonAsync<List<Materias>>("api/Materias");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading materias: {ex.Message}");
+        }
+    }
+    private async Task LoadDivision()
+    {
+        try
+        {
+            divisions = await Http.GetFromJsonAsync<List<Divisiones>>("api/Division");
         }
         catch (Exception ex)
         {
@@ -161,6 +186,11 @@
     {
         var carrera = carreras.FirstOrDefault(c => c.IdCarrera == idCarrera);
         return carrera?.Nombre ?? "Carrera no encontrada";
+    }
+    private string GetNombreDivision(int iddivision)
+    {
+        var division = divisions.FirstOrDefault(c => c.IdDivision == iddivision);
+        return division?.NombreDiv ?? "Division no encontrada";
     }
 
     private void OpenModalToAdd()
