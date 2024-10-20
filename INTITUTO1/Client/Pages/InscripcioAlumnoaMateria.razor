@@ -40,17 +40,19 @@
         }
     </InputSelect>
 </div>
-<div class="table-container" style="overflow: hidden; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); margin-bottom: 20px;">
-    <div style="border-top-left-radius: 12px; border-top-right-radius: 12px; background-color: #f2f2f2; padding: 10px;">
-        <table class="table" style="border-collapse: collapse; width: 100%; border: 2px solid #E6E6FA;">
+<div class="table-container shadow-sm mb-4" style="border-radius: 12px; overflow: hidden;">
+    <div style="border-top-left-radius: 12px; border-top-right-radius: 12px; background-color: #f9f9f9; padding: 10px;">
+        <table class="table table-hover" style="border-collapse: collapse; width: 100%; border: 2px solid #E6E6FA; border-radius: 12px;">
             <thead>
-                <tr style="border-bottom: 2px solid #ddd;">
-                    <th style="border-right: 2px solid #ddd;">Nombre</th>
-                    <th style="border-right: 2px solid #ddd;">Carrera</th>
-                    <th style="border-right: 2px solid #ddd;">Division</th>
-                    <th style="border-right: 2px solid #ddd;">Profesor</th>
-                    <th style="border-right: 2px solid #ddd;">Accion</th>
-                    
+                <tr style="background-color: #f0f8ff; color: #333; border-bottom: 2px solid #ddd;">
+                    <th colspan="5" class="titulo-sutil" style="text-align: center; padding: 10px 0; font-size: 1.2rem; font-weight: 600; background-color: #e6e6fa; border-radius: 12px 12px 0 0;">Materias</th>
+                </tr>
+                <tr style="background-color: #f0f8ff; color: #333; border-bottom: 2px solid #ddd;">
+                    <th style="border-right: 2px solid #ddd; padding: 12px;">Nombre</th>
+                    <th style="border-right: 2px solid #ddd; padding: 12px;">Carrera</th>
+                    <th style="border-right: 2px solid #ddd; padding: 12px;">División</th>
+                    <th style="border-right: 2px solid #ddd; padding: 12px;">Profesor</th>
+                    <th style="border-right: 2px solid #ddd; padding: 12px;">Acción</th>
                 </tr>
             </thead>
             <tbody>
@@ -58,68 +60,77 @@
                 {
                     @foreach (var materia in materiasFiltradas)
                     {
-                        if (idcarrera == materia.IdCarrera && iddivision == materia.IdDivision && DcMateria.MateriasIdMateria== materia.IdMateria 
-                        && DcMateria.DivisionCicloIdDivCic==idciclo)
+                        if (idcarrera == materia.IdCarrera && iddivision == materia.IdDivision && DcMateria.MateriasIdMateria == materia.IdMateria)
                         {
-                            <tr>
-                                <td style="border-right: 2px solid #ddd;">@materia.Nombre</td>
-                                <td style="border-right: 2px solid #ddd;">@GetNombreCarrera(materia.IdCarrera)</td>
-                                <td style="border-right: 2px solid #ddd;">@GetNombreDivision(materia.IdDivision)</td>
-                                <td style="border-right: 2px solid #ddd;">@GetProfesorNombre(DcMateria.ProfesorIdProfesor)</td>
-                                <td>
-                                    <button class="btn btn-outline-primary btn-sm rounded-pill" @onclick="() => SeleccionarMateria(DcMateria.IdDivCicMat)">
-                                        <i class=""></i> Seleccionar
+                            <tr style="background-color: #fff; border-bottom: 1px solid #ddd;">
+                                <td style="border-right: 2px solid #ddd; padding: 10px;">@materia.Nombre</td>
+                                <td style="border-right: 2px solid #ddd; padding: 10px;">@GetNombreCarrera(materia.IdCarrera)</td>
+                                <td style="border-right: 2px solid #ddd; padding: 10px;">@GetNombreDivision(materia.IdDivision)</td>
+                                <td style="border-right: 2px solid #ddd; padding: 10px;">@GetProfesorNombre(DcMateria.ProfesorIdProfesor)</td>
+                                <td style="padding: 10px;">
+                                    <button class="btn btn-outline-warning btn-sm rounded-pill" @onclick="() => SeleccionarMateria(DcMateria.IdDivCicMat)">
+                                        <i class="fas fa-check-circle"></i> Seleccionar
                                     </button>
                                 </td>
                             </tr>
                         }
                     }
-                   
-                    
                 }
             </tbody>
         </table>
     </div>
 </div>
+
 <button class="btn btn-success" @onclick="OpenModalToAddAlumno">Inscribir Alumno</button>
-<div class="table-container" style="overflow: hidden; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); margin-bottom: 20px;">
-    <div style="border-top-left-radius: 12px; border-top-right-radius: 12px; background-color: #f2f2f2; padding: 10px;">
-        <table class="table" style="border-collapse: collapse; width: 100%; border: 2px solid #E6E6FA;">
+<button class="btn btn-warning" @onclick="OnInitializedAsync">
+    <i class="fa fa-broom"></i> Limpiar
+</button>
+<div class="table-container shadow-sm mb-4" style="border-radius: 12px; overflow: hidden;">
+    <div style="background-color: #f9f9f9; padding: 10px; border-top-left-radius: 12px; border-top-right-radius: 12px;">
+        <table class="table" style="border-collapse: collapse; width: 100%; border: 2px solid #E6E6FA; border-radius: 12px;">
             <thead>
-                <tr style="border-bottom: 2px solid #ddd;">
-                    <th style="border-right: 2px solid #ddd;">Carrera</th>
-                    <th style="border-right: 2px solid #ddd;">Nombre</th>
-                    <th style="border-right: 2px solid #ddd;">Apellido</th>
-                    <th style="border-right: 2px solid #ddd;">DNI</th>
-                    <th style="border-right: 2px solid #ddd;">Accion</th>
+                <tr style="background-color: #f0f8ff; color: #333; border-bottom: 2px solid #ddd;">
+                    <th colspan="5" class="titulo-sutil" style="text-align: center; padding: 10px 0; font-size: 1.2rem; font-weight: 600; background-color: #e6e6fa; border-radius: 12px 12px 0 0;">Alumnos</th>
+                </tr>
+                <tr style="background-color: #f0f8ff; border-bottom: 2px solid #ddd;">
+                    <th style="border-right: 2px solid #ddd; padding: 8px;">Carrera</th>
+                    <th style="border-right: 2px solid #ddd; padding: 8px;">Nombre</th>
+                    <th style="border-right: 2px solid #ddd; padding: 8px;">Apellido</th>
+                    <th style="border-right: 2px solid #ddd; padding: 8px;">DNI</th>
+                    <th style="border-right: 2px solid #ddd; padding: 8px;">Acción</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach (var divisionCicloMateriaAlumno in divisionCicloMateriaAlumnos)
-                {@foreach (var alumno in alumnos)
+                {
+                    @foreach (var alumno in alumnos)
                     {
-                        if (idmateria == divisionCicloMateriaAlumno.DivisionCicloMateriaIdDivCicMat && alumno.IdAlumno== divisionCicloMateriaAlumno.AlumnosIdAlumno )
+                        if (idmateria == divisionCicloMateriaAlumno.DivisionCicloMateriaIdDivCicMat && alumno.IdAlumno == divisionCicloMateriaAlumno.AlumnosIdAlumno)
                         {
-                            <tr>
-                                <td style="border-right: 2px solid #ddd;">@GetNombreCarrera(alumno.Id_Carrera)</td>
-                                <td style="border-right: 2px solid #ddd;">@alumno.Nombre</td>
-                                <td style="border-right: 2px solid #ddd;">@alumno.Apellido</td>
-                                <td style="border-right: 2px solid #ddd;">@alumno.DNI_Alum</td>
-                                <td>
-                                    <div class="action-buttons m-1">
-                                        <button class="btn btn-primary me-2" @onclick="() => OpenModalToEditAlumno(divisionCicloMateriaAlumno, divisionCicloMateriaAlumno.IdDivCicMatAlum)"><i class="oi oi-pencil"></i></button>
-                                        <button class="btn btn-danger" @onclick="() => OpenConfirmDeleteModalAlumno(divisionCicloMateriaAlumno.IdDivCicMatAlum)"><i class="oi oi-trash"></i></button>
+                            <tr style="border-bottom: 1px solid #ddd; background-color: #fff;">
+                                <td style="border-right: 2px solid #ddd; padding: 10px;">@GetNombreCarrera(alumno.Id_Carrera)</td>
+                                <td style="border-right: 2px solid #ddd; padding: 10px;">@alumno.Nombre</td>
+                                <td style="border-right: 2px solid #ddd; padding: 10px;">@alumno.Apellido</td>
+                                <td style="border-right: 2px solid #ddd; padding: 10px;">@alumno.DNI_Alum</td>
+                                <td style="padding: 10px;">
+                                    <div class="d-flex justify-content-start">
+                                        <button class="btn btn-warning me-2" style="background-color: #ffc107; border-color: #ffc107;" @onclick="() => OpenModalToEditAlumno(divisionCicloMateriaAlumno, divisionCicloMateriaAlumno.IdDivCicMatAlum)">
+                                            <i class="fas fa-edit" style="color: white;"></i>
+                                        </button>
+                                        <button class="btn btn-danger" @onclick="() => OpenConfirmDeleteModalAlumno(divisionCicloMateriaAlumno.IdDivCicMatAlum)">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
                                     </div>
                                 </td>
                             </tr>
                         }
-                        
                     }
                 }
             </tbody>
         </table>
     </div>
 </div>
+
 
 
 @if (isModalOpenAlumno)
@@ -248,6 +259,10 @@
 
     protected override async Task OnInitializedAsync()
     {
+        idmateria = 0;
+        iddivision = 0;
+        idcarrera = 0;
+        idciclo = 0;
         await LoadMaterias();
         await LoadCarreras();
         await LoadDivision();
@@ -258,6 +273,7 @@
         await LoadAlumnos();
         await FiltrarMaterias();
         await LoadLibros();
+        
     }
 
     private async Task LoadMaterias()

@@ -3,10 +3,136 @@
 @inject HttpClient Http
 @inject IJSRuntime JS
 @using System.Net.Http.Json
+<!-- Filtros -->
+<div class="mb-3">
+    <label class="form-label">Carrera</label>
+    <InputSelect class="form-control" @bind-Value="idcarrera">
+        <option value="">Seleccione una carrera</option>
+        @foreach (var carrera in carreras)
+        {
+            <option value="@carrera.IdCarrera">@carrera.Nombre</option>
+        }
+    </InputSelect>
+</div>
+<div class="mb-3">
+    <label class="form-label">Ciclo</label>
+    <InputSelect class="form-control" @bind-Value="idciclo">
+        <option value="">Seleccione Año lectivo</option>
+        @foreach (var ciclo in divCiclo)
+        {
+            @foreach (var div in divisions)
+            {
+                if (div.CarrerassIdCarrera == idcarrera && ciclo.DivisionesIdDivision == div.IdDivision)
+                {
+                    <option value="@ciclo.IdDivCic">@GetNombreDivision(ciclo.DivisionesIdDivision, ciclo.CicloIdCiclo)</option>
+                }
+                
+            }
+            
+        }
+    </InputSelect>
+</div>
+<div class="mb-3">
+    <label class="form-label">Materia</label>
+    <InputSelect class="form-control" @bind-Value="iddivision">
+        <option value="">Seleccione una division</option>
+        @foreach (var divisiones in divisionCicloMaterias)
+        {
+            @foreach (var materia in materias)
+            {
+                if (idciclo == divisiones.DivisionCicloIdDivCic && idcarrera == materia.IdCarrera && materia.IdCarrera == idcarrera)
+                {
+                    <option value="@divisiones.IdDivCicMat">@materia.Nombre</option>
+                }
+                
+            }
+           
+
+        }
+    </InputSelect>
+</div>
+<div class="mb-3">
+    <label class="form-label">Alumno</label>
+    <InputSelect class="form-control" @bind-Value="idalumno">
+        <option value="">Seleccione un Alumno</option>
+      
+            @foreach (var alumno in divisionCicloMateriaAlumnos)
+            {
+                if (iddivision == alumno.DivisionCicloMateriaIdDivCicMat)
+                {
+                    <option value="@alumno.AlumnosIdAlumno">@GetAlumnoNombre(alumno.AlumnosIdAlumno)</option>
+                }
+
+            }
+
+
+        
+    </InputSelect>
+</div>
 
 <!-- Botón para agregar nota -->
 <button class="btn btn-primary" @onclick="OpenModalToAdd">Agregar Nota</button>
+<button class="btn btn-warning" @onclick="OnInitializedAsync">
+    <i class="fa fa-broom"></i> Limpiar
+</button>
 
+<!-- Tabla de notas -->
+<div class="table-container" style="overflow: hidden; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); margin-bottom: 20px;">
+    <div style="border-top-left-radius: 12px; border-top-right-radius: 12px; background-color: #f2f2f2; padding: 10px;">
+        <table class="table" style="border-collapse: collapse; width: 100%; border: 2px solid #E6E6FA;">
+            <thead>
+                <tr border-bottom: 2px solid #ddd;>
+                    <th style="border-right: 2px solid #ddd;">Alumno</th>
+                    <th style="border-right: 2px solid #ddd;">Tipo Evaluacion</th>
+                    <th style="border-right: 2px solid #ddd;">Fecha</th>
+                    <th style="border-right: 2px solid #ddd;">Nota</th>
+                    <th style="border-right: 2px solid #ddd;">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (divisionCicloMateriaAlumnos != null && divisionCicloMateriaAlumnos.Any())
+                {
+                    @foreach (var alumno in divisionCicloMateriaAlumnos)
+                    {
+                        @foreach (var notasmod in Notas)
+                        {
+                            @if (alumno.IdDivCicMatAlum == notasmod.DivsionCiclosMateriaAlumnosIdDivCicMatAlum && alumno.DivisionCicloMateriaIdDivCicMat == iddivision &&
+                            alumno.AlumnosIdAlumno == idalumno)
+                            {
+                                <tr>
+                                    <td style="border-right: 2px solid #ddd;">@GetAlumnoNombre(alumno.AlumnosIdAlumno)</td>
+                                    <td style="border-right: 2px solid #ddd;">@GetEvaluacionNombre(notasmod.TipoEvaluacionIdTipoEva)</td>
+                                    <td style="border-right: 2px solid #ddd;">@notasmod.Fecha</td>
+                                    <td style="border-right: 2px solid #ddd;">@notasmod.Nota</td>
+                                    <td style="border-right: 2px solid #ddd;">
+                                        <button class="btn btn-primary me-2" @onclick="() => OpenModalToEdit(notasmod, notasmod.IdNotas)"><i class="oi oi-pencil"></i></button>
+                                        <button class="btn btn-danger" @onclick="() => OpenConfirmDeleteModal(notasmod.IdNotas)"><i class="oi oi-trash"></i></button>
+                                        <button class="btn btn-danger" @onclick="() => GenerateReport(notasmod.IdNotas)"><i>Reporte</i></button>
+                                    </td>
+                                </tr>
+                            }
+
+                        }
+
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 20px;">
+                            <div style="text-align: center;">
+                                <!-- Logo del Instituto -->
+                                <img src="Logo_IT.png" alt="Logo ITSC" style="max-width: 100px; margin-bottom: 20px; animation: fadeIn 1s ease-in-out;">
+                                <!-- Mensaje elegante -->
+                                <h5 style="color: #6c757d; font-style: italic;">No se encontraron notas.</h5>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
 
 @if (mostrarAlerta)
 {
@@ -61,9 +187,15 @@
                         <label for="alumnoSelect" class="form-label">Alumno:</label>
                         <InputSelect class="form-select" id="alumnoSelect" @bind-Value="currentNota.Materias">
                             <option value="0">Seleccione un alumno</option>
-                            @foreach (var alumno in alumnos)
+                            @foreach (var alumno in divisionCicloMateriaAlumnos)
                             {
-                                <option value="@alumno.IdDivCicMatAlum">@GetAlumnoNombre(alumno.AlumnosIdAlumno)</option>
+                                
+                                    if(alumno.DivisionCicloMateriaIdDivCicMat == iddivision && idalumno== alumno.AlumnosIdAlumno)
+                                    {
+                                    <option value="@alumno.IdDivCicMatAlum">@GetAlumnoNombre(alumno.AlumnosIdAlumno)</option>
+                                    }
+                                    
+                              
                             }
                         </InputSelect>
                     </div>
@@ -91,63 +223,7 @@
 }
 
 
-<!-- Tabla de notas -->
-<div class="table-container" style="overflow: hidden; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); margin-bottom: 20px;">
-<div style="border-top-left-radius: 12px; border-top-right-radius: 12px; background-color: #f2f2f2; padding: 10px;">
-<table class="table" style="border-collapse: collapse; width: 100%; border: 2px solid #E6E6FA;">
-    <thead>
-        <tr border-bottom: 2px solid #ddd;>
-            <th style="border-right: 2px solid #ddd;">Alumno</th>
-            <th style="border-right: 2px solid #ddd;">Materia</th>
-            <th style="border-right: 2px solid #ddd;">Tipo Evaluacion</th>
-            <th style="border-right: 2px solid #ddd;">Fecha</th>
-            <th style="border-right: 2px solid #ddd;">Nota</th>
-            <th style="border-right: 2px solid #ddd;">Acciones</th>
-        </tr>
-    </thead>
-    <tbody>
-        @if (notasFiltradas != null && notasFiltradas.Any())
-        {
-            @foreach (var nota in notasFiltradas)
-            {
-                @foreach (var notasmod in Notas)
-                        {
-                            @if (nota.Id == notasmod.IdNotas)
-                            {
-                                <tr>
-                                    <td style="border-right: 2px solid #ddd;">@nota.AlumnoNombre</td>
-                                    <td style="border-right: 2px solid #ddd;">@nota.Materia</td>
-                                    <td style="border-right: 2px solid #ddd;">@nota.TipoEvaluacion</td>
-                                    <td style="border-right: 2px solid #ddd;">@nota.Fecha</td>
-                                    <td style="border-right: 2px solid #ddd;">@nota.Nota</td>
-                                    <td style="border-right: 2px solid #ddd;">
-                                        <button class="btn btn-primary me-2" @onclick="() => OpenModalToEdit(notasmod, notasmod.IdNotas)"><i class="oi oi-pencil"></i></button>
-                                        <button class="btn btn-danger" @onclick="() => OpenConfirmDeleteModal(nota.Id)"><i class="oi oi-trash"></i></button>
-                                        <button class="btn btn-danger" @onclick="() => GenerateReport(nota.Id)"><i>Reporte</i></button>
-                                    </td>
-                                </tr>
-                            }
-                            
-                }
-                       
-            }
-        }else
-        {
-                <tr >
-                    <td colspan="6" style="text-align: center; padding: 20px;">
-                        <div style="text-align: center;">
-                            <!-- Logo del Instituto -->
-                            <img src="Logo_IT.png" alt="Logo ITSC" style="max-width: 100px; margin-bottom: 20px; animation: fadeIn 1s ease-in-out;">
-                            <!-- Mensaje elegante -->
-                            <h5 style="color: #6c757d; font-style: italic;">No se encontraron notas.</h5>
-                        </div>
-                    </td>
-                </tr>
-        }
-    </tbody>
-</table>
-</div>
-</div>
+
 
 <!-- Modal de confirmación para eliminar -->
 @if (isConfirmDeleteModalOpen)
@@ -173,6 +249,19 @@
 
 
 @code {
+    private List<DivsionCiclosMateriaAlumnos> divisionCicloMateriaAlumnos = new List<DivsionCiclosMateriaAlumnos>();
+    private List<DivisionCicloMateria> divisionCicloMaterias = new List<DivisionCicloMateria>();
+    private List<LIbros> libros = new List<LIbros>();
+    private List<Ciclos> ciclo = new List<Ciclos>();
+    private List<DivisionCiclo> divCiclo = new List<DivisionCiclo>();
+    private List<Carrerass> carreras = new List<Carrerass>();
+    private List<Divisiones> divisions = new List<Divisiones>();
+    private List<Profesor> profesores = new List<Profesor>();
+    private int idcarrera;
+    private int idciclo;
+    private int iddivision;
+    private int idmateria;
+    private int idalumno;
     private List<NotasDto> notasFiltradas = new();
     private List<Materias> materias = new();
     private List<DivsionCiclosMateriaAlumnos> alumnos = new();
@@ -191,12 +280,25 @@
 
     protected override async Task OnInitializedAsync()
     {
+        idcarrera = 0;
+        iddivision = 0;
+        idciclo = 0;
+        idalumno = 0;
+        idmateria = 0;
         await LoadNotas();
         await LoadMaterias();
         await LoadTipoEvaluaciones();
         await LoadAlumnos();
         await LoadAlumno();
         await LoadNotasMOD();
+        await LoadDivCiclo();
+        await LoadDivision();
+        await LoadCarreras();
+        await LoadCiclos();
+        await LoadDivisionCicloMaterias();
+        await LoadProfesores();
+        await LoadDivisionCicloMateriaAlumnos();
+        await LoadLibros();
     }
 
     private async Task LoadNotas()
@@ -227,13 +329,121 @@
     {
         tipoEvaluaciones = await Http.GetFromJsonAsync<List<TipoEvaluacion>>("api/TipoNota");
     }
+    private async Task LoadDivCiclo()
+    {
+        try
+        {
+            divCiclo = await Http.GetFromJsonAsync<List<DivisionCiclo>>("api/DivisionCiclo");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading materias: {ex.Message}");
+        }
+    }
+    private async Task LoadDivision()
+    {
+        try
+        {
+            divisions = await Http.GetFromJsonAsync<List<Divisiones>>("api/Division");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading materias: {ex.Message}");
+        }
+    }
+
+    private async Task LoadCarreras()
+    {
+        try
+        {
+            carreras = await Http.GetFromJsonAsync<List<Carrerass>>("api/Carrera");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading carreras: {ex.Message}");
+        }
+    }
+    private async Task LoadCiclos()
+    {
+        try
+        {
+            ciclo = await Http.GetFromJsonAsync<List<Ciclos>>("api/Ciclo");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading ciclos: {ex.Message}");
+        }
+    }
+    private async Task LoadDivisionCicloMaterias()
+    {
+        try
+        {
+            divisionCicloMaterias = await Http.GetFromJsonAsync<List<DivisionCicloMateria>>("api/DivisionCicloMateria");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading DivisionCicloMaterias: {ex.Message}");
+        }
+    }
+    private async Task LoadProfesores()
+    {
+        try
+        {
+            profesores = await Http.GetFromJsonAsync<List<Profesor>>("api/Profesor");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading Profesores: {ex.Message}");
+        }
+    }
+    private async Task LoadDivisionCicloMateriaAlumnos()
+    {
+        try
+        {
+            divisionCicloMateriaAlumnos = await Http.GetFromJsonAsync<List<DivsionCiclosMateriaAlumnos>>("api/DivisionCicloMateriaAlumnos");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading DivisionCicloMateriaAlumnos: {ex.Message}");
+        }
+    }
+    private async Task LoadLibros()
+    {
+        try
+        {
+            libros = await Http.GetFromJsonAsync<List<LIbros>>("api/Libros");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading Libros: {ex.Message}");
+        }
+    }
     private string GetAlumnoNombre(int idAlumno)
     {
         var alumn = alumno.FirstOrDefault(m => m.IdAlumno == idAlumno);
         if (alumn == null)
             return "N/A";
 
-        return $"{alumn.DNI_Alum.ToString()}-{ alumn.Nombre.ToString()}-{alumn.Apellido}";
+        return $"{alumn.DNI_Alum.ToString()}-{alumn.Apellido}-{alumn.Nombre.ToString()}";
+    }
+    private string GetEvaluacionNombre(int idEva)
+    {
+        var eva = tipoEvaluaciones.FirstOrDefault(m => m.IdTipoEva == idEva);
+        if (eva == null)
+            return "N/A";
+
+        return $"{eva.NombreEva.ToString()}";
+    }
+    private string GetNombreDivision(int idDivision, int idCiclo)
+    {
+        var div = divisions.FirstOrDefault(m => m.IdDivision == idDivision);
+        if (div == null)
+            return "N/A";
+        var Cic = ciclo.FirstOrDefault(m => m.IdCiclo == idCiclo);
+        if (Cic == null)
+            return "N/A";
+
+        return $"{div.NombreDiv}-{Cic.Fecha.ToString()}";
     }
     private void MostrarError()
     {
@@ -320,9 +530,10 @@
                 // Si el POST es exitoso, cierra el modal y actualiza la lista de notas
                 CloseModal();
                 MostrarAlerta();
+                await LoadDivisionCicloMateriaAlumnos();
                 await LoadAlumnos();
                 await LoadAlumno();
-                await LoadNotas();
+                await LoadNotasMOD();
             }
             else
             {
@@ -343,6 +554,10 @@
         await Http.PutAsJsonAsync($"api/Notas/{idactual}", currentNota);
         CloseModal();
         await LoadNotas();
+        await LoadDivisionCicloMateriaAlumnos();
+        await LoadAlumnos();
+        await LoadAlumno();
+        await LoadNotasMOD();
     }
 
     private async Task DeleteNota()
@@ -350,6 +565,10 @@
         await Http.DeleteAsync($"api/Notas/{idToDelete}");
         CloseConfirmDeleteModal();
         await LoadNotas();
+        await LoadDivisionCicloMateriaAlumnos();
+        await LoadAlumnos();
+        await LoadAlumno();
+        await LoadNotasMOD();
     }
     private async Task GenerateReport(int alumnoId)
     {
