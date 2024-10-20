@@ -32,7 +32,8 @@ builder.Services.AddDbContext<Context>(opciones => opciones.UseSqlServer("name=C
 // Registrar HttpClient
 builder.Services.AddHttpClient();
 
-
+//Generar pdf
+builder.Services.AddScoped<PdfService>();
 
 // Subir Excel
 builder.Services.AddScoped<ExcelService>();

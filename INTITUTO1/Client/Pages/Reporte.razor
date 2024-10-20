@@ -1,152 +1,74 @@
-﻿
-@inject IJSRuntime JSRuntime
+﻿@inject IJSRuntime JS
 @page "/ReporteNotas"
 @attribute [Authorize]
 @using System.ComponentModel.DataAnnotations
+@inject HttpClient Http
 
+<h3>Generar Certificado</h3>
 
+<EditForm Model="@certificado" OnValidSubmit="@GenerarCertificado">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
 
-
-<div class="container mt-4">
     <div>
-        <label for="alumnoSelect">Seleccionar Alumno:</label>
-        <select id="alumnoSelect" class="form-control" @onchange="OnAlumnoSelected">
-            <option value="">Seleccione un alumno</option>
-            @foreach (var alumno in alumnos)
-            {
-                <option value="@alumno.Id">@alumno.Apellido, @alumno.Nombre</option>
-            }
-        </select>
+        <label>Nombre del Administrador:</label>
+        <InputText @bind-Value="certificado.NombreAdministrador" />
+    </div>
+    <div>
+        <label>Nombre del Alumno:</label>
+        <InputText @bind-Value="certificado.NombreAlumno" />
+    </div>
+    <div>
+        <label>DNI del Alumno:</label>
+        <InputNumber @bind-Value="certificado.DniAlumno" />
+    </div>
+    <div>
+        <label>Carrera:</label>
+        <InputText @bind-Value="certificado.Carrera" />
+    </div>
+    <div>
+        <label>Interesado:</label>
+        <InputText @bind-Value="certificado.Interesado" />
+    </div>
+    <div>
+        <label>Día:</label>
+        <InputNumber @bind-Value="certificado.DiaNumero" />
+    </div>
+    <div>
+        <label>Mes:</label>
+        <InputText @bind-Value="certificado.Mes" />
+    </div>
+    <div>
+        <label>Año:</label>
+        <InputNumber @bind-Value="certificado.Anio" />
     </div>
 
-    @if (alumnoSeleccionado != null)
-    {
-        <div class="report-header mt-4">
-            <img src="WhatsApp-Image-2024-05-27-at-22.51.18.png" alt="Logo" class="logo">
-            <div class="report-title">
-                <h3>República Argentina</h3>
-                <h3>Ministerio de Educación de la Provincia de Córdoba</h3>
-                <h3>Instituto Técnico Superior Córdoba</h3>
-                <h3>Tecnica Superior en Óptica y Contactología</h3>
-            </div>
-        </div>
+    <button type="submit">Generar PDF</button>
+</EditForm>
 
-        <div class="report-body mt-4">
-            <h4>CERTIFICADO MATERIAS APROBADAS - ESTUDIANTE REGULAR</h4>
-
-            <div class="student-info">
-                <p><strong>Apellido y Nombre:</strong> @alumnoSeleccionado.Apellido, @alumnoSeleccionado.Nombre</p>
-                <p><strong>Tipo de DNI:</strong> DNI</p>
-                <p><strong>Número de DNI:</strong> @alumnoSeleccionado.Dni</p>
-                <p><strong>Fecha de Nac:</strong> @alumnoSeleccionado.FechaNacimiento.ToShortDateString()</p>
-                <p><strong>Curso:</strong> @alumnoSeleccionado.Curso</p>
-                <p><strong>Domicilio:</strong> @alumnoSeleccionado.Domicilio</p>
-                <p><strong>Teléfono:</strong> @alumnoSeleccionado.Telefono</p>
-            </div>
-
-            <h5>CALIFICACIONES</h5>
-
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th>Asignaturas</th>
-                        <th>Calificaciones Primer Año</th>
-                        <th>Calificaciones Segundo Año</th>
-                        <th>Calificaciones Tercer Año</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var nota in alumnoSeleccionado.Notas)
-                    {
-                        <tr>
-                            <td>@nota.Asignatura</td>
-                            <td>@nota.PrimerAno</td>
-                            <td>@nota.SegundoAno</td>
-                            <td>@nota.TercerAno</td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-
-            <div class="footer">
-                <p><strong>Promedio General:</strong> @alumnoSeleccionado.PromedioGeneral</p>
-                <p><strong>Estado:</strong> @alumnoSeleccionado.Estado</p>
-            </div>
-
-            <button class="btn btn-primary mt-3" @onclick="PrintReport">Imprimir Reporte</button>
-        </div>
-    }
-</div>
+@if (pdfBytes != null)
+{
+    <h4>Certificado generado:</h4>
+    <a href="@pdfUrl" target="_blank">Descargar Certificado</a>
+}
 
 
 
 @code {
 
+    private INTITUTO1.Shared.DTO.CertificadoExamenDTO certificado = new INTITUTO1.Shared.DTO.CertificadoExamenDTO();
+    private byte[] pdfBytes;
+    private string pdfUrl;
 
-
-    private List<Alumno> alumnos = new List<Alumno>
+    private async Task GenerarCertificado()
     {
-        new Alumno
-        {
-            Id = 1,
-            Nombre = "Juan",
-            Apellido = "Perez",
-            Dni = "12345678",
-            FechaNacimiento = new DateTime(2000, 1, 1),
-            Curso = "3° Año",
-            Domicilio = "Calle Falsa 123",
-            Telefono = "123456789",
-            Notas = new List<Nota>
-            {
-                new Nota { Asignatura = "Matemáticas", PrimerAno = 8, SegundoAno = 7, TercerAno = 9 },
-                new Nota { Asignatura = "Lengua", PrimerAno = 9, SegundoAno = 8, TercerAno = 10 }
-            },
-            PromedioGeneral = 8.5,
-            Estado = "Regular"
-        },
-        // Añadir más alumnos si es necesario
-    };
-
-    private Alumno alumnoSeleccionado;
-
-    private void OnAlumnoSelected(ChangeEventArgs e)
-    {
-        var alumnoId = int.Parse(e.Value.ToString());
-        alumnoSeleccionado = alumnos.FirstOrDefault(a => a.Id == alumnoId);
-    }
-
-    private async Task PrintReport()
-    {
-        JSRuntime.InvokeVoidAsync("print");
-        
-        
-    }
-
- 
-
-    public class Alumno
-    {
-        public int Id { get; set; }
-        public string Nombre { get; set; }
-        public string Apellido { get; set; }
-        public string Dni { get; set; }
-        public DateTime FechaNacimiento { get; set; }
-        public string Curso { get; set; }
-        public string Domicilio { get; set; }
-        public string Telefono { get; set; }
-        public List<Nota> Notas { get; set; }
-        public double PromedioGeneral { get; set; }
-        public string Estado { get; set; }
-    }
-
-    public class Nota
-    {
-        public string Asignatura { get; set; }
-        public double PrimerAno { get; set; }
-        public double SegundoAno { get; set; }
-        public double TercerAno { get; set; }
+        var response = await Http.PostAsJsonAsync("api/CrearCertificadoEx", certificado);
+        response.EnsureSuccessStatusCode();
+        pdfBytes = await response.Content.ReadAsByteArrayAsync();
+        pdfUrl = $"data:application/pdf;base64,{Convert.ToBase64String(pdfBytes)}";
     }
 }
+
 
 
 
