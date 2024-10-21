@@ -52,6 +52,7 @@ namespace INSTITUTO.Bdat
             {
                 o.HasKey(b => b.IdMateria);
                 o.Property(b => b.Nombre);
+                o.Property(b => b.IdCarrera);
 
             });
             modelBuilder.Entity<Ciclos>(o =>
@@ -89,6 +90,9 @@ namespace INSTITUTO.Bdat
                 o.Property(b => b.Nacionalidad);
                 o.Property(b => b.Estado);
                 o.Property(b => b.Tbase);
+                o.Property(b => b.Numero);
+                o.Property(b => b.Sexo);
+                o.Property(b => b.Id_Carrera);
 
             });
             modelBuilder.Entity<Profesor>(o =>

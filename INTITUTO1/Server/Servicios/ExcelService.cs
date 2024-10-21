@@ -30,7 +30,10 @@ namespace INTITUTO1.Server.Servicios
                             Fecha_Nac = ConvertToDateTime(worksheet.Cell(row, 5)),
                             Tbase = worksheet.Cell(row, 6).GetString(),
                             Nacionalidad = worksheet.Cell(row, 7).GetString(),
-                            Estado = ConvertToBoolean(worksheet.Cell(row, 8))
+                            Estado = ConvertToBoolean(worksheet.Cell(row, 8)),
+                            Numero = ConvertToInt(worksheet.Cell(row, 9)),
+                            Sexo = worksheet.Cell(row, 10).GetString(),
+
                         };
                         alumnos.Add(alumno);
                     }
@@ -96,6 +99,8 @@ namespace INTITUTO1.Server.Servicios
         public string Tbase { get; set; }
         public string Nacionalidad { get; set; }
         public bool Estado { get; set; }
+        public int Numero { get; set; }
+        public string Sexo { get; set; }
     }
 }
 

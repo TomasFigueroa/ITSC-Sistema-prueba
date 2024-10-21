@@ -17,6 +17,9 @@ namespace INTITUTO1.Shared.DTO
         public string Tbase { get; set; }
         public string Nacionalidad { get; set; }
         public bool Estado { get; set; }
+        public int Numero { get; set; }
+        public int Id_Carrera { get; set; }
+        public string Sexo { get; set; }
 
 
     }

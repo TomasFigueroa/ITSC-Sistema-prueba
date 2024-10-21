@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace INSTITUTO.Bdat.Migrations
 {
     /// <inheritdoc />
-    public partial class bua : Migration
+    public partial class actuali20 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -24,7 +24,10 @@ namespace INSTITUTO.Bdat.Migrations
                     Fecha_Nac = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Tbase = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Nacionalidad = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Estado = table.Column<bool>(type: "bit", nullable: false)
+                    Estado = table.Column<bool>(type: "bit", nullable: false),
+                    Numero = table.Column<int>(type: "int", nullable: false),
+                    Sexo = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Id_Carrera = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -79,7 +82,8 @@ namespace INSTITUTO.Bdat.Migrations
                     IdMateria = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Nombre = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    IdCarrera = table.Column<int>(type: "int", nullable: false)
+                    IdCarrera = table.Column<int>(type: "int", nullable: false),
+                    IdDivision = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {

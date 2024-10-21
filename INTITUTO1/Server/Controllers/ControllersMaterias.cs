@@ -51,6 +51,7 @@ namespace INTITUTO1.Server.Controllers
             {
                 Nombre = dtoMaterias.Nombre,
                 IdCarrera = dtoMaterias.IdCarrera,
+                IdDivision = dtoMaterias.IdDivision,
                 
             };
             _context.Materia.Add(mdMateria);
@@ -74,6 +75,7 @@ namespace INTITUTO1.Server.Controllers
                 {
                     dbMaterias.Nombre = dtoMaterias.Nombre;
                     dbMaterias.IdCarrera = dtoMaterias.IdCarrera;
+                    dbMaterias.IdDivision = dtoMaterias.IdDivision;
                     
 
                     _context.Materia.Update(dbMaterias);

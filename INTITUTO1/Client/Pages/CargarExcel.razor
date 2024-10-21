@@ -1,7 +1,6 @@
 ﻿@page "/CargarDeExcel"
 @attribute [Authorize]
 @inject HttpClient Http
-@using Microsoft.EntityFrameworkCore
 
 <h4 class="page-title">Seleccionar Alumnos</h4>
 
@@ -21,27 +20,62 @@
 {
     <h3 style="text-align:center">Alumnos Cargados</h3>
     <EditForm Model="@selectedAlumnos" OnValidSubmit="EnviarAlumnosSeleccionados">
-        <div class="card-container">
-            @foreach (var alumno in alumnos)
-            {
-                <div class="card">
-                    <div class="card-header">
-                        @alumno.Nombre @alumno.Apellido
-                    </div>
-                    <div class="card-content">
-                        <p><strong>DNI:</strong> @alumno.DNI_Alum</p>
-                        <p><strong>Cuil:</strong> @alumno.Cuil</p>
-                        <p><strong>Fecha Nac:</strong> @alumno.Fecha_Nac.ToString("yyyy-MM-dd")</p>
-                        <p><strong>Tbase:</strong> @alumno.Tbase</p>
-                        <p><strong>Nacionalidad:</strong> @alumno.Nacionalidad</p>
-                        <p><strong>Estado:</strong> @(alumno.Estado ? "Activo" : "Inactivo")</p>
-                    </div>
-                    <div class="card-actions">
-                        <InputCheckbox @bind-Value="alumno.IsSelected" /> Seleccionar
-                        <button type="button" class="delete-button" @onclick="() => EliminarAlumno(alumno)">Eliminar</button>
-                    </div>
-                </div>
-            }
+        <div class="mb-3">
+            <label class="form-label">Carrera</label>
+            <InputSelect class="form-control" @bind-Value="idcarrera">
+                <option value="">Seleccione una carrera</option>
+                @foreach (var carrera in carreras)
+                {
+                    <option value="@carrera.IdCarrera">@carrera.Nombre</option>
+                }
+            </InputSelect>
+        </div>
+
+        <div class="table-container" style="overflow: hidden; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); margin-bottom: 20px;">
+            <div style="border-top-left-radius: 12px; border-top-right-radius: 12px; background-color: #f2f2f2; padding: 10px;">
+                <table class="table" style="border-collapse: collapse; width: 100%; border: 2px solid #E6E6FA;">
+                    <thead>
+                        <tr style="border-bottom: 2px solid #ddd;">
+                            @* <th style="border-right: 2px solid #ddd;"><InputCheckbox @onchange="SelectAllAlumnos" /></th> *@
+                            <th style="border-right: 2px solid #ddd;">Carrera</th>
+                            <th style="border-right: 2px solid #ddd;">Nombre</th>
+                            <th style="border-right: 2px solid #ddd;">Apellido</th>
+                            <th style="border-right: 2px solid #ddd;">DNI</th>
+                            <th style="border-right: 2px solid #ddd;">CUIL</th>
+                            <th style="border-right: 2px solid #ddd;">Fecha de Nacimiento</th>
+                            <th style="border-right: 2px solid #ddd;">Tbase</th>
+                            <th style="border-right: 2px solid #ddd;">Nacionalidad</th>
+                            <th style="border-right: 2px solid #ddd;">Sexo</th>
+                            <th style="border-right: 2px solid #ddd;">Teléfono</th>
+                            <th style="border-right: 2px solid #ddd;">Estado</th>
+                            <th style="border-right: 2px solid #ddd;">Accion</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var alumno in alumnos)
+                        {
+                            <tr>
+                                @* <td style="border-right: 2px solid #ddd;"><InputCheckbox @bind-Value="alumno.IsSelected" /></td> *@
+                                <td style="border-right: 2px solid #ddd;">@GetNombreCarrera(alumno.idcarrera=idcarrera)</td>
+                                <td style="border-right: 2px solid #ddd;">@alumno.Nombre</td>
+                                <td style="border-right: 2px solid #ddd;">@alumno.Apellido</td>
+                                <td style="border-right: 2px solid #ddd;">@alumno.DNI_Alum</td>
+                                <td style="border-right: 2px solid #ddd;">@alumno.Cuil</td>
+                                <td style="border-right: 2px solid #ddd;">@alumno.Fecha_Nac.ToShortDateString()</td>
+                                <td style="border-right: 2px solid #ddd;">@alumno.Tbase</td>
+                                <td style="border-right: 2px solid #ddd;">@alumno.Nacionalidad</td>
+                                <td style="border-right: 2px solid #ddd;">@alumno.Sexo</td>
+                                <td style="border-right: 2px solid #ddd;">@alumno.Numero</td>
+                                <td style="border-right: 2px solid #ddd;">@(alumno.Estado ? "Activo" : "Inactivo")</td>
+                                <td>
+                                    <InputCheckbox @bind-Value="alumno.IsSelected" /> Seleccionar
+                                    <button type="button" class="delete-button" @onclick="() => EliminarAlumno(alumno)">Eliminar</button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
         </div>
         <button type="submit" class="btn-submit">Enviar Alumnos Seleccionados</button>
     </EditForm>
@@ -179,17 +213,40 @@
 </style>
 
 @code {
+    private List<Carrerass> carreras = new List<Carrerass>();
     private List<AlumnoViewModel> alumnos = new();
     private List<DTOAlumnos> selectedAlumnos = new();
     private IBrowserFile selectedFile;
+    private bool selectAll = false;
+    private int idcarrera;
     private bool mostrarMensajeExito = false;
+    protected override async Task OnInitializedAsync()
+    {
 
+      
+        await LoadCarreras();
+    }
     private async Task HandleSelected(InputFileChangeEventArgs e)
     {
         selectedFile = e.File;
         mostrarMensajeExito = false;
     }
-
+    private async Task LoadCarreras()
+    {
+        try
+        {
+            carreras = await Http.GetFromJsonAsync<List<Carrerass>>("api/Carrera");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading carreras: {ex.Message}");
+        }
+    }
+    private string GetNombreCarrera(int idCarrera)
+    {
+        var carrera = carreras.FirstOrDefault(c => c.IdCarrera == idCarrera);
+        return carrera?.Nombre ?? "Carrera no encontrada";
+    }
     private async Task CargarAlumnos()
     {
         if (selectedFile != null)
@@ -214,6 +271,7 @@
             }
         }
     }
+  
 
     private async Task EnviarAlumnosSeleccionados()
     {
@@ -254,6 +312,9 @@
         public string Tbase { get; set; }
         public string Nacionalidad { get; set; }
         public bool Estado { get; set; }
+        public int Numero { get; set; }
+        public int idcarrera { get; set; }
+        public string Sexo { get; set; }
 
         public AlumnoViewModel(DTOAlumnos dto)
         {
@@ -265,6 +326,9 @@
             Tbase = dto.Tbase;
             Nacionalidad = dto.Nacionalidad;
             Estado = dto.Estado;
+            Numero = dto.Numero;
+            Sexo = dto.Sexo;
+            idcarrera = dto.Id_Carrera;
         }
 
         public DTOAlumnos ToAlumnoDto()
@@ -278,7 +342,10 @@
                     Fecha_Nac = Fecha_Nac,
                     Tbase = Tbase,
                     Nacionalidad = Nacionalidad,
-                    Estado = Estado
+                    Estado = Estado,
+                    Numero =  Numero,
+                    Sexo =  Sexo,
+                    Id_Carrera =  idcarrera
                 };
         }
     }
