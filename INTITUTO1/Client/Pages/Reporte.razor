@@ -1,10 +1,10 @@
-﻿@inject IJSRuntime JS
+﻿@inject IJSRuntime JSRuntime
 @page "/ReporteNotas"
 @attribute [Authorize]
 @using System.ComponentModel.DataAnnotations
 @inject HttpClient Http
 
-<h3>Generar Certificado</h3>
+<h3>Generar Certificado de examen</h3>
 
 <EditForm Model="@certificado" OnValidSubmit="@GenerarCertificado">
     <DataAnnotationsValidator />
@@ -14,62 +14,107 @@
         <label>Nombre del Administrador:</label>
         <InputText @bind-Value="certificado.NombreAdministrador" />
     </div>
+
     <div>
         <label>Nombre del Alumno:</label>
         <InputText @bind-Value="certificado.NombreAlumno" />
     </div>
+
     <div>
         <label>DNI del Alumno:</label>
         <InputNumber @bind-Value="certificado.DniAlumno" />
     </div>
+
     <div>
         <label>Carrera:</label>
         <InputText @bind-Value="certificado.Carrera" />
     </div>
+
     <div>
         <label>Interesado:</label>
         <InputText @bind-Value="certificado.Interesado" />
     </div>
+
     <div>
         <label>Día:</label>
-        <InputNumber @bind-Value="certificado.DiaNumero" />
+        <InputNumber @bind-Value="certificado.DiaNumero" min="1" max="31" />
     </div>
+
     <div>
         <label>Mes:</label>
-        <InputText @bind-Value="certificado.Mes" />
+        <InputSelect @bind-Value="certificado.Mes" class="form-control">
+            @foreach (var mes in meses)
+            {
+                <option value="@mes">@mes</option>
+            }
+        </InputSelect>
     </div>
+
     <div>
         <label>Año:</label>
         <InputNumber @bind-Value="certificado.Anio" />
     </div>
 
-    <button type="submit">Generar PDF</button>
+    <button type="submit" class="btn btn-primary">Generar PDF</button>
 </EditForm>
 
-@if (pdfBytes != null)
-{
-    <h4>Certificado generado:</h4>
-    <a href="@pdfUrl" target="_blank">Descargar Certificado</a>
-}
-
+<div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="errorModalLabel">Error</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                @errorMensaje
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 
 @code {
-
-    private INTITUTO1.Shared.DTO.CertificadoExamenDTO certificado = new INTITUTO1.Shared.DTO.CertificadoExamenDTO();
-    private byte[] pdfBytes;
+    private CertificadoExamenDTO certificado = new CertificadoExamenDTO();
     private string pdfUrl;
+    private string errorMensaje;
+
+    //lista de meses
+    private List<string> meses = new List<string>
+    {
+         "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+        "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+    };
 
     private async Task GenerarCertificado()
     {
+        // Genera el certificado enviando los datos a la API
         var response = await Http.PostAsJsonAsync("api/CrearCertificadoEx", certificado);
-        response.EnsureSuccessStatusCode();
-        pdfBytes = await response.Content.ReadAsByteArrayAsync();
-        pdfUrl = $"data:application/pdf;base64,{Convert.ToBase64String(pdfBytes)}";
+
+        if (response.IsSuccessStatusCode)
+        {
+            // Lee el contenido de la respuesta como un arreglo de bytes
+            var pdfBytes = await response.Content.ReadAsByteArrayAsync();
+
+            // Crea un Blob a partir de los bytes
+            using var streamRef = new DotNetStreamReference(stream: new MemoryStream(pdfBytes));
+
+            // Inicia la descarga del archivo PDF
+            await JSRuntime.InvokeVoidAsync("downloadFileFromStream", "Certificado.pdf", streamRef);
+        }
+        else
+        {
+            // Manejo de errores (opcional)
+            string content = await response.Content.ReadAsStringAsync();
+            // Imprime o registra el contenido completo para ayudar a la depuración
+            Console.WriteLine($"Error al generar el certificado: {response.StatusCode}, Detalle: {content}");
+            errorMensaje = $"Error al generar el certificado: {response.StatusCode}, Detalle: {content}";
+            await JSRuntime.InvokeVoidAsync("showErrorModal");
+        }
     }
+
+
+
 }
-
-
-
-
-

@@ -19,7 +19,12 @@ namespace INTITUTO1.Server.Controllers
         [HttpPost]
         public IActionResult GenerarCertificado([FromBody] CertificadoExamenDTO dto)
         {
-            //se convierte el dto en una entidad
+            if (dto == null)
+            {
+                return BadRequest("El DTO no puede ser nulo.");
+            }
+
+            // Conversión del DTO a la entidad
             var model = new CertificadoExamen
             {
                 NombreAdministrador = dto.NombreAdministrador,
@@ -32,8 +37,16 @@ namespace INTITUTO1.Server.Controllers
                 Anio = dto.Anio
             };
 
-            var pdfBytes = _pdfService.GenerateCertificado(model);
-            return File(pdfBytes, "application/pdf", "constancia.pdf");
+            try
+            {
+                var pdfBytes = _pdfService.GenerateCertificado(model);
+                return File(pdfBytes, "application/pdf", "constancia.pdf");
+            }
+            catch (Exception ex)
+            {
+                // Registro del error (puedes usar un logger)
+                return StatusCode(500, $"Error generando el PDF: {ex.Message}");
+            }
         }
     }
 }

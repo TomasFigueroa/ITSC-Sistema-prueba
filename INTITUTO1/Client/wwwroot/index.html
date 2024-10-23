@@ -32,8 +32,9 @@
         </div>
 
 
-
     </div>
+
+
 
     <div id="blazor-error-ui">
         An unhandled error has occurred.
@@ -41,6 +42,34 @@
         <a class="dismiss">🗙</a>
     </div>
     <script src="_framework/blazor.webassembly.js"></script>
+
+    <script>
+        window.downloadFileFromStream = async (filename, streamReference) => {
+            const response = await streamReference.stream(); // Utiliza stream() para obtener el contenido
+            const reader = response.getReader();
+            const result = await reader.read();
+            const blob = new Blob([result.value], { type: 'application/pdf' });
+            const url = URL.createObjectURL(blob);
+
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(url);
+        };
+    </script>
+
+    <script>
+        function showErrorModal() {
+            var modal = new bootstrap.Modal(document.getElementById('errorModal'));
+            modal.show();
+        }
+    </script>
+
+
+
 
 </body>
 
