@@ -105,6 +105,19 @@ namespace INTITUTO1.Server.Controllers
                     return BadRequest(responseApi);
                 }
 
+                // Validar si ya existe un alumno con el mismo DNI y CUIL en la misma carrera
+                var alumnoExistente = await _context.alumnos
+                    .FirstOrDefaultAsync(a => a.DNI_Alum == dtoAlumno.DNI_Alum
+                                           && a.Cuil == dtoAlumno.Cuil
+                                           && a.Id_Carrera == dtoAlumno.Id_Carrera);
+
+                if (alumnoExistente != null)
+                {
+                    responseApi.EsCorrecto = false;
+                    responseApi.Mensaje = "Ya existe un alumno con el mismo DNI y CUIL en esta carrera.";
+                    return BadRequest(responseApi);
+                }
+
                 var mdAlumno = new Alumnos
                 {
                     Nombre = dtoAlumno.Nombre,
@@ -119,6 +132,7 @@ namespace INTITUTO1.Server.Controllers
                     Sexo = dtoAlumno.Sexo,
                     Id_Carrera = dtoAlumno.Id_Carrera
                 };
+
                 _context.alumnos.Add(mdAlumno);
                 await _context.SaveChangesAsync();
 
@@ -132,6 +146,7 @@ namespace INTITUTO1.Server.Controllers
             }
             return Ok(responseApi);
         }
+
 
         // PUT: api/Alumnos/{id}
         [HttpPut("{id:int}")]

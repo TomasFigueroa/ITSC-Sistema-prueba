@@ -60,6 +60,17 @@ namespace INTITUTO1.Server.Controllers
         [HttpPost]
         public async Task<ActionResult<TipoEvaluacionDTO>> PostTipoEvaluacion(TipoEvaluacionDTO tipoEvaluacionDto)
         {
+            // Verificar si ya existe un tipo de evaluación con el mismo nombre
+            var tipoEvaluacionExistente = await _context.TipoEvaluacions
+                .FirstOrDefaultAsync(te => te.NombreEva == tipoEvaluacionDto.NombreEva);
+
+            if (tipoEvaluacionExistente != null)
+            {
+                // Retornar un error de conflicto si ya existe
+                return Conflict(new { message = "Ya existe un tipo de evaluación con este nombre." });
+            }
+
+            // Si no existe, proceder a crear el nuevo tipo de evaluación
             var tipoEvaluacion = new TipoEvaluacion
             {
                 NombreEva = tipoEvaluacionDto.NombreEva
@@ -72,6 +83,7 @@ namespace INTITUTO1.Server.Controllers
 
             return CreatedAtAction(nameof(GetTipoEvaluacion), new { id = tipoEvaluacion.IdTipoEva }, tipoEvaluacionDto);
         }
+
 
         // PUT: api/TipoEvaluacion/5
         [HttpPut("{id}")]

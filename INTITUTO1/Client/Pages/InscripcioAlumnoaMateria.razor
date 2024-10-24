@@ -1,5 +1,6 @@
 ﻿@page "/inscripcion"
 @attribute [Authorize]
+@inject IJSRuntime JS
 @using Microsoft.EntityFrameworkCore
 
 @inject HttpClient Http
@@ -26,20 +27,7 @@
         }
     </InputSelect>
 </div>
-<div class="mb-3">
-    <label class="form-label">Division</label>
-    <InputSelect class="form-control" @bind-Value="iddivision">
-        <option value="">Seleccione una division</option>
-        @foreach (var divisiones in divisions)
-        {
-            if (idcarrera == divisiones.CarrerassIdCarrera)
-            {
-                <option value="@divisiones.IdDivision">@divisiones.NombreDiv</option>
-            }
-            
-        }
-    </InputSelect>
-</div>
+
 <div class="table-container shadow-sm mb-4" style="border-radius: 12px; overflow: hidden;">
     <div style="border-top-left-radius: 12px; border-top-right-radius: 12px; background-color: #f9f9f9; padding: 10px;">
         <table class="table table-hover" style="border-collapse: collapse; width: 100%; border: 2px solid #E6E6FA; border-radius: 12px;">
@@ -60,7 +48,7 @@
                 {
                     @foreach (var materia in materiasFiltradas)
                     {
-                        if (idcarrera == materia.IdCarrera && iddivision == materia.IdDivision && DcMateria.MateriasIdMateria == materia.IdMateria && 
+                        if (idcarrera == materia.IdCarrera && DcMateria.MateriasIdMateria == materia.IdMateria && 
                         DcMateria.DivisionCicloIdDivCic == idciclo)
                         {
                             <tr style="background-color: #fff; border-bottom: 1px solid #ddd;">
@@ -86,6 +74,8 @@
 <button class="btn btn-warning" @onclick="OnInitializedAsync">
     <i class="fa fa-broom"></i> Limpiar
 </button>
+<button class="btn btn-outline-success" data-toggle="tooltip" title="Exportar" @onclick="(()=> export())">Generar PDF</button>
+
 <div class="table-container shadow-sm mb-4" style="border-radius: 12px; overflow: hidden;">
     <div style="background-color: #f9f9f9; padding: 10px; border-top-left-radius: 12px; border-top-right-radius: 12px;">
         <table class="table" style="border-collapse: collapse; width: 100%; border: 2px solid #E6E6FA; border-radius: 12px;">
@@ -270,6 +260,12 @@
         await LoadDivCiclo();
 
     }
+    async Task export()
+    {
+        await JS.InvokeVoidAsync("gp");
+    }
+
+
 
     private async Task LoadMaterias()
     {

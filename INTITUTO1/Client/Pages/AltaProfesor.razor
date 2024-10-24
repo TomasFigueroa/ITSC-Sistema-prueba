@@ -37,6 +37,7 @@
 
 
 <button class="btn btn-success" @onclick="OpenModalToAdd">Cargar Profesor</button>
+<button class="btn btn-primary" @onclick="OpenDuplicarMateriasModal">Duplicar Materias</button>
 
 
 <div class="table-container shadow-sm mb-4" style="border-radius: 12px; overflow: hidden;">
@@ -147,6 +148,45 @@
         </div>
     </div>
 }
+@if (isDuplicarMateriasModalOpen)
+{
+    <div class="modal fade show d-block" style="background-color: rgba(0, 0, 0, 0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Duplicar Materias</h5>
+                    <button type="button" class="btn-close" @onclick="CloseDuplicarMateriasModal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Ciclo Anterior</label>
+                        <InputSelect class="form-control" @bind-Value="cicloAnteriorId">
+                            <option value="">Seleccione un ciclo lectivo</option>
+                            @foreach (var ciclo in divCiclo)
+                            {
+                                <option value="@ciclo.IdDivCic">@GetNombreDivision(ciclo.DivisionesIdDivision, ciclo.CicloIdCiclo)</option>
+                            }
+                        </InputSelect>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Ciclo Nuevo</label>
+                        <InputSelect class="form-control" @bind-Value="cicloNuevoId">
+                            <option value="">Seleccione el nuevo ciclo lectivo</option>
+                            @foreach (var ciclo in divCiclo)
+                            {
+                                <option value="@ciclo.IdDivCic">@GetNombreDivision(ciclo.DivisionesIdDivision, ciclo.CicloIdCiclo)</option>
+                            }
+                        </InputSelect>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseDuplicarMateriasModal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" @onclick="DuplicateMaterias">Duplicar Materias</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
 
 @code {
     private List<DivsionCiclosMateriaAlumnos> divisionCicloMateriaAlumnos = new List<DivsionCiclosMateriaAlumnos>();
@@ -176,7 +216,9 @@
     private int idciclo;
     private int iddivision;
     private int idmateria;
-
+    private bool isDuplicarMateriasModalOpen = false;
+    private int cicloAnteriorId;
+    private int cicloNuevoId;
     int idactual;
     protected override async Task OnInitializedAsync()
     {
@@ -196,6 +238,59 @@
         await LoadCarreras();
         await LoadDivCiclo();
     }
+  
+
+    private void OpenDuplicarMateriasModal()
+    {
+        isDuplicarMateriasModalOpen = true;
+    }
+
+    private void CloseDuplicarMateriasModal()
+    {
+        isDuplicarMateriasModalOpen = false;
+    }
+    private async Task DuplicateMaterias()
+    {
+        try
+        {
+            // Cargar las materias del ciclo anterior
+            var materiasAnteriores = divisionCicloMaterias.Where(m => m.DivisionCicloIdDivCic == cicloAnteriorId).ToList();
+
+            foreach (var materia in materiasAnteriores)
+            {
+                // Crear una nueva instancia para la nueva materia en el ciclo nuevo
+                var nuevaMateria = new DTODivisionCicloMateria
+                    {
+                        DivisionCicloIdDivCic = cicloNuevoId,  // Nuevo ciclo lectivo
+                        MateriasIdMateria = materia.MateriasIdMateria,  // ID de la materia anterior
+                        ProfesorIdProfesor = materia.ProfesorIdProfesor  // Profesor asignado
+                    };
+
+                // Enviar la nueva materia al servidor una por una
+                var response = await Http.PostAsJsonAsync("api/DivisionCicloMateria", nuevaMateria);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    Console.WriteLine($"Error duplicating materia: {response.ReasonPhrase}");
+                }
+            }
+
+            // Recargar las materias para reflejar los cambios
+            await LoadDivisionCicloMaterias();
+
+            // Cerrar el modal después de la duplicación
+            CloseDuplicarMateriasModal();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Exception duplicating materias: {ex.Message}");
+        }
+    }
+
+
+
+  
+
 
     private async Task LoadDivisiones()
     {

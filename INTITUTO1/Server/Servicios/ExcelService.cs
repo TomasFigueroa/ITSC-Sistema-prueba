@@ -101,6 +101,8 @@ namespace INTITUTO1.Server.Servicios
         public bool Estado { get; set; }
         public string Numero { get; set; }
         public string Sexo { get; set; }
+
+        public int Id_Carrera{ get; set; }
     }
 }
 

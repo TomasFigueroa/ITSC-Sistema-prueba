@@ -45,7 +45,7 @@ namespace INTITUTO1.Server.Controllers
 
         // POST: api/Profesor
         [HttpPost]
-        public async Task<ActionResult<Profesor>> Post(DTOProfesor dtoProfesor)
+        public async Task<ActionResult<ResponseAPI<int>>> Post(DTOProfesor dtoProfesor)
         {
             if (!ModelState.IsValid)
             {
@@ -53,6 +53,19 @@ namespace INTITUTO1.Server.Controllers
             }
 
             var responseApi = new ResponseAPI<int>();
+
+            // Validar si ya existe un profesor con el mismo DNI
+            var profesorExistente = await _context.profesors
+                .FirstOrDefaultAsync(p => p.Dni == dtoProfesor.Dni);
+
+            if (profesorExistente != null)
+            {
+                responseApi.EsCorrecto = false;
+                responseApi.Mensaje = "Ya existe un profesor con el mismo DNI.";
+                return BadRequest(responseApi);
+            }
+
+            // Crear nuevo profesor si no existe uno con el mismo DNI
             var mdProfesor = new Profesor
             {
                 Apellido_Prof = dtoProfesor.Apellido_Prof,
@@ -60,13 +73,16 @@ namespace INTITUTO1.Server.Controllers
                 Dni = dtoProfesor.Dni,
                 Estado = dtoProfesor.Estado,
             };
+
             _context.profesors.Add(mdProfesor);
             await _context.SaveChangesAsync();
+
             responseApi.Valor = mdProfesor.IdProfesor;
             responseApi.EsCorrecto = true;
+            responseApi.Mensaje = "Profesor creado con éxito.";
             return Ok(responseApi);
-
         }
+
 
 
 
