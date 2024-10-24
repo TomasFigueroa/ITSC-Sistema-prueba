@@ -13,6 +13,8 @@ namespace INSTITUTO.Bdat.Data.Entity
         public DateTime Fecha { get; set; }
         public int TipoEvaluacionIdTipoEva { get; set; }
         public TipoEvaluacion TipoEvaluacion { get; set; }
+        public int LibrosId_Libro { get; set; }
+        public LIbros LIbros { get; set; }
         public int DivsionCiclosMateriaAlumnosIdDivCicMatAlum { get; set; }
         public DivsionCiclosMateriaAlumnos DivsionCiclosMateriaAlumnos { get; set; }
     }

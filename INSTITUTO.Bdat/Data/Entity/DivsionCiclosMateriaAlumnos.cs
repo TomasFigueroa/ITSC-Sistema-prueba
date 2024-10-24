@@ -16,8 +16,7 @@ namespace INSTITUTO.Bdat.Data.Entity
         public int AlumnosIdAlumno { get; set; }
         public Alumnos Alumnos { get; set; }
 
-        public int LibrosId_Libro { get; set; }
-        public LIbros LIbros { get; set; }
+        
 
         public List<Notas> Notas { get; set; }
 

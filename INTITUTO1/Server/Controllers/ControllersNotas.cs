@@ -157,7 +157,9 @@ namespace INTITUTO1.Server.Controllers
                 Nota = dtoNotas.Nota,
                 Fecha = dtoNotas.Fecha,
                 DivsionCiclosMateriaAlumnosIdDivCicMatAlum = dtoNotas.Materias,
-                TipoEvaluacionIdTipoEva = dtoNotas.TipoEvaluacionIdTipoEva
+                TipoEvaluacionIdTipoEva = dtoNotas.TipoEvaluacionIdTipoEva,
+                LibrosId_Libro = dtoNotas.Idlibro
+                
             };
 
             _context.notas.Add(nuevaNota);

@@ -23,7 +23,7 @@
                     <tr>
                         <td style="border-right: 2px solid #ddd;">@GetDivisionCicloMateriaNombre(divisionCicloMateriaAlumno.DivisionCicloMateriaIdDivCicMat)</td>
                         <td style="border-right: 2px solid #ddd;">@GetAlumnoNombre(divisionCicloMateriaAlumno.AlumnosIdAlumno)</td>
-                        <td style="border-right: 2px solid #ddd;">@GetLibroNombre(divisionCicloMateriaAlumno.LibrosId_Libro)</td>
+                       
                         <td>
                             <div class="action-buttons m-1">
                                 <button class="btn btn-primary me-2" @onclick="() => OpenModalToEditAlumno(divisionCicloMateriaAlumno, divisionCicloMateriaAlumno.IdDivCicMatAlum)"><i class="oi oi-pencil"></i></button>
@@ -67,15 +67,7 @@
                                 }
                             </InputSelect>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">Libro</label>
-                            <InputSelect class="form-control" @bind-Value="currentDivisionCicloMateriaAlumno.LibrosId_Libro">
-                                @foreach (var libro in libros)
-                                {
-                                    <option value="@libro.Id_Libro">@GetLibroNombre(libro.Id_Libro)</option>
-                                }
-                            </InputSelect>
-                        </div>
+                   
                         <button type="submit" class="btn btn-primary">@((isEditAlumno) ? "Guardar Cambios" : "Agregar DivisionCicloMateriaAlumno")</button>
                     </EditForm>
                 </div>
@@ -220,7 +212,7 @@
             {
                 DivisionCicloMateriaIdDivCicMat = divisionCicloMateriaAlumno.DivisionCicloMateriaIdDivCicMat,
                 AlumnosIdAlumno = divisionCicloMateriaAlumno.AlumnosIdAlumno,
-                LibrosId_Libro = divisionCicloMateriaAlumno.LibrosId_Libro
+              
             };
         idActualAlumno = id;
         isEditAlumno = true;

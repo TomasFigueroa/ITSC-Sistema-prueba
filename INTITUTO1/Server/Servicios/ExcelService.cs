@@ -25,13 +25,13 @@ namespace INTITUTO1.Server.Servicios
                         {
                             Nombre = worksheet.Cell(row, 1).GetString(),
                             Apellido = worksheet.Cell(row, 2).GetString(),
-                            DNI_Alum = ConvertToInt(worksheet.Cell(row, 3)),
+                            DNI_Alum = worksheet.Cell(row, 3).GetString(),
                             Cuil = worksheet.Cell(row, 4).GetString(),
                             Fecha_Nac = ConvertToDateTime(worksheet.Cell(row, 5)),
                             Tbase = worksheet.Cell(row, 6).GetString(),
                             Nacionalidad = worksheet.Cell(row, 7).GetString(),
                             Estado = ConvertToBoolean(worksheet.Cell(row, 8)),
-                            Numero = ConvertToInt(worksheet.Cell(row, 9)),
+                            Numero = worksheet.Cell(row, 9).GetString(),
                             Sexo = worksheet.Cell(row, 10).GetString(),
 
                         };
@@ -93,13 +93,13 @@ namespace INTITUTO1.Server.Servicios
     {
         public string Nombre { get; set; }
         public string Apellido { get; set; }
-        public int DNI_Alum { get; set; }
+        public string DNI_Alum { get; set; }
         public string Cuil { get; set; }
         public DateTime Fecha_Nac { get; set; }
         public string Tbase { get; set; }
         public string Nacionalidad { get; set; }
         public bool Estado { get; set; }
-        public int Numero { get; set; }
+        public string Numero { get; set; }
         public string Sexo { get; set; }
     }
 }

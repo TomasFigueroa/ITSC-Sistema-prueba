@@ -20,9 +20,9 @@
     <label class="form-label">Ciclo</label>
     <InputSelect class="form-control" @bind-Value="idciclo">
         <option value="">Seleccione Año lectivo</option>
-        @foreach (var ciclo in ciclo)
+        @foreach (var ciclo in DivCic)
         {
-            <option value="@ciclo.IdCiclo">@ciclo.Fecha</option>
+            <option value="@ciclo.IdDivCic">@GetNombreDivision(ciclo.DivisionesIdDivision, ciclo.CicloIdCiclo)</option>
         }
     </InputSelect>
 </div>
@@ -60,7 +60,8 @@
                 {
                     @foreach (var materia in materiasFiltradas)
                     {
-                        if (idcarrera == materia.IdCarrera && iddivision == materia.IdDivision && DcMateria.MateriasIdMateria == materia.IdMateria)
+                        if (idcarrera == materia.IdCarrera && iddivision == materia.IdDivision && DcMateria.MateriasIdMateria == materia.IdMateria && 
+                        DcMateria.DivisionCicloIdDivCic == idciclo)
                         {
                             <tr style="background-color: #fff; border-bottom: 1px solid #ddd;">
                                 <td style="border-right: 2px solid #ddd; padding: 10px;">@materia.Nombre</td>
@@ -188,15 +189,7 @@
                                 }
                             </InputSelect>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">Libro</label>
-                            <InputSelect class="form-control" @bind-Value="currentDivisionCicloMateriaAlumno.LibrosId_Libro">
-                                @foreach (var libro in libros)
-                                {
-                                    <option value="@libro.Id_Libro">@GetLibroNombre(libro.Id_Libro)</option>
-                                }
-                            </InputSelect>
-                        </div>
+                      
                         <button type="submit" class="btn btn-primary">@((isEditAlumno) ? "Guardar Cambios" : "Agregar DivisionCicloMateriaAlumno")</button>
                     </EditForm>
                 </div>
@@ -232,6 +225,7 @@
     private List<LIbros> libros = new List<LIbros>();
     private List<Alumnos> alumnos = new List<Alumnos>();
     private List<Ciclos> ciclo = new List<Ciclos>();
+    private List<DivisionCiclo> DivCic = new List<DivisionCiclo>();
     private List<Carrerass> carreras = new List<Carrerass>();
     private List<Divisiones> divisions = new List<Divisiones>();
     private List<Profesor> profesores = new List<Profesor>();
@@ -273,7 +267,8 @@
         await LoadAlumnos();
         await FiltrarMaterias();
         await LoadLibros();
-        
+        await LoadDivCiclo();
+
     }
 
     private async Task LoadMaterias()
@@ -293,6 +288,17 @@
             (string.IsNullOrEmpty(filtroNombre) || m.Nombre.Contains(filtroNombre, StringComparison.OrdinalIgnoreCase)) &&
             (string.IsNullOrEmpty(filtroCarrera) || GetNombreCarrera(m.IdCarrera).Contains(filtroCarrera, StringComparison.OrdinalIgnoreCase))
         ).ToList();
+    }
+    private async Task LoadDivCiclo()
+    {
+        try
+        {
+            DivCic = await Http.GetFromJsonAsync<List<DivisionCiclo>>("api/DivisionCiclo");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading materias: {ex.Message}");
+        }
     }
     private async Task LoadAlumnos()
     {
@@ -390,7 +396,17 @@
         LoadDivisionCicloMateriaAlumnos();
         LoadAlumnos();
     }
-    
+    private string GetNombreDivision(int idDivision, int idCiclo)
+    {
+        var div = divisions.FirstOrDefault(m => m.IdDivision == idDivision);
+        if (div == null)
+            return "N/A";
+        var Cic = ciclo.FirstOrDefault(m => m.IdCiclo == idCiclo);
+        if (Cic == null)
+            return "N/A";
+
+        return $"{div.NombreDiv}-{Cic.Fecha.ToString()}";
+    }
     private string GetAlumnoNombre(int idAlumno)
     {
         var alumno = alumnos.FirstOrDefault(a => a.IdAlumno == idAlumno);
@@ -471,7 +487,7 @@
             {
                 DivisionCicloMateriaIdDivCicMat = divisionCicloMateriaAlumno.DivisionCicloMateriaIdDivCicMat,
                 AlumnosIdAlumno = divisionCicloMateriaAlumno.AlumnosIdAlumno,
-                LibrosId_Libro = divisionCicloMateriaAlumno.LibrosId_Libro
+               
             };
         idActualAlumno = id;
         isEditAlumno = true;
