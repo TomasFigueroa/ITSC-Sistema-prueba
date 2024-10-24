@@ -6,57 +6,67 @@
 
 <h3>Generar Certificado de examen</h3>
 
-<EditForm Model="@certificado" OnValidSubmit="@GenerarCertificado">
-    <DataAnnotationsValidator />
-    <ValidationSummary />
+<div class="card text-center border-dark">
+    <div class="card-body">
+        <EditForm Model="@certificado" OnValidSubmit="@GenerarCertificado">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
 
-    <div>
-        <label>Nombre del Administrador:</label>
-        <InputText @bind-Value="certificado.NombreAdministrador" />
+            <div class="form-group">
+                <label>Nombre del Administrador:</label>
+                <InputText @bind-Value="certificado.NombreAdministrador" class="form-control" />
+            </div>
+
+            <div class="form-group">
+                <label>Nombre del Alumno:</label>
+                <InputText @bind-Value="certificado.NombreAlumno" class="form-control" />
+            </div>
+
+            <div class="form-group">
+                <label>DNI del Alumno:</label>
+                <InputNumber @bind-Value="certificado.DniAlumno" class="form-control" />
+            </div>
+
+            <div class="form-group">
+                <label>Carrera:</label>
+                <InputSelect @bind-Value="certificado.Carrera" class="form-control">
+                    @foreach (var carrera in carreras)
+                    {
+                        <option value="@carrera">@carrera</option>
+                    }
+                </InputSelect>
+            </div>
+
+
+            <div class="form-group">
+                <label>Interesado:</label>
+                <InputText @bind-Value="certificado.Interesado" class="form-control" />
+            </div>
+
+            <div class="form-group">
+                <label>Día:</label>
+                <InputNumber @bind-Value="certificado.DiaNumero" min="1" max="31" class="form-control" />
+            </div>
+
+            <div class="form-group">
+                <label>Mes:</label>
+                <InputSelect @bind-Value="certificado.Mes" class="form-control">
+                    @foreach (var mes in meses)
+                    {
+                        <option value="@mes">@mes</option>
+                    }
+                </InputSelect>
+            </div>
+
+            <div class="form-group">
+                <label>Año:</label>
+                <InputNumber @bind-Value="certificado.Anio" class="form-control" />
+            </div>
+
+            <button type="submit" class="btn btn-primary">Generar PDF</button>
+        </EditForm>
     </div>
-
-    <div>
-        <label>Nombre del Alumno:</label>
-        <InputText @bind-Value="certificado.NombreAlumno" />
-    </div>
-
-    <div>
-        <label>DNI del Alumno:</label>
-        <InputNumber @bind-Value="certificado.DniAlumno" />
-    </div>
-
-    <div>
-        <label>Carrera:</label>
-        <InputText @bind-Value="certificado.Carrera" />
-    </div>
-
-    <div>
-        <label>Interesado:</label>
-        <InputText @bind-Value="certificado.Interesado" />
-    </div>
-
-    <div>
-        <label>Día:</label>
-        <InputNumber @bind-Value="certificado.DiaNumero" min="1" max="31" />
-    </div>
-
-    <div>
-        <label>Mes:</label>
-        <InputSelect @bind-Value="certificado.Mes" class="form-control">
-            @foreach (var mes in meses)
-            {
-                <option value="@mes">@mes</option>
-            }
-        </InputSelect>
-    </div>
-
-    <div>
-        <label>Año:</label>
-        <InputNumber @bind-Value="certificado.Anio" />
-    </div>
-
-    <button type="submit" class="btn btn-primary">Generar PDF</button>
-</EditForm>
+</div>
 
 <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -76,10 +86,20 @@
 </div>
 
 
+
 @code {
     private CertificadoExamenDTO certificado = new CertificadoExamenDTO();
     private string pdfUrl;
     private string errorMensaje;
+
+    // Lista de carreras
+    private List<string> carreras = new List<string>
+    {
+        "Desarrollo en software",
+        "Higiene y seguridad",
+        "Optica",
+        "Protesis dental"
+    };
 
     //lista de meses
     private List<string> meses = new List<string>
@@ -112,6 +132,8 @@
             Console.WriteLine($"Error al generar el certificado: {response.StatusCode}, Detalle: {content}");
             errorMensaje = $"Error al generar el certificado: {response.StatusCode}, Detalle: {content}";
             await JSRuntime.InvokeVoidAsync("showErrorModal");
+            
+            
         }
     }
 
