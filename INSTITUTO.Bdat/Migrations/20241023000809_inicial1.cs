@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace INSTITUTO.Bdat.Migrations
 {
     /// <inheritdoc />
-    public partial class actuali20 : Migration
+    public partial class inicial1 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -19,13 +19,13 @@ namespace INSTITUTO.Bdat.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Nombre = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Apellido = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    DNI_Alum = table.Column<int>(type: "int", nullable: false),
-                    Cuil = table.Column<int>(type: "int", nullable: false),
+                    DNI_Alum = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Cuil = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Fecha_Nac = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Tbase = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Nacionalidad = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Estado = table.Column<bool>(type: "bit", nullable: false),
-                    Numero = table.Column<int>(type: "int", nullable: false),
+                    Numero = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Sexo = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Id_Carrera = table.Column<int>(type: "int", nullable: false)
                 },
@@ -205,8 +205,7 @@ namespace INSTITUTO.Bdat.Migrations
                     IdDivCicMatAlum = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     DivisionCicloMateriaIdDivCicMat = table.Column<int>(type: "int", nullable: false),
-                    AlumnosIdAlumno = table.Column<int>(type: "int", nullable: false),
-                    LibrosId_Libro = table.Column<int>(type: "int", nullable: false)
+                    AlumnosIdAlumno = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -216,12 +215,6 @@ namespace INSTITUTO.Bdat.Migrations
                         column: x => x.DivisionCicloMateriaIdDivCicMat,
                         principalTable: "DivisionCicloMaterias",
                         principalColumn: "IdDivCicMat",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_DivsionCiclosMateriaAlumnos_LIbros_LibrosId_Libro",
-                        column: x => x.LibrosId_Libro,
-                        principalTable: "LIbros",
-                        principalColumn: "Id_Libro",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_DivsionCiclosMateriaAlumnos_alumnos_AlumnosIdAlumno",
@@ -240,6 +233,7 @@ namespace INSTITUTO.Bdat.Migrations
                     Nota = table.Column<int>(type: "int", nullable: false),
                     Fecha = table.Column<DateTime>(type: "datetime2", nullable: false),
                     TipoEvaluacionIdTipoEva = table.Column<int>(type: "int", nullable: false),
+                    LibrosId_Libro = table.Column<int>(type: "int", nullable: false),
                     DivsionCiclosMateriaAlumnosIdDivCicMatAlum = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -250,6 +244,12 @@ namespace INSTITUTO.Bdat.Migrations
                         column: x => x.DivsionCiclosMateriaAlumnosIdDivCicMatAlum,
                         principalTable: "DivsionCiclosMateriaAlumnos",
                         principalColumn: "IdDivCicMatAlum",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_notas_LIbros_LibrosId_Libro",
+                        column: x => x.LibrosId_Libro,
+                        principalTable: "LIbros",
+                        principalColumn: "Id_Libro",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_notas_TipoEvaluacions_TipoEvaluacionIdTipoEva",
@@ -300,14 +300,14 @@ namespace INSTITUTO.Bdat.Migrations
                 column: "DivisionCicloMateriaIdDivCicMat");
 
             migrationBuilder.CreateIndex(
-                name: "IX_DivsionCiclosMateriaAlumnos_LibrosId_Libro",
-                table: "DivsionCiclosMateriaAlumnos",
-                column: "LibrosId_Libro");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_notas_DivsionCiclosMateriaAlumnosIdDivCicMatAlum",
                 table: "notas",
                 column: "DivsionCiclosMateriaAlumnosIdDivCicMatAlum");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_notas_LibrosId_Libro",
+                table: "notas",
+                column: "LibrosId_Libro");
 
             migrationBuilder.CreateIndex(
                 name: "IX_notas_TipoEvaluacionIdTipoEva",
@@ -325,13 +325,13 @@ namespace INSTITUTO.Bdat.Migrations
                 name: "DivsionCiclosMateriaAlumnos");
 
             migrationBuilder.DropTable(
+                name: "LIbros");
+
+            migrationBuilder.DropTable(
                 name: "TipoEvaluacions");
 
             migrationBuilder.DropTable(
                 name: "DivisionCicloMaterias");
-
-            migrationBuilder.DropTable(
-                name: "LIbros");
 
             migrationBuilder.DropTable(
                 name: "alumnos");

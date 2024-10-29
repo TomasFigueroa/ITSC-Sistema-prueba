@@ -138,12 +138,13 @@ namespace INTITUTO1.Server.Controllers
         [HttpPost]
         public async Task<IActionResult> Post(DTONotas dtoNotas)
         {
-            //validaciones
+            // Validaciones básicas
             if (dtoNotas == null || dtoNotas.Materias == 0 || dtoNotas.Nota < 0)
             {
                 return BadRequest("Datos inválidos en la solicitud.");
             }
 
+            // Verificar si el DivisionCicloMateria existe
             var divisionCicloMateria = await _context.DivsionCiclosMateriaAlumnos
                 .FirstOrDefaultAsync(dcm => dcm.IdDivCicMatAlum == dtoNotas.Materias);
 
@@ -152,12 +153,24 @@ namespace INTITUTO1.Server.Controllers
                 return BadRequest("El ID de DivisionCicloMateria no es válido.");
             }
 
+            // Validar si ya existe una nota para el mismo alumno, materia y tipo de evaluación
+            var notaExistente = await _context.notas
+                .FirstOrDefaultAsync(n => n.DivsionCiclosMateriaAlumnosIdDivCicMatAlum == dtoNotas.Materias
+                                       && n.TipoEvaluacionIdTipoEva == dtoNotas.TipoEvaluacionIdTipoEva);
+
+            if (notaExistente != null)
+            {
+                return BadRequest("Ya existe una nota para el mismo alumno, materia y evaluación.");
+            }
+
+            // Crear nueva nota
             var nuevaNota = new Notas
             {
                 Nota = dtoNotas.Nota,
                 Fecha = dtoNotas.Fecha,
                 DivsionCiclosMateriaAlumnosIdDivCicMatAlum = dtoNotas.Materias,
-                TipoEvaluacionIdTipoEva = dtoNotas.TipoEvaluacionIdTipoEva
+                TipoEvaluacionIdTipoEva = dtoNotas.TipoEvaluacionIdTipoEva,
+                LibrosId_Libro = dtoNotas.Idlibro
             };
 
             _context.notas.Add(nuevaNota);
@@ -328,7 +341,7 @@ namespace INTITUTO1.Server.Controllers
 
     }
 }
-   
-    
+
+
 
 

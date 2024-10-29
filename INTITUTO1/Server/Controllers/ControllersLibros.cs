@@ -48,6 +48,18 @@ namespace INTITUTO1.Server.Controllers
 
             try
             {
+                // Validar si ya existe un libro con el mismo nombre
+                var libroExistente = await _context.LIbros
+                    .FirstOrDefaultAsync(l => l.Nombre_Lib.ToLower() == dtoLibros.Nombre_Lib.ToLower());
+
+                if (libroExistente != null)
+                {
+                    responseApi.EsCorrecto = false;
+                    responseApi.Mensaje = "Ya existe un libro con el mismo nombre.";
+                    return BadRequest(responseApi);
+                }
+
+                // Crear un nuevo libro si no existe uno con el mismo nombre
                 var nuevoLibro = new LIbros
                 {
                     Nombre_Lib = dtoLibros.Nombre_Lib
@@ -66,6 +78,7 @@ namespace INTITUTO1.Server.Controllers
                 return BadRequest(responseApi);
             }
         }
+
 
         // PUT: api/Libros/{id}
         [HttpPut("{id:int}")]

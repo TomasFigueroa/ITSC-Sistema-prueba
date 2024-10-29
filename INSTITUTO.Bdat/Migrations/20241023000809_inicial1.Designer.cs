@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace INSTITUTO.Bdat.Migrations
 {
     [DbContext(typeof(Context))]
-    [Migration("20241017003008_actuali2.0")]
-    partial class actuali20
+    [Migration("20241023000809_inicial1")]
+    partial class inicial1
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -37,11 +37,13 @@ namespace INSTITUTO.Bdat.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Cuil")
-                        .HasColumnType("int");
+                    b.Property<string>("Cuil")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("DNI_Alum")
-                        .HasColumnType("int");
+                    b.Property<string>("DNI_Alum")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("Estado")
                         .HasColumnType("bit");
@@ -60,8 +62,9 @@ namespace INSTITUTO.Bdat.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Numero")
-                        .HasColumnType("int");
+                    b.Property<string>("Numero")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Sexo")
                         .IsRequired()
@@ -202,16 +205,11 @@ namespace INSTITUTO.Bdat.Migrations
                     b.Property<int>("DivisionCicloMateriaIdDivCicMat")
                         .HasColumnType("int");
 
-                    b.Property<int>("LibrosId_Libro")
-                        .HasColumnType("int");
-
                     b.HasKey("IdDivCicMatAlum");
 
                     b.HasIndex("AlumnosIdAlumno");
 
                     b.HasIndex("DivisionCicloMateriaIdDivCicMat");
-
-                    b.HasIndex("LibrosId_Libro");
 
                     b.ToTable("DivsionCiclosMateriaAlumnos");
                 });
@@ -270,6 +268,9 @@ namespace INSTITUTO.Bdat.Migrations
                     b.Property<DateTime>("Fecha")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("LibrosId_Libro")
+                        .HasColumnType("int");
+
                     b.Property<int>("Nota")
                         .HasColumnType("int");
 
@@ -279,6 +280,8 @@ namespace INSTITUTO.Bdat.Migrations
                     b.HasKey("IdNotas");
 
                     b.HasIndex("DivsionCiclosMateriaAlumnosIdDivCicMatAlum");
+
+                    b.HasIndex("LibrosId_Libro");
 
                     b.HasIndex("TipoEvaluacionIdTipoEva");
 
@@ -400,17 +403,9 @@ namespace INSTITUTO.Bdat.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("INSTITUTO.Bdat.Data.Entity.LIbros", "LIbros")
-                        .WithMany("DivsionCiclosMateriaAlumnos")
-                        .HasForeignKey("LibrosId_Libro")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Alumnos");
 
                     b.Navigation("DivisionCicloMateria");
-
-                    b.Navigation("LIbros");
                 });
 
             modelBuilder.Entity("INSTITUTO.Bdat.Data.Entity.Notas", b =>
@@ -421,6 +416,12 @@ namespace INSTITUTO.Bdat.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("INSTITUTO.Bdat.Data.Entity.LIbros", "LIbros")
+                        .WithMany("notas")
+                        .HasForeignKey("LibrosId_Libro")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("INSTITUTO.Bdat.Data.Entity.TipoEvaluacion", "TipoEvaluacion")
                         .WithMany("Notas")
                         .HasForeignKey("TipoEvaluacionIdTipoEva")
@@ -428,6 +429,8 @@ namespace INSTITUTO.Bdat.Migrations
                         .IsRequired();
 
                     b.Navigation("DivsionCiclosMateriaAlumnos");
+
+                    b.Navigation("LIbros");
 
                     b.Navigation("TipoEvaluacion");
                 });
@@ -469,7 +472,7 @@ namespace INSTITUTO.Bdat.Migrations
 
             modelBuilder.Entity("INSTITUTO.Bdat.Data.Entity.LIbros", b =>
                 {
-                    b.Navigation("DivsionCiclosMateriaAlumnos");
+                    b.Navigation("notas");
                 });
 
             modelBuilder.Entity("INSTITUTO.Bdat.Data.Entity.Materias", b =>

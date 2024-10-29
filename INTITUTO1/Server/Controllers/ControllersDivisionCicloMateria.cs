@@ -43,22 +43,54 @@ namespace INTITUTO1.Server.Controllers
 
         // POST: api/DivisionCicloMateria
         [HttpPost]
-        public async Task<ActionResult<DivisionCicloMateria>> Post(DTODivisionCicloMateria dtoDivisionCicloMateria)
+        public async Task<ActionResult<ResponseAPI<int>>> Post(DTODivisionCicloMateria dtoDivisionCicloMateria)
         {
             var responseApi = new ResponseAPI<int>();
-            var mdDivCicMat = new DivisionCicloMateria
+            try
             {
-                DivisionCicloIdDivCic = dtoDivisionCicloMateria.DivisionCicloIdDivCic,
-                MateriasIdMateria = dtoDivisionCicloMateria.MateriasIdMateria,
-                ProfesorIdProfesor = dtoDivisionCicloMateria.ProfesorIdProfesor
+                if (dtoDivisionCicloMateria == null)
+                {
+                    responseApi.EsCorrecto = false;
+                    responseApi.Mensaje = "El DTO de Division-Ciclo-Materia es nulo.";
+                    return BadRequest(responseApi);
+                }
 
-            };
-            _context.DivisionCicloMaterias.Add(mdDivCicMat);
-            await _context.SaveChangesAsync();
-            responseApi.EsCorrecto = true;
+                // Validar si ya existe un registro con la misma combinación de DivisionCicloIdDivCic, MateriasIdMateria y ProfesorIdProfesor
+                var divisionCicloMateriaExistente = await _context.DivisionCicloMaterias
+                    .FirstOrDefaultAsync(dcm => dcm.DivisionCicloIdDivCic == dtoDivisionCicloMateria.DivisionCicloIdDivCic
+                                             && dcm.MateriasIdMateria == dtoDivisionCicloMateria.MateriasIdMateria
+                                             && dcm.ProfesorIdProfesor == dtoDivisionCicloMateria.ProfesorIdProfesor);
+
+                if (divisionCicloMateriaExistente != null)
+                {
+                    responseApi.EsCorrecto = false;
+                    responseApi.Mensaje = "Ya existe una combinación de División-Ciclo, Materia y Profesor con esos valores.";
+                    return BadRequest(responseApi);
+                }
+
+                // Crear un nuevo registro si no existe una combinación igual
+                var mdDivCicMat = new DivisionCicloMateria
+                {
+                    DivisionCicloIdDivCic = dtoDivisionCicloMateria.DivisionCicloIdDivCic,
+                    MateriasIdMateria = dtoDivisionCicloMateria.MateriasIdMateria,
+                    ProfesorIdProfesor = dtoDivisionCicloMateria.ProfesorIdProfesor
+                };
+
+                _context.DivisionCicloMaterias.Add(mdDivCicMat);
+                await _context.SaveChangesAsync();
+
+                responseApi.EsCorrecto = true;
+                responseApi.Valor = mdDivCicMat.IdDivCicMat; // Devolver el ID de la nueva División-Ciclo-Materia
+            }
+            catch (Exception ex)
+            {
+                responseApi.EsCorrecto = false;
+                responseApi.Mensaje = ex.Message;
+            }
+
             return Ok(responseApi);
-
         }
+
 
 
 

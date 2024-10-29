@@ -45,7 +45,7 @@ namespace INTITUTO1.Server.Controllers
                 divisionCicloMateriaAlumno.DivisionCicloMateriaIdDivCicMat,
                 AlumnosIdAlumno = divisionCicloMateriaAlumno.Alumnos.IdAlumno,
                 NombreAlumno = divisionCicloMateriaAlumno.Alumnos.Nombre,  //aca hehe
-                divisionCicloMateriaAlumno.LibrosId_Libro
+           
             });
         }
 
@@ -54,21 +54,36 @@ namespace INTITUTO1.Server.Controllers
         public async Task<ActionResult<ResponseAPI<int>>> Post(DTODivisionCicloMateriaAlumno dtoDivisionCicloMateriaAlumno)
         {
             var responseApi = new ResponseAPI<int>();
+
+            // Verificar si el alumno ya está registrado en la misma materia
+            var existeAlumnoEnMateria = await _context.DivsionCiclosMateriaAlumnos
+                .AnyAsync(x => x.DivisionCicloMateriaIdDivCicMat == dtoDivisionCicloMateriaAlumno.DivisionCicloMateriaIdDivCicMat
+                            && x.AlumnosIdAlumno == dtoDivisionCicloMateriaAlumno.AlumnosIdAlumno);
+
+            if (existeAlumnoEnMateria)
+            {
+                responseApi.EsCorrecto = false;
+                responseApi.Mensaje = "El alumno ya está registrado en esta materia.";
+                return BadRequest(responseApi);
+            }
+
+            // Crear nuevo registro si no existe
             var newDivCicMatAlu = new DivsionCiclosMateriaAlumnos
             {
                 DivisionCicloMateriaIdDivCicMat = dtoDivisionCicloMateriaAlumno.DivisionCicloMateriaIdDivCicMat,
                 AlumnosIdAlumno = dtoDivisionCicloMateriaAlumno.AlumnosIdAlumno,
-                LibrosId_Libro = dtoDivisionCicloMateriaAlumno.LibrosId_Libro,
             };
 
             _context.DivsionCiclosMateriaAlumnos.Add(newDivCicMatAlu);
             await _context.SaveChangesAsync();
+
             responseApi.EsCorrecto = true;
             responseApi.Mensaje = "Registro creado con éxito";
             responseApi.Valor = newDivCicMatAlu.IdDivCicMatAlum;
 
             return Ok(responseApi);
         }
+
 
         // PUT: api/DivisionCicloMateriaAlumnos/{id}
         [HttpPut("{id:int}")]
@@ -84,7 +99,7 @@ namespace INTITUTO1.Server.Controllers
                 {
                     dbDivCicMatAlu.DivisionCicloMateriaIdDivCicMat = dtoDivisionCicloMateriaAlumno.DivisionCicloMateriaIdDivCicMat;
                     dbDivCicMatAlu.AlumnosIdAlumno = dtoDivisionCicloMateriaAlumno.AlumnosIdAlumno;
-                    dbDivCicMatAlu.LibrosId_Libro = dtoDivisionCicloMateriaAlumno.LibrosId_Libro;
+                   
 
                     _context.DivsionCiclosMateriaAlumnos.Update(dbDivCicMatAlu);
                     await _context.SaveChangesAsync();

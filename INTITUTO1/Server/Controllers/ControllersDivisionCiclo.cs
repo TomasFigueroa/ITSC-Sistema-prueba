@@ -38,27 +38,59 @@ namespace INTITUTO1.Server.Controllers
 			return DivCiclo;
 		}
 
-		// POST: api/Carrera
-		[HttpPost]
-		public async Task<ActionResult<DivisionCiclo>> Post(DTODivisionCiclo dtoDivisionCiclo)
-		{
-			var responseApi = new ResponseAPI<int>();
-			var mdDivCic = new DivisionCiclo
-			{
-				CicloIdCiclo = dtoDivisionCiclo.CicloIdCiclo,
-				DivisionesIdDivision = dtoDivisionCiclo.DivisionesIdDivision,
+        // POST: api/Carrera
+        [HttpPost]
+        public async Task<ActionResult<ResponseAPI<int>>> Post(DTODivisionCiclo dtoDivisionCiclo)
+        {
+            var responseApi = new ResponseAPI<int>();
+            try
+            {
+                if (dtoDivisionCiclo == null)
+                {
+                    responseApi.EsCorrecto = false;
+                    responseApi.Mensaje = "El DTO de la División-Ciclo es nulo.";
+                    return BadRequest(responseApi);
+                }
 
-			};
-			_context.DivisionCiclos.Add(mdDivCic);
-			await _context.SaveChangesAsync();
-			return Ok(responseApi);
+                // Validar si ya existe un registro con la misma combinación de CicloIdCiclo y DivisionesIdDivision
+                var divisionCicloExistente = await _context.DivisionCiclos
+                    .FirstOrDefaultAsync(dc => dc.CicloIdCiclo == dtoDivisionCiclo.CicloIdCiclo
+                                            && dc.DivisionesIdDivision == dtoDivisionCiclo.DivisionesIdDivision);
 
-		}
+                if (divisionCicloExistente != null)
+                {
+                    responseApi.EsCorrecto = false;
+                    responseApi.Mensaje = "Ya existe una combinación de Ciclo y División con esos valores.";
+                    return BadRequest(responseApi);
+                }
+
+                // Crear un nuevo registro si no existe una combinación igual
+                var mdDivCic = new DivisionCiclo
+                {
+                    CicloIdCiclo = dtoDivisionCiclo.CicloIdCiclo,
+                    DivisionesIdDivision = dtoDivisionCiclo.DivisionesIdDivision
+                };
+
+                _context.DivisionCiclos.Add(mdDivCic);
+                await _context.SaveChangesAsync();
+
+                responseApi.EsCorrecto = true;
+                responseApi.Valor = mdDivCic.IdDivCic; // Devolver el ID de la nueva División-Ciclo
+            }
+            catch (Exception ex)
+            {
+                responseApi.EsCorrecto = false;
+                responseApi.Mensaje = ex.Message;
+            }
+
+            return Ok(responseApi);
+        }
 
 
 
-		// PUT: api/DivisionCiclo/{id}
-		[HttpPut("{id:int}")]
+
+        // PUT: api/DivisionCiclo/{id}
+        [HttpPut("{id:int}")]
 		public async Task<IActionResult> Put(int id, DTODivisionCiclo dtoDivisionCiclo)
 		{
 			var responseApi = new ResponseAPI<int>();

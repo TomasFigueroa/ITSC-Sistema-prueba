@@ -44,22 +44,49 @@ namespace INTITUTO1.Server.Controllers
 
         // POST: api/materias
         [HttpPost]
-        public async Task<ActionResult<Materias>> Post(DTOMaterias dtoMaterias)
+        public async Task<ActionResult<ResponseAPI<int>>> Post(DTOMaterias dtoMaterias)
         {
             var responseApi = new ResponseAPI<int>();
-            var mdMateria = new Materias
+
+            try
             {
-                Nombre = dtoMaterias.Nombre,
-                IdCarrera = dtoMaterias.IdCarrera,
-                IdDivision = dtoMaterias.IdDivision,
-                
-            };
-            _context.Materia.Add(mdMateria);
-            await _context.SaveChangesAsync();
-            responseApi.EsCorrecto = true;
-            responseApi.Mensaje = "Materia creada con éxito";
-            return Ok(responseApi);
+                // Validar si ya existe una materia con el mismo Nombre, IdCarrera e IdDivision
+                var materiaExistente = await _context.Materia
+                    .FirstOrDefaultAsync(m => m.Nombre.ToLower() == dtoMaterias.Nombre.ToLower()
+                                           && m.IdCarrera == dtoMaterias.IdCarrera
+                                           && m.IdDivision == dtoMaterias.IdDivision);
+
+                if (materiaExistente != null)
+                {
+                    responseApi.EsCorrecto = false;
+                    responseApi.Mensaje = "Ya existe una materia con el mismo nombre en la misma carrera y división.";
+                    return BadRequest(responseApi);
+                }
+
+                // Crear la nueva materia si no existe una combinación igual
+                var mdMateria = new Materias
+                {
+                    Nombre = dtoMaterias.Nombre,
+                    IdCarrera = dtoMaterias.IdCarrera,
+                    IdDivision = dtoMaterias.IdDivision
+                };
+
+                _context.Materia.Add(mdMateria);
+                await _context.SaveChangesAsync();
+
+                responseApi.EsCorrecto = true;
+                responseApi.Mensaje = "Materia creada con éxito";
+                responseApi.Valor = mdMateria.IdMateria; // Devolver el ID de la nueva materia
+                return Ok(responseApi);
+            }
+            catch (Exception ex)
+            {
+                responseApi.EsCorrecto = false;
+                responseApi.Mensaje = ex.InnerException?.Message ?? ex.Message;
+                return BadRequest(responseApi);
+            }
         }
+
 
         // PUT: api/materias/{id}
         [HttpPut("{id:int}")]

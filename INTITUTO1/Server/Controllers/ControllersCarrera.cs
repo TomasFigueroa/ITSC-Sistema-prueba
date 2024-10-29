@@ -44,21 +44,51 @@ namespace INTITUTO1.Server.Controllers
 
         // POST: api/Carrera
         [HttpPost]
-        public async Task<ActionResult<Carrerass>> Post(DTOSCarreras carrera)
+        public async Task<ActionResult<ResponseAPI<int>>> Post(DTOSCarreras carrera)
         {
             var responseApi = new ResponseAPI<int>();
-            var mdCarrera = new Carrerass
+            try
             {
-                Nombre = carrera.Nombres,
-                FechaInicio = carrera.Fecha_inicio,
-                FechaFin = carrera.Fecha_fin,
+                if (carrera == null)
+                {
+                    responseApi.EsCorrecto = false;
+                    responseApi.Mensaje = "El DTO de la carrera es nulo.";
+                    return BadRequest(responseApi);
+                }
 
-            };
-            _context.Carreras.Add(mdCarrera);
-            await _context.SaveChangesAsync();
+                // Validar si ya existe una carrera con el mismo nombre
+                var carreraExistente = await _context.Carreras
+                    .FirstOrDefaultAsync(c => c.Nombre.ToLower() == carrera.Nombres.ToLower());
+
+                if (carreraExistente != null)
+                {
+                    responseApi.EsCorrecto = false;
+                    responseApi.Mensaje = "Ya existe una carrera con el mismo nombre.";
+                    return BadRequest(responseApi);
+                }
+
+                var mdCarrera = new Carrerass
+                {
+                    Nombre = carrera.Nombres,
+                    FechaInicio = carrera.Fecha_inicio,
+                    FechaFin = carrera.Fecha_fin
+                };
+
+                _context.Carreras.Add(mdCarrera);
+                await _context.SaveChangesAsync();
+
+                responseApi.EsCorrecto = true;
+                responseApi.Valor = mdCarrera.IdCarrera; // Devolver el id de la carrera creada
+            }
+            catch (Exception ex)
+            {
+                responseApi.EsCorrecto = false;
+                responseApi.Mensaje = ex.Message;
+            }
+
             return Ok(responseApi);
-
         }
+
 
 
 

@@ -11,13 +11,13 @@ namespace INTITUTO1.Shared.DTO
     {
         public string Nombre {  get; set; }
         public string Apellido { get; set;}
-        public int DNI_Alum { get; set; }
-        public int Cuil { get; set; }
+        public string DNI_Alum { get; set; }
+        public string Cuil { get; set; }
         public DateTime Fecha_Nac { get; set; }
         public string Tbase { get; set; }
         public string Nacionalidad { get; set; }
         public bool Estado { get; set; }
-        public int Numero { get; set; }
+        public string Numero { get; set; }
         public int Id_Carrera { get; set; }
         public string Sexo { get; set; }
 
