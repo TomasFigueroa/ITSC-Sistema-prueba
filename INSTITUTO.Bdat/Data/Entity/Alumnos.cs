@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+
 namespace INSTITUTO.Bdat.Data.Entity
 {
     public class Alumnos
@@ -22,4 +23,5 @@ namespace INSTITUTO.Bdat.Data.Entity
         public int Id_Carrera { get; set; }
         public List<DivsionCiclosMateriaAlumnos> DivsionCiclosMateriaAlumnos { get; set; }
     }
+  
 }
