@@ -4,139 +4,33 @@
 @using System.ComponentModel.DataAnnotations
 @inject HttpClient Http
 
-<h3>Generar Certificado de examen</h3>
+<h3>Formulario de Certificado de Examen</h3>
 
-<div class="card text-center border-dark">
-    <div class="card-body">
-        <EditForm Model="@certificado" OnValidSubmit="@GenerarCertificado">
-            <DataAnnotationsValidator />
-            <ValidationSummary />
+<InputText @bind-Value="certificado.NombreAdministrador" Placeholder="Nombre del Administrador" />
+<InputText @bind-Value="certificado.NombreAlumno" Placeholder="Nombre del Alumno" />
+<InputNumber @bind-Value="certificado.DniAlumno" Placeholder="DNI del Alumno" />
+<InputText @bind-Value="certificado.Carrera" Placeholder="Carrera" />
+<InputText @bind-Value="certificado.Interesado" Placeholder="Interesado" />
+<InputNumber @bind-Value="certificado.DiaNumero" Placeholder="Día" />
+<InputText @bind-Value="certificado.Mes" Placeholder="Mes" />
+<InputNumber @bind-Value="certificado.Anio" Placeholder="Año" />
 
-            <div class="form-group">
-                <label>Nombre del Administrador:</label>
-                <InputText @bind-Value="certificado.NombreAdministrador" class="form-control" />
-            </div>
-
-            <div class="form-group">
-                <label>Nombre del Alumno:</label>
-                <InputText @bind-Value="certificado.NombreAlumno" class="form-control" />
-            </div>
-
-            <div class="form-group">
-                <label>DNI del Alumno:</label>
-                <InputNumber @bind-Value="certificado.DniAlumno" class="form-control" />
-            </div>
-
-            <div class="form-group">
-                <label>Carrera:</label>
-                <InputSelect @bind-Value="certificado.Carrera" class="form-control">
-                    @foreach (var carrera in carreras)
-                    {
-                        <option value="@carrera">@carrera</option>
-                    }
-                </InputSelect>
-            </div>
-
-
-            <div class="form-group">
-                <label>Interesado:</label>
-                <InputText @bind-Value="certificado.Interesado" class="form-control" />
-            </div>
-
-            <div class="form-group">
-                <label>Día:</label>
-                <InputNumber @bind-Value="certificado.DiaNumero" min="1" max="31" class="form-control" />
-            </div>
-
-            <div class="form-group">
-                <label>Mes:</label>
-                <InputSelect @bind-Value="certificado.Mes" class="form-control">
-                    @foreach (var mes in meses)
-                    {
-                        <option value="@mes">@mes</option>
-                    }
-                </InputSelect>
-            </div>
-
-            <div class="form-group">
-                <label>Año:</label>
-                <InputNumber @bind-Value="certificado.Anio" class="form-control" />
-            </div>
-
-            <button type="submit" class="btn btn-primary">Generar PDF</button>
-        </EditForm>
-    </div>
-</div>
-
-<div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="errorModalLabel">Error</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                @errorMensaje
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-
+<button @onclick="ExportarExcel">Exportar a Excel</button>
 
 @code {
-    private CertificadoExamenDTO certificado = new CertificadoExamenDTO();
-    private string pdfUrl;
-    private string errorMensaje;
+    private CertificadoExamen certificado = new CertificadoExamen();
 
-    // Lista de carreras
-    private List<string> carreras = new List<string>
+    private async Task ExportarExcel()
     {
-        "Desarrollo en software",
-        "Higiene y seguridad",
-        "Optica",
-        "Protesis dental"
-    };
-
-    //lista de meses
-    private List<string> meses = new List<string>
-    {
-         "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
-        "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
-    };
-
-    private async Task GenerarCertificado()
-    {
-        // Genera el certificado enviando los datos a la API
-        var response = await Http.PostAsJsonAsync("api/CrearCertificadoEx", certificado);
-
+        var response = await Http.PostAsJsonAsync("api/certificado/Template", certificado);
         if (response.IsSuccessStatusCode)
         {
-            // Lee el contenido de la respuesta como un arreglo de bytes
-            var pdfBytes = await response.Content.ReadAsByteArrayAsync();
-
-            // Crea un Blob a partir de los bytes
-            using var streamRef = new DotNetStreamReference(stream: new MemoryStream(pdfBytes));
-
-            // Inicia la descarga del archivo PDF
-            await JSRuntime.InvokeVoidAsync("downloadFileFromStream", "Certificado.pdf", streamRef);
+            var stream = await response.Content.ReadAsStreamAsync();
+            await JSRuntime.InvokeVoidAsync("downloadFileFromStream", "Certificado.xlsx", stream);
         }
         else
         {
-            // Manejo de errores (opcional)
-            string content = await response.Content.ReadAsStringAsync();
-            // Imprime o registra el contenido completo para ayudar a la depuración
-            Console.WriteLine($"Error al generar el certificado: {response.StatusCode}, Detalle: {content}");
-            errorMensaje = $"Error al generar el certificado: {response.StatusCode}, Detalle: {content}";
-            await JSRuntime.InvokeVoidAsync("showErrorModal");
-            
-            
+            Console.WriteLine("No se pudo generar el archivo.");
         }
     }
-
-
-
 }

@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Data;
-
+using INSTITUTO.Bdat.Data.Entity;
 namespace INTITUTO1.Server.Controllers
 {
     [Route("api/Reporte")]
@@ -82,33 +82,38 @@ namespace INTITUTO1.Server.Controllers
         }
 
 
-        [HttpGet]
-        [Route("Template")]
-        public IActionResult ExportExcel3()
+        [HttpGet("Template/{dni}")]
+        public IActionResult ExportExcel3([FromBody] CertificadoExamen certificado)
         {
             try
             {
+
                 using (var workbook = new XLWorkbook(@"C:\Users\Usuario\source\repos\ITSC-Sistema-prueba2\INTITUTO1\Client\wwwroot\CERTIFICADO.xlsx"))
                 {
-                    var SampleSheet = workbook.Worksheets.Where(x => x.Name == "Certificado").First();
+                    var SampleSheet = workbook.Worksheets.First(x => x.Name == "Certificado");
 
-                    string CeldaItem = "Z12";
+                    // Llenar campos específicos desde la entidad
 
-                    //*************************************************
-
-                    SampleSheet.Cell(CeldaItem).Value = 26000444;
+                    // Completar los demás campos con los valores de la entidad
+                    SampleSheet.Cell("I10").Value = certificado.NombreAdministrador;
+                    SampleSheet.Cell("Z12").Value = certificado.DniAlumno;
+                    SampleSheet.Cell("H12").Value = certificado.NombreAlumno;
+                    //SampleSheet.Cell("I16").Value = certificado.Carrera;
+                    SampleSheet.Cell("W20").Value = certificado.Interesado;
+                    SampleSheet.Cell("L24").Value = certificado.DiaNumero;
+                    SampleSheet.Cell("Y24").Value = certificado.Mes;
+                    SampleSheet.Cell("AH24").Value = certificado.Anio;
 
                     using var memoria = new MemoryStream();
                     workbook.SaveAs(memoria);
-                    var nombreExcel = "Reporte.xlsx";
+                    var nombreExcel = "CertificadoExamen.xlsx";
                     var archivo = File(memoria.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", nombreExcel);
                     return archivo;
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
-
+                return StatusCode(500, $"Error al generar el archivo: {ex.Message}");
             }
         }
     }
