@@ -82,7 +82,7 @@ namespace INTITUTO1.Server.Controllers
         }
 
 
-        [HttpGet("Template/{dni}")]
+        [HttpPost("Template")]
         public IActionResult ExportExcel3([FromBody] CertificadoExamen certificado)
         {
             try
@@ -92,9 +92,6 @@ namespace INTITUTO1.Server.Controllers
                 {
                     var SampleSheet = workbook.Worksheets.First(x => x.Name == "Certificado");
 
-                    // Llenar campos específicos desde la entidad
-
-                    // Completar los demás campos con los valores de la entidad
                     SampleSheet.Cell("I10").Value = certificado.NombreAdministrador;
                     SampleSheet.Cell("Z12").Value = certificado.DniAlumno;
                     SampleSheet.Cell("H12").Value = certificado.NombreAlumno;
