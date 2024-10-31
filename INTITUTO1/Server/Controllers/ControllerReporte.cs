@@ -132,10 +132,12 @@ namespace INTITUTO1.Server.Controllers
                         join alumno in _context.alumnos on divCicMatAlum.AlumnosIdAlumno equals alumno.IdAlumno
                         join divCicMat in _context.DivisionCicloMaterias on divCicMatAlum.DivisionCicloMateriaIdDivCicMat equals divCicMat.IdDivCicMat
                         join divisionCiclo in _context.DivisionCiclos on divCicMat.DivisionCicloIdDivCic equals divisionCiclo.IdDivCic
+                        join division in _context.Division on divisionCiclo.DivisionesIdDivision equals division.IdDivision
                         join ciclo in _context.Ciclos on divisionCiclo.CicloIdCiclo equals ciclo.IdCiclo
+                        join carrera in _context.Carreras on alumno.Id_Carrera equals carrera.IdCarrera  // Join con Carreras
                         join materia in _context.Materia on divCicMat.MateriasIdMateria equals materia.IdMateria
                         join tipoEvaluacion in _context.TipoEvaluacions on nota.TipoEvaluacionIdTipoEva equals tipoEvaluacion.IdTipoEva
-                        where alumno.IdAlumno == idAlumno // Filtrar por el ID del alumno específico
+                        where alumno.IdAlumno == idAlumno
                         select new NotasDto
                         {
                             Id = nota.IdNotas,
@@ -143,10 +145,13 @@ namespace INTITUTO1.Server.Controllers
                             AlumnoApellido = alumno.Apellido,
                             AlumnoDni = alumno.DNI_Alum,
                             AlumnoCuil = alumno.Cuil,
+                            Carrera = carrera.Nombre,  // Nombre de la Carrera
                             Materia = materia.Nombre,
                             Fecha = nota.Fecha,
                             Nota = nota.Nota,
-                            TipoEvaluacion = tipoEvaluacion.NombreEva
+                            TipoEvaluacion = tipoEvaluacion.NombreEva,
+                            Division = division.NombreDiv,
+                            Ciclo = ciclo.Fecha
                         };
 
             var notasAlumno = await query.ToListAsync();
@@ -158,13 +163,12 @@ namespace INTITUTO1.Server.Controllers
 
             try
             {
-                // Cargar el archivo de plantilla
                 using (var workbook = new XLWorkbook(@"C:\Users\Usuario\source\repos\ITSC-Sistema-prueba2\INTITUTO1\Client\wwwroot\Notas.xlsx"))
                 {
-                    var sheet = workbook.Worksheet(1); // Usa la primera hoja de la plantilla
+                    var sheet = workbook.Worksheet(1);
 
-                    // Encabezado del Alumno en las celdas de K19 a L22
                     var alumnoData = notasAlumno.First();
+                    // Formato para la sección de información del alumno
                     sheet.Cell("A19").Value = "Apellido:";
                     sheet.Cell("B19").Value = alumnoData.AlumnoApellido;
                     sheet.Cell("A20").Value = "Nombre:";
@@ -173,25 +177,40 @@ namespace INTITUTO1.Server.Controllers
                     sheet.Cell("B21").Value = alumnoData.AlumnoDni;
                     sheet.Cell("A22").Value = "CUIL:";
                     sheet.Cell("B22").Value = alumnoData.AlumnoCuil;
+                    sheet.Cell("A23").Value = "Carrera:";
+                    sheet.Cell("B23").Value = alumnoData.Carrera;
 
-                    // Encabezados de la tabla de notas desde la fila K24
-                    sheet.Cell("A24").Value = "Materia";
-                    sheet.Cell("B24").Value = "Fecha";
-                    sheet.Cell("C24").Value = "Nota";
-                    sheet.Cell("D24").Value = "Tipo de Evaluación";
+                    // Estilos para la sección de información del alumno
+                    var infoRange = sheet.Range("A19:B23");
+                    infoRange.Style.Font.Bold = true;
+                    infoRange.Style.Font.FontColor = XLColor.DarkSlateGray;
+                    infoRange.Style.Fill.BackgroundColor = XLColor.LightSteelBlue;
 
-                    // Insertar datos de notas comenzando desde la fila 25 en adelante
-                    int currentRow = 25;
+                    // Encabezado de tabla de notas
+                    sheet.Cell("A25").Value = "Materia";
+                    sheet.Cell("C25").Value = "Fecha";
+                    sheet.Cell("E25").Value = "Nota";
+                    sheet.Cell("G25").Value = "Tipo de Evaluación";
+                    sheet.Cell("I25").Value = "División";
+                    sheet.Cell("K25").Value = "Ciclo";
+
+                    int currentRow = 26;
                     foreach (var nota in notasAlumno)
                     {
                         sheet.Cell($"A{currentRow}").Value = nota.Materia;
-                        sheet.Cell($"B{currentRow}").Value = nota.Fecha.ToShortDateString();
-                        sheet.Cell($"C{currentRow}").Value = nota.Nota;
-                        sheet.Cell($"D{currentRow}").Value = nota.TipoEvaluacion;
+                        sheet.Cell($"C{currentRow}").Value = nota.Fecha.ToShortDateString();
+                        sheet.Cell($"E{currentRow}").Value = nota.Nota;
+                        sheet.Cell($"G{currentRow}").Value = nota.TipoEvaluacion;
+                        sheet.Cell($"I{currentRow}").Value = nota.Division;
+                        sheet.Cell($"K{currentRow}").Value = nota.Ciclo;
+
+                        var range = sheet.Range($"A{currentRow}:K{currentRow}");
+                        range.Style.Fill.BackgroundColor = XLColor.LightGray;
+                        range.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+
                         currentRow++;
                     }
 
-                    // Guardar el archivo en un MemoryStream
                     using var memoryStream = new MemoryStream();
                     workbook.SaveAs(memoryStream);
                     var nombreExcel = "ReporteNotasAlumno.xlsx";
@@ -203,7 +222,6 @@ namespace INTITUTO1.Server.Controllers
                 return StatusCode(500, $"Error al generar el archivo: {ex.Message}");
             }
         }
-
 
 
     }
