@@ -1,0 +1,120 @@
+﻿@page "/ExcelNotas"
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+
+<h3>Reporte de Notas por Alumno</h3>
+
+<div>
+    <label>Carrera: </label>
+    <select @onchange="FilterByCarrera">
+        <option value="">Todas</option>
+        @foreach (var carrera in Carreras)
+        {
+            <option value="@carrera.IdCarrera">@carrera.Nombre</option>
+        }
+    </select>
+
+    <label>DNI del Alumno: </label>
+    <input @bind="SearchDni" placeholder="Ingrese DNI" />
+
+    <button @onclick="FilterByDni">Buscar</button>
+</div>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Apellido</th>
+            <th>Nombre</th>
+            <th>DNI</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (FilteredAlumnos != null)
+        {
+            @foreach (var alumno in FilteredAlumnos)
+            {
+                <tr>
+                    <td>@alumno.Apellido</td>
+                    <td>@alumno.Nombre</td>
+                    <td>@alumno.DNI_Alum</td>
+                    <td>
+                        <button @onclick="() => GenerateReport(alumno.IdAlumno)" class="btn btn-primary">
+                            Generar Reporte
+                        </button>
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="4">Cargando alumnos...</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    private List<Alumnos> Alumnos { get; set; } = new();
+    private List<Carrerass> Carreras { get; set; } = new();
+    private List<Alumnos> FilteredAlumnos { get; set; } = new();
+    private string SearchDni { get; set; } = string.Empty;
+    private int SelectedCarreraId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCarreras();
+        await LoadAlumnos();
+    }
+
+    private async Task LoadAlumnos()
+    {
+        Alumnos = await Http.GetFromJsonAsync<List<Alumnos>>("api/Alumnos");
+        FilteredAlumnos = Alumnos;
+    }
+
+    private async Task LoadCarreras()
+    {
+        Carreras = await Http.GetFromJsonAsync<List<Carrerass>>("api/Carrera");
+    }
+
+    private void FilterByCarrera(ChangeEventArgs e)
+    {
+        SelectedCarreraId = int.Parse(e.Value.ToString());
+        ApplyFilters();
+    }
+
+    private void FilterByDni()
+    {
+        ApplyFilters();
+    }
+
+    private void ApplyFilters()
+    {
+        FilteredAlumnos = Alumnos
+            .Where(a => (SelectedCarreraId == 0 || a.Id_Carrera == SelectedCarreraId) &&
+                        (string.IsNullOrWhiteSpace(SearchDni) || a.DNI_Alum.Contains(SearchDni)))
+            .ToList();
+    }
+
+    private async Task GenerateReport(int idAlumno)
+    {
+        var response = await Http.PostAsync($"api/Reporte/ExportExcel/{idAlumno}", null);
+
+        if (response.IsSuccessStatusCode)
+        {
+            var fileName = $"ReporteNotasAlumno_{idAlumno}.xlsx";
+            var fileBytes = await response.Content.ReadAsByteArrayAsync();
+
+            // Invocar JS para descargar el archivo (necesario en Blazor WebAssembly)
+            await JS.InvokeVoidAsync("downloadFileFromBytes", fileName, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileBytes);
+        }
+        else
+        {
+            Console.WriteLine("Error al generar el reporte.");
+        }
+    }
+}
+

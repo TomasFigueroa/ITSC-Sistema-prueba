@@ -10,6 +10,9 @@ namespace INTITUTO1.Shared.DTO
     {
         public int Id { get; set; }
         public string AlumnoNombre { get; set; }
+        public string AlumnoApellido { get; set; }
+        public string AlumnoDni { get; set; }
+        public string AlumnoCuil { get; set; }
         public string Materia { get; set; }
         public DateTime Fecha { get; set; }
         public int Nota { get; set; }

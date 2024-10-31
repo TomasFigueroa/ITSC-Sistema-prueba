@@ -35,9 +35,8 @@
         <a class="dismiss">🗙</a>
     </div>
     <script>
-        window.downloadFileFromStream = async (fileName, contentStreamReference) => {
-            const arrayBuffer = await contentStreamReference.arrayBuffer();
-            const blob = new Blob([arrayBuffer]);
+        window.downloadFileFromBytes = (fileName, bytes) => {
+            const blob = new Blob([new Uint8Array(bytes)]);
             const url = URL.createObjectURL(blob);
             const anchorElement = document.createElement('a');
             anchorElement.href = url;
@@ -47,6 +46,7 @@
             URL.revokeObjectURL(url);
         }
     </script>
+
 
     <script src="_framework/blazor.webassembly.js"></script>
 </body>
