@@ -170,7 +170,7 @@ namespace INTITUTO1.Server.Controllers
                 Fecha = dtoNotas.Fecha,
                 DivsionCiclosMateriaAlumnosIdDivCicMatAlum = dtoNotas.Materias,
                 TipoEvaluacionIdTipoEva = dtoNotas.TipoEvaluacionIdTipoEva,
-                LibrosId_Libro = dtoNotas.Idlibro
+            
             };
 
             _context.notas.Add(nuevaNota);

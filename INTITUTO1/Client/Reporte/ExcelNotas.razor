@@ -1,0 +1,161 @@
+﻿@page "/ExcelNotas"
+@inject HttpClient Http
+@inject IJSRuntime JS
+
+<h3 class="text-primary">Reporte de Notas por Alumno</h3>
+
+<div class="filters-section mb-3 p-3 border rounded shadow-sm">
+    <div class="form-group mb-2">
+        <label for="carrera-select" class="form-label">Selecciona una Carrera:</label>
+        <select id="carrera-select" class="form-select" @onchange="FilterByCarrera">
+            <option value="0">Todas</option>
+            @foreach (var carrera in Carreras)
+            {
+                <option value="@carrera.IdCarrera">@carrera.Nombre</option>
+            }
+        </select>
+    </div>
+
+    @if (SelectedCarreraId != 0)
+    {
+        <div class="form-group">
+            <label for="dni-input" class="form-label">Buscar por DNI:</label>
+            <input id="dni-input" @bind="SearchDni" placeholder="Ingrese DNI" @oninput="FilterByDni"
+                   class="form-control" />
+        </div>
+    }
+</div>
+
+@if (FilteredAlumnos?.Any() == true)
+{
+    <div class="table-container" style="overflow: hidden; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); margin-bottom: 20px;">
+        <div style="border-top-left-radius: 12px; border-top-right-radius: 12px; background-color: #f2f2f2; padding: 10px;">
+            <table class="table" style="border-collapse: collapse; width: 100%; border: 2px solid #E6E6FA;">
+                <thead>
+                    <tr style="border-bottom: 2px solid #ddd;">
+                        <th style="padding: 10px; border-right: 2px solid #ddd; text-align: left;">Apellido</th>
+                        <th style="padding: 10px; border-right: 2px solid #ddd; text-align: left;">Nombre</th>
+                        <th style="padding: 10px; border-right: 2px solid #ddd; text-align: left;">DNI</th>
+                        <th style="padding: 10px; text-align: center;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (FilteredAlumnos != null && FilteredAlumnos.Any())
+                    {
+                        @foreach (var alumno in FilteredAlumnos)
+                        {
+                            <tr style="border-bottom: 1px solid #ddd;">
+                                <td style="padding: 10px; border-right: 2px solid #ddd;">@alumno.Apellido</td>
+                                <td style="padding: 10px; border-right: 2px solid #ddd;">@alumno.Nombre</td>
+                                <td style="padding: 10px; border-right: 2px solid #ddd;">@alumno.DNI_Alum</td>
+                                <td style="padding: 10px; text-align: center;">
+                                    <div class="action-buttons">
+                                        <button class="btn btn-primary me-2" @onclick="() => GenerateReport(alumno.IdAlumno)">
+                                            <i class="oi oi-pencil"></i> Generar Reporte
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="4" style="text-align: center; padding: 20px;">
+                                <div>
+                                    <img src="Logo_IT.png" alt="Logo ITSC" style="max-width: 100px; margin-bottom: 20px; animation: fadeIn 1s ease-in-out;">
+                                    <h5 style="color: #6c757d; font-style: italic;">No se encontraron alumnos.</h5>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+}
+else
+{
+    <div class="alert alert-info mt-3">No se encontraron alumnos para esta carrera y/o DNI.</div>
+}
+<style>
+    .filters-section {
+        background-color: #f9f9f9;
+    }
+
+    .table {
+        transition: all 0.2s;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: #f1f1f1;
+    }
+
+</style>
+
+@code {
+    private List<Alumnos> Alumnos { get; set; } = new();
+    private List<Carrerass> Carreras { get; set; } = new();
+    private List<Alumnos> FilteredAlumnos { get; set; } = new();
+    private string SearchDni { get; set; } = string.Empty;
+    private int SelectedCarreraId { get; set; } = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCarreras();
+        await LoadAlumnos();
+    }
+
+    private async Task LoadAlumnos()
+    {
+        Alumnos = await Http.GetFromJsonAsync<List<Alumnos>>("api/Alumnos");
+        FilteredAlumnos = Alumnos;
+    }
+
+    private async Task LoadCarreras()
+    {
+        Carreras = await Http.GetFromJsonAsync<List<Carrerass>>("api/Carrera");
+    }
+
+    private void FilterByCarrera(ChangeEventArgs e)
+    {
+        SelectedCarreraId = int.Parse(e.Value.ToString());
+        SearchDni = string.Empty;
+        ApplyFilters();
+    }
+
+    private void FilterByDni(ChangeEventArgs e)
+    {
+        SearchDni = e.Value.ToString();
+        ApplyFilters();
+    }
+
+    private void ApplyFilters()
+    {
+        FilteredAlumnos = Alumnos
+            .Where(a => (SelectedCarreraId == 0 || a.Id_Carrera == SelectedCarreraId) &&
+                        (string.IsNullOrWhiteSpace(SearchDni) || a.DNI_Alum.Contains(SearchDni)))
+            .ToList();
+    }
+
+    private async Task GenerateReport(int idAlumno)
+    {
+        var response = await Http.PostAsync($"api/Reporte/ExportExcel/{idAlumno}", null);
+
+        if (response.IsSuccessStatusCode)
+        {
+            var fileName = $"ReporteNotasAlumno_{idAlumno}.xlsx";
+            var fileBytes = await response.Content.ReadAsByteArrayAsync();
+            var base64File = Convert.ToBase64String(fileBytes);
+
+            await JS.InvokeVoidAsync("downloadFile", fileName, base64File);
+        }
+        else
+        {
+            Console.WriteLine("Error al generar el reporte.");
+        }
+    }
+}
+
+

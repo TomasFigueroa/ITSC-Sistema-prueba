@@ -13,8 +13,8 @@ namespace INSTITUTO.Bdat.Data.Entity
         public int DniAlumno { get; set; }
         public string Carrera { get; set; }
         public string Interesado { get; set; }
-        public int DiaNumero {  get; set; }
-        public string Mes {  get; set; }
+        public int DiaNumero { get; set; }
+        public string Mes { get; set; }
         public int Anio { get; set; }
     }
 }

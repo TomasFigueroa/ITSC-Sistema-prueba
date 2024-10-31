@@ -4,6 +4,7 @@ using INSTITUTO.Bdat;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace INSTITUTO.Bdat.Migrations
 {
     [DbContext(typeof(Context))]
-    partial class ContextModelSnapshot : ModelSnapshot
+    [Migration("20241029214306_12")]
+    partial class _12
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -265,7 +268,7 @@ namespace INSTITUTO.Bdat.Migrations
                     b.Property<DateTime>("Fecha")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("LIbrosId_Libro")
+                    b.Property<int>("LibrosId_Libro")
                         .HasColumnType("int");
 
                     b.Property<int>("Nota")
@@ -278,7 +281,7 @@ namespace INSTITUTO.Bdat.Migrations
 
                     b.HasIndex("DivsionCiclosMateriaAlumnosIdDivCicMatAlum");
 
-                    b.HasIndex("LIbrosId_Libro");
+                    b.HasIndex("LibrosId_Libro");
 
                     b.HasIndex("TipoEvaluacionIdTipoEva");
 
@@ -413,9 +416,11 @@ namespace INSTITUTO.Bdat.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("INSTITUTO.Bdat.Data.Entity.LIbros", null)
+                    b.HasOne("INSTITUTO.Bdat.Data.Entity.LIbros", "LIbros")
                         .WithMany("notas")
-                        .HasForeignKey("LIbrosId_Libro");
+                        .HasForeignKey("LibrosId_Libro")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("INSTITUTO.Bdat.Data.Entity.TipoEvaluacion", "TipoEvaluacion")
                         .WithMany("Notas")
@@ -424,6 +429,8 @@ namespace INSTITUTO.Bdat.Migrations
                         .IsRequired();
 
                     b.Navigation("DivsionCiclosMateriaAlumnos");
+
+                    b.Navigation("LIbros");
 
                     b.Navigation("TipoEvaluacion");
                 });

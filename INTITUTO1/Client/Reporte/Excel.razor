@@ -1,17 +1,77 @@
-﻿@page "/counter"
+﻿@page "/formulario-certificado"
+@using System.Net.Http.Json
 @inject HttpClient Http
 @inject IJSRuntime JS
-<PageTitle>Use Template</PageTitle>
-<button class="btn btn-outline-success" data-toggle="tooltip" title="Exportar" @onclick="(()=> Exportar3())">Exportar Registros xlxs</button>
-<br />
+
+<h3 class="text-center mb-4">Certificado de Examen</h3>
+
+<div class="form-container">
+    <div class="form-group">
+        <InputText @bind-Value="certificado.NombreAdministrador" Placeholder="Nombre del Administrador" class="form-control mb-3" />
+    </div>
+    <div class="form-group">
+        <InputText @bind-Value="certificado.NombreAlumno" Placeholder="Nombre del Alumno" class="form-control mb-3" />
+    </div>
+    <div class="form-group">
+        <InputNumber @bind-Value="certificado.DniAlumno" Placeholder="DNI del Alumno" class="form-control mb-3" />
+    </div>
+    <div class="form-group">
+        <InputText @bind-Value="certificado.Carrera" Placeholder="Carrera" class="form-control mb-3" />
+    </div>
+    <div class="form-group">
+        <InputText @bind-Value="certificado.Interesado" Placeholder="Interesado" class="form-control mb-3" />
+    </div>
+    <div class="form-group">
+        <InputNumber @bind-Value="certificado.DiaNumero" Placeholder="Día" class="form-control mb-3" />
+    </div>
+    <div class="form-group">
+        <InputText @bind-Value="certificado.Mes" Placeholder="Mes" class="form-control mb-3" />
+    </div>
+    <div class="form-group">
+        <InputNumber @bind-Value="certificado.Anio" Placeholder="Año" class="form-control mb-3" />
+    </div>
+    <button @onclick="ExportarExcel" class="btn btn-primary mt-4 w-100">Exportar a Excel</button>
+</div>
+
+<style>
+    .form-container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-control {
+        font-size: 1.1em;
+    }
+
+    .btn-primary {
+        background-color: #4CAF50;
+        border-color: #4CAF50;
+        font-size: 1.2em;
+    }
+
+
+</style>
+
 
 @code {
-    private async Task Exportar3()
-    {
-        var response = await Http.GetAsync("api/Reporte/Template");
-        var fileStream = response.Content.ReadAsStream();
-        using var streamRef = new DotNetStreamReference(stream: fileStream);
-        await JS.InvokeVoidAsync("downloadFileFromStream", "Template.xlsx", streamRef);
+    private CertificadoExamen certificado = new CertificadoExamen();
 
+    private async Task ExportarExcel()
+    {
+        var response = await Http.PostAsJsonAsync("api/Reporte/Template", certificado);
+        if (response.IsSuccessStatusCode)
+        {
+            var bytes = await response.Content.ReadAsByteArrayAsync(); // Convertir a byte[]
+            await JS.InvokeVoidAsync("downloadFileFromBytes", "Certificado.xlsx", bytes); // Llamar a JavaScript con el byte array
+        }
+        else
+        {
+            Console.WriteLine("No se pudo generar el archivo.");
+        }
     }
 }
+

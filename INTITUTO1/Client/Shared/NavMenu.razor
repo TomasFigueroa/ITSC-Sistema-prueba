@@ -14,51 +14,113 @@
         <NavLink class="nav-link text-light mb-2" href="/Index" Match="NavLinkMatch.All">
             <i class="bi bi-house-door"></i> Inicio
         </NavLink>
-        <NavLink class="nav-link text-light mb-2" href="Carrera">
-            <i class="bi bi-briefcase"></i> Carreras
-        </NavLink>
-        <NavLink class="nav-link text-light mb-2" href="Division">
-            <i class="bi bi-table"></i> Division
-        </NavLink>
-        <NavLink class="nav-link text-light mb-2" href="Materias">
-            <i class="bi bi-file-earmark"></i> Materias
-        </NavLink>
-        <NavLink class="nav-link text-light mb-2" href="Ciclo">
-            <i class="bi bi-calendar"></i> Ciclos Lectivos
-        </NavLink>
-        <NavLink class="nav-link text-light mb-2" href="DivisionCiclo">
-            <i class="bi bi-plus-circle"></i> Division Ciclo Electivo
-        </NavLink>
-        <NavLink class="nav-link text-light mb-2" href="Profesores">
-            <i class="bi bi-person"></i> Profesores
-        </NavLink>
-        <NavLink class="nav-link text-light mb-2" href="DivisionCicloMateriaAlumnos">
-            <i class="bi bi-pencil"></i> Alta Docente
-        </NavLink>
-        <NavLink class="nav-link text-light mb-2" href="inscripcion">
-            <i class="bi bi-pencil"></i> Inscribir Alumnos
-        </NavLink>
-        <NavLink class="nav-link text-light mb-2" href="Alumno">
-            <i class="bi bi-people"></i> Registrar Alumnos
-        </NavLink>
-        <NavLink class="nav-link text-light mb-2" href="CargarDeExcel">
-            <i class="bi bi-upload"></i> Cargar alumnos desde Excel
-        </NavLink>
-        <NavLink class="nav-link text-light mb-2" href="TipoEvaluaciones">
-            <i class="bi bi-list-check"></i> Tipo De Evaluacion
-        </NavLink>
-        <NavLink class="nav-link text-light mb-2" href="Notas">
-            <i class="bi bi-card-list"></i> Calificaciones
-        </NavLink>
-        <NavLink class="nav-link text-light mb-2" href="Libros">
-            <i class="bi bi-journal"></i> Libro de Actas
-        </NavLink>
-        <NavLink class="nav-link text-light mb-2" href="ReporteNotas">
-            <i class="bi bi-file-earmark-text"></i> Reporte
-        </NavLink>
+
+        <!-- Desplegable "Gestión de Carreras" -->
+        <div class="dropdown">
+            <div class="btn btn-dark text-light w-100 text-start mb-2">
+                <i class="bi bi-briefcase"></i> Gestión de Carreras
+            </div>
+            <div class="dropdown-content">
+                <NavLink class="nav-link text-light ms-3" href="Carrera">
+                    <i class="bi bi-mortarboard"></i> Carreras
+                </NavLink>
+                <NavLink class="nav-link text-light ms-3" href="Division">
+                    <i class="bi bi-diagram-3"></i> División
+                </NavLink>
+                <NavLink class="nav-link text-light ms-3" href="Materias">
+                    <i class="bi bi-book"></i> Materias
+                </NavLink>
+                <NavLink class="nav-link text-light ms-3" href="Ciclo">
+                    <i class="bi bi-calendar3"></i> Ciclos Lectivos
+                </NavLink>
+                <NavLink class="nav-link text-light ms-3" href="DivisionCiclo">
+                    <i class="bi bi-clipboard-check"></i> División por Ciclo
+                </NavLink>
+            </div>
+        </div>
+
+        <!-- Desplegable "Gestión de Profesores" -->
+        <div class="dropdown">
+            <div class="btn btn-dark text-light w-100 text-start mb-2">
+                <i class="bi bi-person-badge"></i> Gestión de Profesores
+            </div>
+            <div class="dropdown-content">
+                <NavLink class="nav-link text-light ms-3" href="Profesores">
+                    <i class="bi bi-person"></i> Profesores
+                </NavLink>
+                <NavLink class="nav-link text-light ms-3" href="DivisionCicloMateriaAlumnos">
+                    <i class="bi bi-person-plus"></i> Alta Docente
+                </NavLink>
+            </div>
+        </div>
+
+        <!-- Desplegable "Gestión de Alumnos" -->
+        <div class="dropdown">
+            <div class="btn btn-dark text-light w-100 text-start mb-2">
+                <i class="bi bi-people"></i> Gestión de Alumnos
+            </div>
+            <div class="dropdown-content">
+                <NavLink class="nav-link text-light ms-3" href="CargarDeExcel">
+                    <i class="bi bi-upload"></i> Cargar alumnos desde Excel
+                </NavLink>
+                <NavLink class="nav-link text-light ms-3" href="Alumno">
+                    <i class="bi bi-person-circle"></i> Registrar Alumnos
+                </NavLink>
+                <NavLink class="nav-link text-light ms-3" href="Inscripcion">
+                    <i class="bi bi-pencil-square"></i> Inscribir Alumnos
+                </NavLink>
+            </div>
+        </div>
+
+        <!-- Desplegable "Gestión de Notas" -->
+        <div class="dropdown">
+            <div class="btn btn-dark text-light w-100 text-start mb-2">
+                <i class="bi bi-journal-bookmark"></i> Gestión de Notas
+            </div>
+            <div class="dropdown-content">
+                <NavLink class="nav-link text-light ms-3" href="Notas">
+                    <i class="bi bi-card-list"></i> Calificaciones
+                </NavLink>
+                <NavLink class="nav-link text-light ms-3" href="Libros">
+                    <i class="bi bi-journal"></i> Libro de Actas
+                </NavLink>
+                <NavLink class="nav-link text-light ms-3" href="ReporteNotas">
+                    <i class="bi bi-file-earmark-text"></i> Reporte
+                </NavLink>
+            </div>
+        </div>
+        <div class="dropdown">
+            <div class="btn btn-dark text-light w-100 text-start mb-2">
+                <i class="bi bi-credit-card-2-front"></i> Formularios
+            </div>
+            <div class="dropdown-content">
+                <NavLink class="nav-link text-light ms-3" href="formulario-certificado">
+                    <i class="bi bi-book"></i> Certificado De Examen
+                </NavLink>
+                <NavLink class="nav-link text-light ms-3" href="ExcelNotas">
+                    <i class="bi bi-book"></i> Reporte Notas
+                </NavLink>
+            </div>
+        </div>
        
+
     </nav>
 </div>
+
+<style>
+    .dropdown-content {
+        display: none;
+        flex-direction: column;
+        padding-left: 15px;
+    }
+
+    /* Mostrar el contenido al pasar el mouse */
+    .dropdown:hover .dropdown-content {
+        display: flex;
+    }
+</style>
+
+
 
 @code {
     private async Task CerrarSesion()
