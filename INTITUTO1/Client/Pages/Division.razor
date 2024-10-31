@@ -21,7 +21,7 @@
                 {
                     <tr>
                         <td style="border-right: 2px solid #ddd;">@division.NombreDiv</td>
-                        <td style="border-right: 2px solid #ddd;">@GetNombreCarrera(division.CarrerassIdCarrera)</td> <!-- Obtener el nombre de la carrera -->
+                        <td style="border-right: 2px solid #ddd;">@GetNombreCarrera(division.CarrerassIdCarrera)</td>
                         <td>
                             <div class="action-buttons m-1">
                                 <button class="btn btn-primary me-2" @onclick="() => OpenModalToEdit(division, division.IdDivision)"><i class="oi oi-pencil"></i></button>
@@ -34,6 +34,13 @@
         </table>
     </div>
 </div>
+
+@if (!string.IsNullOrEmpty(confirmationMessage))
+{
+    <div class="alert alert-success" role="alert">
+        @confirmationMessage
+    </div>
+}
 
 <!-- Modal para agregar y editar divisiones -->
 @if (isModalOpen)
@@ -101,21 +108,21 @@
     private DTODivison currentDivision = new DTODivison();
     private int divisionToDeleteId;
     private bool isConfirmDeleteModalOpen = false;
+    private string confirmationMessage = string.Empty; // Mensaje de confirmación
     int idactual;
-    public Context context;
-
 
     protected override async Task OnInitializedAsync()
     {
         await LoadDivisiones();
         await LoadCarreras();
-
     }
+
     private string GetNombreCarrera(int idCarrera)
     {
         var carrera = carreras.FirstOrDefault(c => c.IdCarrera == idCarrera);
         return carrera?.Nombre ?? "Carrera no encontrada";
     }
+
     private async Task LoadDivisiones()
     {
         try
@@ -152,7 +159,6 @@
     {
         currentDivision = new DTODivison
             {
-
                 NombreDiv = division.NombreDiv,
                 NombreCar = division.CarrerassIdCarrera
             };
@@ -164,6 +170,7 @@
     private void CloseModal()
     {
         isModalOpen = false;
+        confirmationMessage = string.Empty; // Limpiar el mensaje de confirmación al cerrar el modal
     }
 
     private async Task AddDivision()
@@ -174,6 +181,7 @@
             if (response.IsSuccessStatusCode)
             {
                 await LoadDivisiones();
+                confirmationMessage = "División agregada con éxito."; // Establecer el mensaje de confirmación
                 CloseModal();
             }
             else
@@ -240,3 +248,4 @@
         }
     }
 }
+

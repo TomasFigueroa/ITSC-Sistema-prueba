@@ -5,6 +5,14 @@
 
 <PageTitle>Libros</PageTitle>
 <button class="btn btn-success" @onclick="OpenModalToAdd">Cargar Libro</button>
+
+@if (isSuccessMessageVisible)
+{
+    <div class="alert alert-success mt-3" role="alert">
+        Se ha agregado un libro
+    </div>
+}
+
 <div class="table-container" style="overflow: hidden; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); margin-bottom: 20px;">
     <div style="border-top-left-radius: 12px; border-top-right-radius: 12px; background-color: #f2f2f2; padding: 10px;">
         <table class="table" style="border-collapse: collapse; width: 100%; border: 2px solid #E6E6FA;">
@@ -88,6 +96,7 @@
     private DTOLibros currentLibro = new DTOLibros();
     private LIbros libroToDelete;
     private bool isConfirmDeleteModalOpen = false;
+    private bool isSuccessMessageVisible = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -138,6 +147,7 @@
             {
                 await LoadLibros();
                 CloseModal();
+                ShowSuccessMessage();
             }
             else
             {
@@ -202,5 +212,11 @@
         {
             Console.WriteLine($"Exception deleting libro: {ex.Message}");
         }
+    }
+
+    private void ShowSuccessMessage()
+    {
+        isSuccessMessageVisible = true;
+        _ = Task.Delay(3000).ContinueWith(_ => isSuccessMessageVisible = false);
     }
 }

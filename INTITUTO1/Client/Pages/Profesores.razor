@@ -4,6 +4,12 @@
 
 @inject HttpClient Http
 
+@if (showSuccessMessage)
+{
+    <div class="alert alert-success" role="alert">
+        @successMessage
+    </div>
+}
 <PageTitle>Profesor</PageTitle>
 <button class="btn btn-success" @onclick="OpenModalToAdd">Cargar Profesor</button>
 <div class="table-container" style="overflow: hidden; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); margin-bottom: 20px;">
@@ -105,6 +111,8 @@
     private int idProfesorToDelete;
     private bool isConfirmDeleteModalOpen = false;
     int idactual;
+    private string successMessage;
+    private bool showSuccessMessage = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -169,6 +177,13 @@
             {
                 await LoadProfesores();
                 CloseModal();
+                successMessage = "Profesor agregado exitosamente.";
+                showSuccessMessage = true;
+                await LoadProfesores();
+                CloseModal();
+
+                await Task.Delay(3000);
+                showSuccessMessage = false;
             }
             else
             {

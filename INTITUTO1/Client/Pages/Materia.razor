@@ -6,6 +6,7 @@
 
 <PageTitle>Materias</PageTitle>
 <button class="btn btn-success" @onclick="OpenModalToAdd">Cargar Materia</button>
+
 <!-- Filtros -->
 <div class="mb-3">
     <label class="form-label">Filtrar por Nombre de Materia</label>
@@ -225,18 +226,13 @@
             if (response.IsSuccessStatusCode)
             {
                 await LoadMaterias();
-                await LoadCarreras();
                 await FiltrarMaterias();
                 CloseModal();
-            }
-            else
-            {
-                Console.WriteLine($"Error adding materia: {response.ReasonPhrase}");
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Exception adding materia: {ex.Message}");
+            Console.WriteLine($"Error adding materia: {ex.Message}");
         }
     }
 
@@ -245,22 +241,16 @@
         try
         {
             var response = await Http.PutAsJsonAsync($"api/Materias/{idToDelete}", currentMateria);
-            
             if (response.IsSuccessStatusCode)
             {
                 await LoadMaterias();
-                await LoadCarreras();
                 await FiltrarMaterias();
                 CloseModal();
-            }
-            else
-            {
-                Console.WriteLine($"Error editing materia: {response.ReasonPhrase}");
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Exception editing materia: {ex.Message}");
+            Console.WriteLine($"Error editing materia: {ex.Message}");
         }
     }
 
@@ -283,16 +273,13 @@
             if (response.IsSuccessStatusCode)
             {
                 await LoadMaterias();
+                await FiltrarMaterias();
                 CloseConfirmDeleteModal();
-            }
-            else
-            {
-                Console.WriteLine($"Error deleting materia: {response.ReasonPhrase}");
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Exception deleting materia: {ex.Message}");
+            Console.WriteLine($"Error deleting materia: {ex.Message}");
         }
     }
 }
