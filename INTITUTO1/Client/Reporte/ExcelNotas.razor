@@ -26,6 +26,13 @@
     }
 </div>
 
+@if (ShowSuccessMessage)
+{
+    <div class="alert alert-success mt-3" role="alert">
+        Reporte generado correctamente
+    </div>
+}
+
 @if (FilteredAlumnos?.Any() == true)
 {
     <div class="table-container" style="overflow: hidden; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); margin-bottom: 20px;">
@@ -100,6 +107,7 @@ else
     private List<Alumnos> FilteredAlumnos { get; set; } = new();
     private string SearchDni { get; set; } = string.Empty;
     private int SelectedCarreraId { get; set; } = 0;
+    private bool ShowSuccessMessage { get; set; } = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -150,6 +158,10 @@ else
             var base64File = Convert.ToBase64String(fileBytes);
 
             await JS.InvokeVoidAsync("downloadFile", fileName, base64File);
+            ShowSuccessMessage = true;
+            await Task.Delay(3000);
+            ShowSuccessMessage = false;
+            StateHasChanged();
         }
         else
         {
@@ -157,5 +169,4 @@ else
         }
     }
 }
-
 
