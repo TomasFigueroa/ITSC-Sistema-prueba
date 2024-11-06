@@ -108,7 +108,7 @@ namespace INTITUTO1.Server.Controllers
                     SampleSheet.Cell("H12").Value = certificado.NombreAlumno;
                     //SampleSheet.Cell("I16").Value = certificado.Carrera;
                     SampleSheet.Cell("V20").Value = certificado.Interesado;
-                    SampleSheet.Cell("L24").Value = certificado.DiaNumero;
+                    SampleSheet.Cell("G24").Value = certificado.DiaNumero;
                     SampleSheet.Cell("X24").Value = certificado.Mes;
                     SampleSheet.Cell("AH24").Value = certificado.Anio;
 
