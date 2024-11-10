@@ -58,7 +58,7 @@ namespace INTITUTO1.Server.Controllers
             {
                 NombreDiv = dtoDivision.NombreDiv,
                 CarrerassIdCarrera = carrera.IdCarrera, // Usar el IdCarrera de la carrera encontrada
-                
+
             };
 
             _context.Division.Add(division);
@@ -113,13 +113,26 @@ namespace INTITUTO1.Server.Controllers
 
             try
             {
+                // Buscar la división en la base de datos
                 var dbDivision = await _context.Division.FirstOrDefaultAsync(e => e.IdDivision == id);
 
                 if (dbDivision != null)
                 {
-                    _context.Division.Remove(dbDivision);
-                    await _context.SaveChangesAsync();
-                    responseApi.EsCorrecto = true;
+                    // Verificar si existen materias relacionadas con esta división
+                    bool hasRelatedMaterias = await _context.Materia
+                        .AnyAsync(m => m.IdMateria == id);
+
+                    if (hasRelatedMaterias)
+                    {
+                        responseApi.EsCorrecto = false;
+                        responseApi.Mensaje = "No se puede eliminar la división porque tiene materias asociadas.";
+                    }
+                    else
+                    {
+                        _context.Division.Remove(dbDivision);
+                        await _context.SaveChangesAsync();
+                        responseApi.EsCorrecto = true;
+                    }
                 }
                 else
                 {
@@ -130,10 +143,11 @@ namespace INTITUTO1.Server.Controllers
             catch (Exception ex)
             {
                 responseApi.EsCorrecto = false;
-                responseApi.Mensaje = ex.InnerException.Message;
+                responseApi.Mensaje = ex.InnerException?.Message ?? ex.Message;
             }
+
             return Ok(responseApi);
         }
     }
 
-}
+   }

@@ -6,14 +6,36 @@
 
 <PageTitle>Materias</PageTitle>
 <button class="btn btn-success" @onclick="OpenModalToAdd">Cargar Materia</button>
+<button class="btn btn-warning" @onclick="OnInitializedAsync">
+    <i class="fa fa-broom"></i> Limpiar
+</button>
 <!-- Filtros -->
 <div class="mb-3">
-    <label class="form-label">Filtrar por Nombre de Materia</label>
-    <input type="text" class="form-control" @bind="filtroNombre" @oninput="FiltrarMaterias" placeholder="Nombre de Materia" />
+    <label class="form-label">Carrera</label>
+    <InputSelect class="form-control" @bind-Value="idcarrera">
+        <option value="">Seleccione una carrera</option>
+        @foreach (var carrera in carreras)
+        {
+            <option value="@carrera.IdCarrera">@carrera.Nombre</option>
+        }
+    </InputSelect>
 </div>
 <div class="mb-3">
-    <label class="form-label">Filtrar por Carrera</label>
-    <input type="text" class="form-control" @bind="filtroCarrera" @oninput="FiltrarMaterias" placeholder="Carrera" />
+    <label class="form-label">Ciclo</label>
+    <InputSelect class="form-control" @bind-Value="iddivision">
+        <option value="">Seleccione Año lectivo</option>
+       
+            @foreach (var div in divisions)
+            {
+                if (div.CarrerassIdCarrera == idcarrera )
+                {
+                    <option value="@div.IdDivision">@div.NombreDiv</option>
+                }
+
+            }
+
+        
+    </InputSelect>
 </div>
 <div class="table-container" style="overflow: hidden; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); margin-bottom: 20px;">
     <div style="border-top-left-radius: 12px; border-top-right-radius: 12px; background-color: #f2f2f2; padding: 10px;">
@@ -29,17 +51,21 @@
             <tbody>
                 @foreach (var materia in materiasFiltradas)
                 {
-                    <tr>
-                        <td style="border-right: 2px solid #ddd;">@materia.Nombre</td>
-                        <td style="border-right: 2px solid #ddd;">@GetNombreCarrera(materia.IdCarrera)</td>
-                        <td style="border-right: 2px solid #ddd;">@GetNombreDivision(materia.IdDivision)</td>
-                        <td>
-                            <div class="action-buttons m-1">
-                                <button class="btn btn-primary me-2" @onclick="() => OpenModalToEdit(materia, materia.IdMateria)"><i class="oi oi-pencil"></i></button>
-                                <button class="btn btn-danger" @onclick="() => OpenConfirmDeleteModal(materia.IdMateria)"><i class="oi oi-trash"></i></button>
-                            </div>
-                        </td>
-                    </tr>
+                    if (idcarrera==materia.IdCarrera && iddivision==materia.IdDivision)
+                    {
+                        <tr>
+                            <td style="border-right: 2px solid #ddd;">@materia.Nombre</td>
+                            <td style="border-right: 2px solid #ddd;">@GetNombreCarrera(materia.IdCarrera)</td>
+                            <td style="border-right: 2px solid #ddd;">@GetNombreDivision(materia.IdDivision)</td>
+                            <td>
+                                <div class="action-buttons m-1">
+                                    <button class="btn btn-primary me-2" @onclick="() => OpenModalToEdit(materia, materia.IdMateria)"><i class="oi oi-pencil"></i></button>
+                                    <button class="btn btn-danger" @onclick="() => OpenConfirmDeleteModal(materia.IdMateria)"><i class="oi oi-trash"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                 
                 }
             </tbody>
         </table>
@@ -67,25 +93,35 @@
                             <InputText class="form-control" @bind-Value="currentMateria.Nombre" />
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Carrera</label>
-                            <InputSelect class="form-control" @bind-Value="currentMateria.IdCarrera">
-                                <option value="">Seleccione una carrera</option>
-                                @foreach (var carrera in carreras)
-                                {
-                                    <option value="@carrera.IdCarrera">@carrera.Nombre</option>
-                                }
-                            </InputSelect>
-                        </div>
-                        <div class="mb-3">
                             <label class="form-label">Division</label>
                             <InputSelect class="form-control" @bind-Value="currentMateria.IdDivision">
                                 <option value="">Seleccione una division</option>
                                 @foreach (var divisiones in divisions)
                                 {
-                                    <option value="@divisiones.IdDivision">@divisiones.NombreDiv</option>
+                                    if (iddivision==divisiones.IdDivision)
+                                    {
+                                        <option value="@divisiones.IdDivision">@divisiones.NombreDiv</option>
+                                    }
+                                   
                                 }
                             </InputSelect>
                         </div>
+                        <div class="mb-3">
+                            <label class="form-label">Carrera</label>
+                            <InputSelect class="form-control" @bind-Value="currentMateria.IdCarrera">
+                                <option value="">Seleccione una carrera</option>
+                                @foreach (var carrera in carreras)
+                                { 
+                                    if (idcarrera==carrera.IdCarrera)
+                                    {
+                                        <option value="@carrera.IdCarrera">@carrera.Nombre</option>
+
+                                    }
+                                  
+                                }
+                            </InputSelect>
+                        </div>
+                    
                         <button type="submit" class="btn btn-primary">@((isEdit) ? "Guardar Cambios" : "Agregar Materia")</button>
                     </EditForm>
                 </div>
@@ -115,6 +151,30 @@
         </div>
     </div>
 }
+@if (mostrarAlerta)
+{
+
+    <div class="alert alert-success d-flex align-items-center alert-right animated-alert" role="alert">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-check-circle-fill me-2" viewBox="0 0 16 16">
+            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM6.97 11.03a.75.75 0 0 0 1.08.022L11.97 8a.75.75 0 1 0-1.08-1.04L7.5 10.21 5.646 8.354a.75.75 0 1 0-1.08 1.04l2 2z" />
+        </svg>
+        <div>
+            @mensage
+        </div>
+    </div>
+}
+@if (mostraError)
+{
+    <div class="alert alert-danger d-flex align-items-center alert-right animated-alert" role="alert">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-x-circle-fill me-2" viewBox="0 0 16 16">
+            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z" />
+        </svg>
+        <div>
+            @mensage
+        </div>
+    </div>
+
+}
 
 @code {
     private List<Materias> materias = new List<Materias>();
@@ -125,7 +185,11 @@
     private DTOMaterias currentMateria = new DTOMaterias();
     private bool isConfirmDeleteModalOpen = false;
     private int idToDelete;
-
+    private int idcarrera;
+    private int iddivision;
+    private bool mostrarAlerta = false;
+    private bool mostraError = false;
+    string mensage = "";
     // Filtros
     private string filtroNombre = string.Empty;
     private string filtroCarrera = string.Empty;
@@ -137,6 +201,38 @@
         await LoadCarreras();
         await LoadDivision();
         await FiltrarMaterias();
+        idcarrera = 0;
+        iddivision = 0;
+    }
+    //Alertas
+    private void MostrarError(string menssage)
+    {
+        mostraError = true;
+        mensage = mensage;
+
+        // Crear un temporizador para ocultar la alerta después de 5 segundos
+        var timer = new System.Timers.Timer(5000); // 5000 ms = 5 segundos
+        timer.Elapsed += (sender, e) =>
+        {
+            mostraError = false;
+            InvokeAsync(StateHasChanged); // Asegurar que el UI se actualice
+            timer.Dispose(); // Liberar el temporizador
+        };
+        timer.Start();
+    }
+    private void MostrarAlerta(string menssage)
+    {
+        mostrarAlerta = true;
+        mensage = menssage;
+        // Crear un temporizador para ocultar la alerta después de 5 segundos
+        var timer = new System.Timers.Timer(5000); // 5000 ms = 5 segundos
+        timer.Elapsed += (sender, e) =>
+        {
+            mostrarAlerta = false;
+            InvokeAsync(StateHasChanged); // Asegurar que el UI se actualice
+            timer.Dispose(); // Liberar el temporizador
+        };
+        timer.Start();
     }
 
     private async Task LoadMaterias()
@@ -227,15 +323,18 @@
                 await LoadMaterias();
                 await LoadCarreras();
                 await FiltrarMaterias();
+                MostrarAlerta("Materia cargada correctamente.");
                 CloseModal();
             }
             else
             {
+                MostrarError("No se cargó correctamente la Materia.");
                 Console.WriteLine($"Error adding materia: {response.ReasonPhrase}");
             }
         }
         catch (Exception ex)
         {
+            MostrarError("Error al tratar de cargar la Materia.");
             Console.WriteLine($"Exception adding materia: {ex.Message}");
         }
     }
@@ -251,15 +350,18 @@
                 await LoadMaterias();
                 await LoadCarreras();
                 await FiltrarMaterias();
+                MostrarAlerta("Materia editada correctamente.");
                 CloseModal();
             }
             else
             {
+                MostrarError("No se edito correctamente la Materia.");
                 Console.WriteLine($"Error editing materia: {response.ReasonPhrase}");
             }
         }
         catch (Exception ex)
         {
+            MostrarError("Error al tratar de editar la Materia.");
             Console.WriteLine($"Exception editing materia: {ex.Message}");
         }
     }
@@ -283,15 +385,18 @@
             if (response.IsSuccessStatusCode)
             {
                 await LoadMaterias();
+                MostrarAlerta("Materia eliminada correctamente.");
                 CloseConfirmDeleteModal();
             }
             else
             {
+                MostrarError("No se elimino correctamente la Materia.");
                 Console.WriteLine($"Error deleting materia: {response.ReasonPhrase}");
             }
         }
         catch (Exception ex)
         {
+            MostrarError("Error al tratar de eliminar la Materia.");
             Console.WriteLine($"Exception deleting materia: {ex.Message}");
         }
     }

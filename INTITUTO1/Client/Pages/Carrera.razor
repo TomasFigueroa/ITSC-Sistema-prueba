@@ -124,6 +124,31 @@
         </div>
     </div>
 }
+@if (mostrarAlerta)
+{
+
+    <div class="alert alert-success d-flex align-items-center alert-right animated-alert" role="alert">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-check-circle-fill me-2" viewBox="0 0 16 16">
+            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM6.97 11.03a.75.75 0 0 0 1.08.022L11.97 8a.75.75 0 1 0-1.08-1.04L7.5 10.21 5.646 8.354a.75.75 0 1 0-1.08 1.04l2 2z" />
+        </svg>
+        <div>
+           @mensage
+        </div>
+    </div>
+}
+@if (mostraError)
+{
+    <div class="alert alert-danger d-flex align-items-center alert-right animated-alert" role="alert">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-x-circle-fill me-2" viewBox="0 0 16 16">
+            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z" />
+        </svg>
+        <div>
+            @mensage
+        </div>
+    </div>
+
+}
+
 
 @code {
     int idcarreralocal;
@@ -135,12 +160,45 @@
     private Carrerass carreraToDelete;
     private bool isConfirmDeleteModalOpen = false;
     private string sortOrder = "asc";
-
+    private bool mostrarAlerta = false;
+    private bool mostraError = false;
+    string mensage = "";
     protected override async Task OnInitializedAsync()
     {
         await LoadCarreras();
+        currentCarrera.Fecha_inicio = DateTime.Today;
+        currentCarrera.Fecha_fin = DateTime.Today;
     }
+    //Alertas
+    private void MostrarError(string menssage)
+    {
+        mostraError = true;
+        mensage = mensage;
 
+        // Crear un temporizador para ocultar la alerta después de 5 segundos
+        var timer = new System.Timers.Timer(5000); // 5000 ms = 5 segundos
+        timer.Elapsed += (sender, e) =>
+        {
+            mostraError = false;
+            InvokeAsync(StateHasChanged); // Asegurar que el UI se actualice
+            timer.Dispose(); // Liberar el temporizador
+        };
+        timer.Start();
+    }
+    private void MostrarAlerta(string menssage)
+    {
+        mostrarAlerta = true;
+        mensage = menssage;
+        // Crear un temporizador para ocultar la alerta después de 5 segundos
+        var timer = new System.Timers.Timer(5000); // 5000 ms = 5 segundos
+        timer.Elapsed += (sender, e) =>
+        {
+            mostrarAlerta = false;
+            InvokeAsync(StateHasChanged); // Asegurar que el UI se actualice
+            timer.Dispose(); // Liberar el temporizador
+        };
+        timer.Start();
+    }
     private async Task LoadCarreras()
     {
         try
@@ -163,7 +221,10 @@
 
     private void OpenModalToAdd()
     {
+
         currentCarrera = new DTOSCarreras();
+        currentCarrera.Fecha_inicio = DateTime.Today;
+        currentCarrera.Fecha_fin = DateTime.Today;
         isEdit = false;
         isModalOpen = true;
     }
@@ -195,15 +256,18 @@
             if (response.IsSuccessStatusCode)
             {
                 await LoadCarreras();
+                MostrarAlerta("Carrera cargada correctamente.");
                 CloseModal();
             }
             else
             {
+                MostrarError("No se cargó correctamente la Carrera.");
                 Console.WriteLine($"Error adding carrera: {response.ReasonPhrase}");
             }
         }
         catch (Exception ex)
         {
+            MostrarError("Error al tratar de cargar la Carrera.");
             Console.WriteLine($"Exception adding carrera: {ex.Message}");
         }
     }
@@ -216,15 +280,18 @@
             if (response.IsSuccessStatusCode)
             {
                 await LoadCarreras();
+                MostrarAlerta("Carrera editada correctamente.");
                 CloseModal();
             }
             else
             {
+                MostrarError("No se edito correctamente la Carrera.");
                 Console.WriteLine($"Error editing carrera: {response.ReasonPhrase}");
             }
         }
         catch (Exception ex)
         {
+            MostrarError("Error al tratar de editar la Carrera.");
             Console.WriteLine($"Exception editing carrera: {ex.Message}");
         }
     }
@@ -249,15 +316,18 @@
             if (response.IsSuccessStatusCode)
             {
                 await LoadCarreras();
+                MostrarAlerta("Carrera eliminada correctamente.");
                 CloseConfirmDeleteModal();
             }
             else
             {
+                MostrarError("No se elimino correctamente la Carrera.");
                 Console.WriteLine($"Error deleting carrera: {response.ReasonPhrase}");
             }
         }
         catch (Exception ex)
         {
+            MostrarError("Error al tratar de eliminar la Carrera.");
             Console.WriteLine($"Exception deleting carrera: {ex.Message}");
         }
     }

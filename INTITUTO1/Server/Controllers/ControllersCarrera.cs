@@ -136,6 +136,15 @@ namespace INTITUTO1.Server.Controllers
 
             try
             {
+                // Verificar si existen divisiones relacionadas con la carrera
+                var tieneDivisionesRelacionadas = await _context.Division.AnyAsync(d => d.CarrerassIdCarrera == id);
+
+                if (tieneDivisionesRelacionadas)
+                {
+                    responseApi.EsCorrecto = false;
+                    responseApi.Mensaje = "No se puede eliminar la carrera porque tiene divisiones relacionadas.";
+                    return BadRequest(responseApi);
+                }
 
                 var dbCarrera = await _context.Carreras.FirstOrDefaultAsync(e => e.IdCarrera == id);
 
@@ -148,14 +157,15 @@ namespace INTITUTO1.Server.Controllers
                 else
                 {
                     responseApi.EsCorrecto = false;
-                    responseApi.Mensaje = "Carrera no encontrada";
+                    responseApi.Mensaje = "Carrera no encontrada.";
                 }
             }
             catch (Exception ex)
             {
                 responseApi.EsCorrecto = false;
-                responseApi.Mensaje = ex.InnerException.Message;
+                responseApi.Mensaje = ex.InnerException?.Message ?? ex.Message;
             }
+
             return Ok(responseApi);
         }
 
