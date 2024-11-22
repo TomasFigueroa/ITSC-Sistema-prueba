@@ -21,7 +21,7 @@
                 {
                     <tr>
                         <td style="border-right: 2px solid #ddd;">@division.NombreDiv</td>
-                        <td style="border-right: 2px solid #ddd;">@GetNombreCarrera(division.CarrerassIdCarrera)</td>
+                        <td style="border-right: 2px solid #ddd;">@GetNombreCarrera(division.CarrerassIdCarrera)</td> <!-- Obtener el nombre de la carrera -->
                         <td>
                             <div class="action-buttons m-1">
                                 <button class="btn btn-primary me-2" @onclick="() => OpenModalToEdit(division, division.IdDivision)"><i class="oi oi-pencil"></i></button>
@@ -34,13 +34,6 @@
         </table>
     </div>
 </div>
-
-@if (!string.IsNullOrEmpty(confirmationMessage))
-{
-    <div class="alert alert-success" role="alert">
-        @confirmationMessage
-    </div>
-}
 
 <!-- Modal para agregar y editar divisiones -->
 @if (isModalOpen)
@@ -97,6 +90,30 @@
         </div>
     </div>
 }
+@if (mostrarAlerta)
+{
+
+    <div class="alert alert-success d-flex align-items-center alert-right animated-alert" role="alert">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-check-circle-fill me-2" viewBox="0 0 16 16">
+            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM6.97 11.03a.75.75 0 0 0 1.08.022L11.97 8a.75.75 0 1 0-1.08-1.04L7.5 10.21 5.646 8.354a.75.75 0 1 0-1.08 1.04l2 2z" />
+        </svg>
+        <div>
+            @mensage
+        </div>
+    </div>
+}
+@if (mostraError)
+{
+    <div class="alert alert-danger d-flex align-items-center alert-right animated-alert" role="alert">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-x-circle-fill me-2" viewBox="0 0 16 16">
+            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z" />
+        </svg>
+        <div>
+            @mensage
+        </div>
+    </div>
+
+}
 
 @code {
 
@@ -108,21 +125,53 @@
     private DTODivison currentDivision = new DTODivison();
     private int divisionToDeleteId;
     private bool isConfirmDeleteModalOpen = false;
-    private string confirmationMessage = string.Empty; // Mensaje de confirmación
     int idactual;
+    public Context context;
+    //alerta
+    private bool mostrarAlerta = false;
+    private bool mostraError = false;
+    string mensage = "";
+    private void MostrarError(string menssage)
+    {
+        mostraError = true;
+        mensage = mensage;
+
+        // Crear un temporizador para ocultar la alerta después de 5 segundos
+        var timer = new System.Timers.Timer(5000); // 5000 ms = 5 segundos
+        timer.Elapsed += (sender, e) =>
+        {
+            mostraError = false;
+            InvokeAsync(StateHasChanged); // Asegurar que el UI se actualice
+            timer.Dispose(); // Liberar el temporizador
+        };
+        timer.Start();
+    }
+    private void MostrarAlerta(string menssage)
+    {
+        mostrarAlerta = true;
+        mensage = menssage;
+        // Crear un temporizador para ocultar la alerta después de 5 segundos
+        var timer = new System.Timers.Timer(5000); // 5000 ms = 5 segundos
+        timer.Elapsed += (sender, e) =>
+        {
+            mostrarAlerta = false;
+            InvokeAsync(StateHasChanged); // Asegurar que el UI se actualice
+            timer.Dispose(); // Liberar el temporizador
+        };
+        timer.Start();
+    }
 
     protected override async Task OnInitializedAsync()
     {
         await LoadDivisiones();
         await LoadCarreras();
-    }
 
+    }
     private string GetNombreCarrera(int idCarrera)
     {
         var carrera = carreras.FirstOrDefault(c => c.IdCarrera == idCarrera);
         return carrera?.Nombre ?? "Carrera no encontrada";
     }
-
     private async Task LoadDivisiones()
     {
         try
@@ -159,6 +208,7 @@
     {
         currentDivision = new DTODivison
             {
+
                 NombreDiv = division.NombreDiv,
                 NombreCar = division.CarrerassIdCarrera
             };
@@ -170,7 +220,6 @@
     private void CloseModal()
     {
         isModalOpen = false;
-        confirmationMessage = string.Empty; // Limpiar el mensaje de confirmación al cerrar el modal
     }
 
     private async Task AddDivision()
@@ -181,16 +230,18 @@
             if (response.IsSuccessStatusCode)
             {
                 await LoadDivisiones();
-                confirmationMessage = "División agregada con éxito."; // Establecer el mensaje de confirmación
+                MostrarAlerta("Division cargada correctamente.");
                 CloseModal();
             }
             else
             {
+                MostrarError("No se cargó correctamente la Division.");
                 Console.WriteLine($"Error adding division: {response.ReasonPhrase}");
             }
         }
         catch (Exception ex)
         {
+            MostrarError("Error al tratar de cargar la Division.");
             Console.WriteLine($"Exception adding division: {ex.Message}");
         }
     }
@@ -203,15 +254,18 @@
             if (response.IsSuccessStatusCode)
             {
                 await LoadDivisiones();
+                MostrarAlerta("Division editada correctamente.");
                 CloseModal();
             }
             else
             {
+                MostrarError("No se edito correctamente la Division.");
                 Console.WriteLine($"Error editing division: {response.ReasonPhrase}");
             }
         }
         catch (Exception ex)
         {
+            MostrarError("Error al tratar de editar la Division.");
             Console.WriteLine($"Exception editing division: {ex.Message}");
         }
     }
@@ -235,17 +289,19 @@
             if (response.IsSuccessStatusCode)
             {
                 await LoadDivisiones();
+                MostrarAlerta("Division eliminada correctamente.");
                 CloseConfirmDeleteModal();
             }
             else
             {
+                MostrarError("No se elimino correctamente la Division.");
                 Console.WriteLine($"Error deleting division: {response.ReasonPhrase}");
             }
         }
         catch (Exception ex)
         {
+            MostrarError("Error al tratar de eliminar la Division.");
             Console.WriteLine($"Exception deleting division: {ex.Message}");
         }
     }
 }
-

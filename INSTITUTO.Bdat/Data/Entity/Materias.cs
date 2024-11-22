@@ -16,9 +16,7 @@ namespace INSTITUTO.Bdat.Data.Entity
 
         //Conexion por detras para no generar un ciclo
         public int IdDivision { get; set; }
-        //Genera Ciclos
-        //public Divisiones divisiones { get; set; }
-
+      
         public List<DivisionCicloMateria> DivisionCicloMateria { get; set; }
        
 

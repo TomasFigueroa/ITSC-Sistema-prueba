@@ -132,14 +132,26 @@ namespace INTITUTO1.Server.Controllers
 
             try
             {
-                var dbMaterias = await _context.Materia.FirstOrDefaultAsync(e => e.IdMateria == id);
+                var dbMateria = await _context.Materia.FirstOrDefaultAsync(e => e.IdMateria == id);
 
-                if (dbMaterias != null)
+                if (dbMateria != null)
                 {
-                    _context.Materia.Remove(dbMaterias);
-                    await _context.SaveChangesAsync();
-                    responseApi.EsCorrecto = true;
-                    responseApi.Mensaje = "Materia eliminada con éxito";
+                    // Verificar si la materia está asociada a alguna DivisionCicloMateria
+                    bool hasRelatedDivisionCicloMateria = await _context.DivisionCicloMaterias
+                        .AnyAsync(dcm => dcm.MateriasIdMateria == id);
+
+                    if (hasRelatedDivisionCicloMateria)
+                    {
+                        responseApi.EsCorrecto = false;
+                        responseApi.Mensaje = "No se puede eliminar la materia porque está asociada a una o más divisiones.";
+                    }
+                    else
+                    {
+                        _context.Materia.Remove(dbMateria);
+                        await _context.SaveChangesAsync();
+                        responseApi.EsCorrecto = true;
+                        responseApi.Mensaje = "Materia eliminada con éxito";
+                    }
                 }
                 else
                 {
@@ -152,7 +164,9 @@ namespace INTITUTO1.Server.Controllers
                 responseApi.EsCorrecto = false;
                 responseApi.Mensaje = ex.InnerException?.Message ?? ex.Message;
             }
+
             return Ok(responseApi);
         }
+
     }
 }

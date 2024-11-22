@@ -107,6 +107,7 @@
     private void OpenModalToAdd()
     {
         currentCiclo = new DTOCiclo();
+        currentCiclo.Fecha = DateTime.Today;
         isEdit = false;
         isModalOpen = true;
     }
