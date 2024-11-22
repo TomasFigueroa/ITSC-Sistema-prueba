@@ -67,6 +67,23 @@
 
             </tbody>
         </table>
+        <!-- Paginación -->
+        <nav>
+            <ul class="pagination justify-content-center">
+                <li class="page-item @(CurrentPage == 1 ? "disabled" : "")">
+                    <button class="page-link" @onclick="() => ChangePage(CurrentPage - 1)">Anterior</button>
+                </li>
+                @for (int i = 1; i <= TotalPages; i++)
+                {
+                    <li class="page-item @(CurrentPage == i ? "active" : "")">
+                        <button class="page-link" @onclick="() => ChangePage(i)">@i</button>
+                    </li>
+                }
+                <li class="page-item @(CurrentPage == TotalPages ? "disabled" : "")">
+                    <button class="page-link" @onclick="() => ChangePage(CurrentPage + 1)">Siguiente</button>
+                </li>
+            </ul>
+        </nav>
     </div>
 </div>
 
@@ -151,6 +168,10 @@
 
 
 @code {
+    private List<Carrerass> pagedCarreras = new List<Carrerass>();
+    private int CurrentPage = 1; //pagina actual
+    private int PageSize = 10; //cantidad de elementos por pagina
+    private int TotalPages;
     int idcarreralocal;
     Carrerass Carreras = new Carrerass();
     List<Carrerass> carreras = new List<Carrerass>();
@@ -204,19 +225,39 @@
         try
         {
             var response = await Http.GetFromJsonAsync<List<Carrerass>>("api/Carrera");
-            if (sortOrder == "asc")
-            {
-                carreras = response.OrderBy(c => c.Nombre).ToList();
-            }
-            else
-            {
-                carreras = response.OrderByDescending(c => c.Nombre).ToList();
-            }
+            var orderedCarreras = sortOrder == "asc"
+                ? response.OrderBy(c => c.Nombre).ToList()
+                : response.OrderByDescending(c => c.Nombre).ToList();
+
+            // Actualizar total de páginas
+            TotalPages = (int)Math.Ceiling(orderedCarreras.Count / (double)PageSize);
+
+            // Obtener las carreras de la página actual
+            pagedCarreras = orderedCarreras
+                .Skip((CurrentPage - 1) * PageSize)
+                .Take(PageSize)
+                .ToList();
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Error loading carreras: {ex.Message}");
         }
+    }
+
+    private void ChangePage(int newPage)
+    {
+        if (newPage < 1 || newPage > TotalPages)
+            return;
+
+        CurrentPage = newPage;
+        LoadCarreras();
+    }
+
+    private void SortByNombre()
+    {
+        sortOrder = sortOrder == "asc" ? "desc" : "asc";
+        CurrentPage = 1; // Reiniciar a la primera página
+        LoadCarreras();
     }
 
     private void OpenModalToAdd()
@@ -330,20 +371,6 @@
             MostrarError("Error al tratar de eliminar la Carrera.");
             Console.WriteLine($"Exception deleting carrera: {ex.Message}");
         }
-    }
-    
-    //ordenar por nombre
-    private void SortByNombre()
-    {
-        if (sortOrder == "asc")
-        {
-            sortOrder = "desc";
-        }
-        else
-        {
-            sortOrder = "asc";
-        }
-        LoadCarreras();
     }
    
 }
