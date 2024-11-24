@@ -24,7 +24,7 @@
             {
                 if (div.CarrerassIdCarrera == idcarrera && ciclo.DivisionesIdDivision == div.IdDivision)
                 {
-                    <option value="@ciclo.IdDivCic">@GetNombreDivision(ciclo.DivisionesIdDivision, ciclo.CicloIdCiclo)</option>
+                    <option value="@ciclo.DivisionesIdDivision">@GetNombreDivision(ciclo.DivisionesIdDivision, ciclo.CicloIdCiclo)</option>
                 }
                 
             }
@@ -40,7 +40,8 @@
         {
             @foreach (var materia in materias)
             {
-                if (idciclo == divisiones.DivisionCicloIdDivCic && idcarrera == materia.IdCarrera && materia.IdCarrera == idcarrera)
+                if (idciclo == divisiones.DivisionCicloIdDivCic && idcarrera == materia.IdCarrera && materia.IdCarrera == idcarrera && materia.IdDivision == idciclo &&
+                divisiones.MateriasIdMateria == materia.IdMateria)
                 {
                     <option value="@divisiones.IdDivCicMat">@materia.Nombre</option>
                 }
@@ -161,7 +162,6 @@
 
 
 
-<!-- Modal para agregar/editar notas -->
 @if (isModalOpen)
 {
     <div class="modal show d-block" tabindex="-1" role="dialog">
@@ -188,13 +188,10 @@
                             <option value="0">Seleccione un alumno</option>
                             @foreach (var alumno in divisionCicloMateriaAlumnos)
                             {
-                                
-                                    if(alumno.DivisionCicloMateriaIdDivCicMat == iddivision && idalumno== alumno.AlumnosIdAlumno)
-                                    {
+                                if (alumno.DivisionCicloMateriaIdDivCicMat == iddivision && idalumno == alumno.AlumnosIdAlumno)
+                                {
                                     <option value="@alumno.IdDivCicMatAlum">@GetAlumnoNombre(alumno.AlumnosIdAlumno)</option>
-                                    }
-                                    
-                              
+                                }
                             }
                         </InputSelect>
                     </div>
@@ -209,7 +206,28 @@
                             }
                         </InputSelect>
                     </div>
+
+                    <div class="d-flex justify-content-end">
+                        <button type="button" class="btn btn-info me-2" @onclick="ToggleFinal">
+                            Mostrar/Ocultar Libro
+                        </button>
+                    </div>
+
+                    @if (isFinal)
+                    {
+                        <div class="mb-3 animate__animated animate__fadeIn">
+                            <label for="libroSelect" class="form-label">Libro:</label>
+                            <InputSelect class="form-select" id="libroSelect" @bind-Value="currentNota.Idlibro">
+                                <option value="0">Seleccione un libro</option>
+                                @foreach (var libro in libros)
+                                {
+                                    <option value="@libro.Id_Libro">@GetNombrelibro(libro.Id_Libro)</option>
+                                }
+                            </InputSelect>
+                        </div>
+                    }
                 </div>
+
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" @onclick="CloseModal">Cancelar</button>
                     <button type="button" class="btn btn-primary" @onclick="@(isEdit ? EditNota : AddNota)">
@@ -444,6 +462,15 @@
 
         return $"{div.NombreDiv}-{Cic.Fecha.ToString()}";
     }
+    private string GetNombrelibro(int idLibro)
+    {
+        var lib = libros.FirstOrDefault(m => m.Id_Libro == idLibro);
+        if (lib == null)
+            return "N/A";
+       
+
+        return $"{lib.Nombre_Lib}";
+    }
     private void MostrarError()
     {
         mostraError = true;
@@ -503,6 +530,7 @@
     private void CloseModal()
     {
         isModalOpen = false;
+        isFinal = false; // Resetea el estado del campo de Libro
     }
 
     private void OpenConfirmDeleteModal(int id)
@@ -588,6 +616,13 @@
             Console.WriteLine("Error al generar el reporte.");
         }
     }
+   private bool isFinal = false; // Controla si el campo de Libro es visible
 
+    // Lógica para gestionar el botón que alterna la visibilidad del campo de Libro
+    private void ToggleFinal()
+    {
+        isFinal = !isFinal; // Alterna entre visible y no visible
+    }
 
+    
 }

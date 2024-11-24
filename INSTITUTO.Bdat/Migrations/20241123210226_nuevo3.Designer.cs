@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace INSTITUTO.Bdat.Migrations
 {
     [DbContext(typeof(Context))]
-    [Migration("20241030231806_24")]
-    partial class _24
+    [Migration("20241123210226_nuevo3")]
+    partial class nuevo3
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -268,7 +268,10 @@ namespace INSTITUTO.Bdat.Migrations
                     b.Property<DateTime>("Fecha")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("LIbrosId_Libro")
+                    b.Property<int?>("LIbroId_Libro")
+                        .HasColumnType("int");
+
+                    b.Property<int>("LIbrosId_Libro")
                         .HasColumnType("int");
 
                     b.Property<int>("Nota")
@@ -416,9 +419,11 @@ namespace INSTITUTO.Bdat.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("INSTITUTO.Bdat.Data.Entity.LIbros", null)
+                    b.HasOne("INSTITUTO.Bdat.Data.Entity.LIbros", "LIbros")
                         .WithMany("notas")
-                        .HasForeignKey("LIbrosId_Libro");
+                        .HasForeignKey("LIbrosId_Libro")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("INSTITUTO.Bdat.Data.Entity.TipoEvaluacion", "TipoEvaluacion")
                         .WithMany("Notas")
@@ -427,6 +432,8 @@ namespace INSTITUTO.Bdat.Migrations
                         .IsRequired();
 
                     b.Navigation("DivsionCiclosMateriaAlumnos");
+
+                    b.Navigation("LIbros");
 
                     b.Navigation("TipoEvaluacion");
                 });

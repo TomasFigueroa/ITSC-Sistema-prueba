@@ -45,7 +45,8 @@ namespace INTITUTO1.Server.Controllers
                             Materia = materia.Nombre,
                             Fecha = nota.Fecha,
                             Nota = nota.Nota,
-                            TipoEvaluacion = tipoEvaluacion.NombreEva
+                            TipoEvaluacion = tipoEvaluacion.NombreEva,
+                            IdLibro = nota.LIbrosId_Libro
                         };
 
             return Ok(await query.ToListAsync());
@@ -144,23 +145,20 @@ namespace INTITUTO1.Server.Controllers
                 return BadRequest("Datos inválidos en la solicitud.");
             }
 
-            // Verificar si el DivisionCicloMateria existe
-            var divisionCicloMateria = await _context.DivsionCiclosMateriaAlumnos
-                .FirstOrDefaultAsync(dcm => dcm.IdDivCicMatAlum == dtoNotas.Materias);
-
-            if (divisionCicloMateria == null)
+            // Validar libro solo si el ID no es 0
+            if (dtoNotas.Idlibro != null && dtoNotas.Idlibro != 0)
             {
-                return BadRequest("El ID de DivisionCicloMateria no es válido.");
+                var libroExiste = await _context.LIbros.AnyAsync(l => l.Id_Libro == dtoNotas.Idlibro);
+                if (!libroExiste)
+                {
+                    return BadRequest("El ID del libro no es válido.");
+                }
             }
 
-            // Validar si ya existe una nota para el mismo alumno, materia y tipo de evaluación
-            var notaExistente = await _context.notas
-                .FirstOrDefaultAsync(n => n.DivsionCiclosMateriaAlumnosIdDivCicMatAlum == dtoNotas.Materias
-                                       && n.TipoEvaluacionIdTipoEva == dtoNotas.TipoEvaluacionIdTipoEva);
-
-            if (notaExistente != null)
+            // Asignar null si el ID del libro es 0
+            if (dtoNotas.Idlibro == 0)
             {
-                return BadRequest("Ya existe una nota para el mismo alumno, materia y evaluación.");
+                dtoNotas.Idlibro = 0;
             }
 
             // Crear nueva nota
@@ -170,7 +168,7 @@ namespace INTITUTO1.Server.Controllers
                 Fecha = dtoNotas.Fecha,
                 DivsionCiclosMateriaAlumnosIdDivCicMatAlum = dtoNotas.Materias,
                 TipoEvaluacionIdTipoEva = dtoNotas.TipoEvaluacionIdTipoEva,
-            
+                LIbrosId_Libro = dtoNotas.Idlibro,
             };
 
             _context.notas.Add(nuevaNota);
@@ -185,6 +183,7 @@ namespace INTITUTO1.Server.Controllers
                 return StatusCode(500, "Error al guardar los datos: " + ex.InnerException?.Message);
             }
         }
+
 
 
         // PUT: api/Notas/{id}
@@ -203,6 +202,7 @@ namespace INTITUTO1.Server.Controllers
                     dbNotas.Fecha = dtoNotas.Fecha;
                     dbNotas.DivsionCiclosMateriaAlumnosIdDivCicMatAlum = dtoNotas.Materias;
                     dbNotas.TipoEvaluacionIdTipoEva = dtoNotas.TipoEvaluacionIdTipoEva;
+                    dbNotas.LIbrosId_Libro = dtoNotas.Idlibro;
 
                     _context.notas.Update(dbNotas);
                     await _context.SaveChangesAsync();
@@ -254,89 +254,89 @@ namespace INTITUTO1.Server.Controllers
             return Ok(responseApi);
         }
 
-        [HttpGet("GenerarReporte/{alumnoId}")]
-        public IActionResult GenerarReporte(int alumnoId)
-        {
-            // Consulta para obtener las notas del alumno
-            var query = from nota in _context.notas
-                        join divCicMatAlum in _context.DivsionCiclosMateriaAlumnos on nota.DivsionCiclosMateriaAlumnosIdDivCicMatAlum equals divCicMatAlum.IdDivCicMatAlum
-                        join alumno in _context.alumnos on divCicMatAlum.AlumnosIdAlumno equals alumno.IdAlumno
-                        join divCicMat in _context.DivisionCicloMaterias on divCicMatAlum.DivisionCicloMateriaIdDivCicMat equals divCicMat.IdDivCicMat
-                        join divisionCiclo in _context.DivisionCiclos on divCicMat.DivisionCicloIdDivCic equals divisionCiclo.IdDivCic
-                        join ciclo in _context.Ciclos on divisionCiclo.CicloIdCiclo equals ciclo.IdCiclo
-                        join materia in _context.Materia on divCicMat.MateriasIdMateria equals materia.IdMateria
-                        join tipoEvaluacion in _context.TipoEvaluacions on nota.TipoEvaluacionIdTipoEva equals tipoEvaluacion.IdTipoEva
-                        where alumno.IdAlumno == alumnoId  // Filtrar por el alumno específico
-                        select new NotasDto
-                        {
-                            Id = nota.IdNotas,
-                            AlumnoNombre = alumno.Nombre + " " + alumno.Apellido,
-                            Materia = materia.Nombre,
-                            Fecha = nota.Fecha,
-                            Nota = nota.Nota,
-                            TipoEvaluacion = tipoEvaluacion.NombreEva
-                        };
+        //[HttpGet("GenerarReporte/{alumnoId}")]
+        //public IActionResult GenerarReporte(int alumnoId)
+        //{
+        //    // Consulta para obtener las notas del alumno
+        //    var query = from nota in _context.notas
+        //                join divCicMatAlum in _context.DivsionCiclosMateriaAlumnos on nota.DivsionCiclosMateriaAlumnosIdDivCicMatAlum equals divCicMatAlum.IdDivCicMatAlum
+        //                join alumno in _context.alumnos on divCicMatAlum.AlumnosIdAlumno equals alumno.IdAlumno
+        //                join divCicMat in _context.DivisionCicloMaterias on divCicMatAlum.DivisionCicloMateriaIdDivCicMat equals divCicMat.IdDivCicMat
+        //                join divisionCiclo in _context.DivisionCiclos on divCicMat.DivisionCicloIdDivCic equals divisionCiclo.IdDivCic
+        //                join ciclo in _context.Ciclos on divisionCiclo.CicloIdCiclo equals ciclo.IdCiclo
+        //                join materia in _context.Materia on divCicMat.MateriasIdMateria equals materia.IdMateria
+        //                join tipoEvaluacion in _context.TipoEvaluacions on nota.TipoEvaluacionIdTipoEva equals tipoEvaluacion.IdTipoEva
+        //                where alumno.IdAlumno == alumnoId  // Filtrar por el alumno específico
+        //                select new NotasDto
+        //                {
+        //                    Id = nota.IdNotas,
+        //                    AlumnoNombre = alumno.Nombre + " " + alumno.Apellido,
+        //                    Materia = materia.Nombre,
+        //                    Fecha = nota.Fecha,
+        //                    Nota = nota.Nota,
+        //                    TipoEvaluacion = tipoEvaluacion.NombreEva
+        //                };
 
-            // Obtener el resultado de la consulta
-            var notasAlumno = query.ToList();
+        //    // Obtener el resultado de la consulta
+        //    var notasAlumno = query.ToList();
 
-            if (notasAlumno == null || !notasAlumno.Any())
-            {
-                return NotFound("No se encontraron notas para el alumno con el ID especificado.");
-            }
+        //    if (notasAlumno == null || !notasAlumno.Any())
+        //    {
+        //        return NotFound("No se encontraron notas para el alumno con el ID especificado.");
+        //    }
 
-            // Creamos un documento PDF en memoria
-            using (var ms = new MemoryStream())
-            {
-                // Inicializa el escritor de PDF
-                var writer = new iText.Kernel.Pdf.PdfWriter(ms);
-                var pdf = new iText.Kernel.Pdf.PdfDocument(writer);
-                var document = new iText.Layout.Document(pdf);
+        //    // Creamos un documento PDF en memoria
+        //    using (var ms = new MemoryStream())
+        //    {
+        //        // Inicializa el escritor de PDF
+        //        var writer = new iText.Kernel.Pdf.PdfWriter(ms);
+        //        var pdf = new iText.Kernel.Pdf.PdfDocument(writer);
+        //        var document = new iText.Layout.Document(pdf);
 
-                // Título del documento
-                var titulo = new iText.Layout.Element.Paragraph("Reporte de Notas del Alumno")
-                    .SetTextAlignment(iText.Layout.Properties.TextAlignment.CENTER)
-                    .SetFontSize(20);
-                document.Add(titulo);
+        //        // Título del documento
+        //        var titulo = new iText.Layout.Element.Paragraph("Reporte de Notas del Alumno")
+        //            .SetTextAlignment(iText.Layout.Properties.TextAlignment.CENTER)
+        //            .SetFontSize(20);
+        //        document.Add(titulo);
 
-                // Información del alumno
-                var infoAlumno = new iText.Layout.Element.Paragraph($"Alumno: {notasAlumno.First().AlumnoNombre}\n" +
-                    $"Número de Alumno: {alumnoId}\n")
-                    .SetMarginTop(20);
-                document.Add(infoAlumno);
+        //        // Información del alumno
+        //        var infoAlumno = new iText.Layout.Element.Paragraph($"Alumno: {notasAlumno.First().AlumnoNombre}\n" +
+        //            $"Número de Alumno: {alumnoId}\n")
+        //            .SetMarginTop(20);
+        //        document.Add(infoAlumno);
 
-                // Calificaciones
-                var tituloCalificaciones = new iText.Layout.Element.Paragraph("Calificaciones")
-                    .SetFontSize(16)
-                    .SetBold()
-                    .SetMarginTop(20);
-                document.Add(tituloCalificaciones);
+        //        // Calificaciones
+        //        var tituloCalificaciones = new iText.Layout.Element.Paragraph("Calificaciones")
+        //            .SetFontSize(16)
+        //            .SetBold()
+        //            .SetMarginTop(20);
+        //        document.Add(tituloCalificaciones);
 
-                // Tabla de calificaciones
-                var table = new iText.Layout.Element.Table(4); // 4 columnas: Asignatura, Nota, Tipo Evaluación, Fecha de aprobación
-                table.AddHeaderCell("Asignatura");
-                table.AddHeaderCell("Nota");
-                table.AddHeaderCell("Tipo Evaluación");
-                table.AddHeaderCell("Fecha Aprobado");
+        //        // Tabla de calificaciones
+        //        var table = new iText.Layout.Element.Table(4); // 4 columnas: Asignatura, Nota, Tipo Evaluación, Fecha de aprobación
+        //        table.AddHeaderCell("Asignatura");
+        //        table.AddHeaderCell("Nota");
+        //        table.AddHeaderCell("Tipo Evaluación");
+        //        table.AddHeaderCell("Fecha Aprobado");
 
-                foreach (var nota in notasAlumno)
-                {
-                    table.AddCell(nota.Materia);
-                    table.AddCell(nota.Nota.ToString());
-                    table.AddCell(nota.TipoEvaluacion);
-                    table.AddCell(nota.Fecha.ToString("dd/MM/yyyy"));
-                }
+        //        foreach (var nota in notasAlumno)
+        //        {
+        //            table.AddCell(nota.Materia);
+        //            table.AddCell(nota.Nota.ToString());
+        //            table.AddCell(nota.TipoEvaluacion);
+        //            table.AddCell(nota.Fecha.ToString("dd/MM/yyyy"));
+        //        }
 
-                document.Add(table);
+        //        document.Add(table);
 
-                // Cerrar el documento
-                document.Close();
+        //        // Cerrar el documento
+        //        document.Close();
 
-                // Enviar el PDF generado al cliente
-                var pdfBytes = ms.ToArray();
-                return File(pdfBytes, "application/pdf", "Reporte_Notas_Alumno.pdf");
-            }
-        }
+        //        // Enviar el PDF generado al cliente
+        //        var pdfBytes = ms.ToArray();
+        //        return File(pdfBytes, "application/pdf", "Reporte_Notas_Alumno.pdf");
+        //    }
+        //}
 
 
     }

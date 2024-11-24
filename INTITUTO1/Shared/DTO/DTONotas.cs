@@ -12,7 +12,7 @@ namespace INTITUTO1.Shared.DTO
         public DateTime Fecha { get; set; }
         public int Materias { get; set; }
         public int TipoEvaluacionIdTipoEva {  get; set; }
-        public int Idlibro { get; set; }
+        public int? Idlibro { get; set; }
 
         //agrega tipo de evaluacion si hace falta aca
     }

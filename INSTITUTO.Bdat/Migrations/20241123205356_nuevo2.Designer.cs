@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace INSTITUTO.Bdat.Migrations
 {
     [DbContext(typeof(Context))]
-    [Migration("20241023000809_inicial1")]
-    partial class inicial1
+    [Migration("20241123205356_nuevo2")]
+    partial class nuevo2
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -268,7 +268,10 @@ namespace INSTITUTO.Bdat.Migrations
                     b.Property<DateTime>("Fecha")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("LibrosId_Libro")
+                    b.Property<int>("LIbroId_Libro")
+                        .HasColumnType("int");
+
+                    b.Property<int>("LIbrosId_Libro")
                         .HasColumnType("int");
 
                     b.Property<int>("Nota")
@@ -281,7 +284,7 @@ namespace INSTITUTO.Bdat.Migrations
 
                     b.HasIndex("DivsionCiclosMateriaAlumnosIdDivCicMatAlum");
 
-                    b.HasIndex("LibrosId_Libro");
+                    b.HasIndex("LIbrosId_Libro");
 
                     b.HasIndex("TipoEvaluacionIdTipoEva");
 
@@ -418,7 +421,7 @@ namespace INSTITUTO.Bdat.Migrations
 
                     b.HasOne("INSTITUTO.Bdat.Data.Entity.LIbros", "LIbros")
                         .WithMany("notas")
-                        .HasForeignKey("LibrosId_Libro")
+                        .HasForeignKey("LIbrosId_Libro")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
