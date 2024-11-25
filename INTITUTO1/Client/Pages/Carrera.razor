@@ -168,7 +168,7 @@
 
 
 @code {
-    private List<Carrerass> pagedCarreras = new List<Carrerass>();
+    // private List<Carrerass> pagedCarreras = new List<Carrerass>();
     private int CurrentPage = 1; //pagina actual
     private int PageSize = 10; //cantidad de elementos por pagina
     private int TotalPages;
@@ -233,7 +233,7 @@
             TotalPages = (int)Math.Ceiling(orderedCarreras.Count / (double)PageSize);
 
             // Obtener las carreras de la página actual
-            pagedCarreras = orderedCarreras
+            carreras = orderedCarreras
                 .Skip((CurrentPage - 1) * PageSize)
                 .Take(PageSize)
                 .ToList();
