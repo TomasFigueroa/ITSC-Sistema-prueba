@@ -413,7 +413,7 @@ namespace INSTITUTO.Bdat.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("INSTITUTO.Bdat.Data.Entity.LIbros", null)
+                    b.HasOne("INSTITUTO.Bdat.Data.Entity.LIbros", "LIbros")
                         .WithMany("notas")
                         .HasForeignKey("LIbrosId_Libro");
 
@@ -424,6 +424,8 @@ namespace INSTITUTO.Bdat.Migrations
                         .IsRequired();
 
                     b.Navigation("DivsionCiclosMateriaAlumnos");
+
+                    b.Navigation("LIbros");
 
                     b.Navigation("TipoEvaluacion");
                 });

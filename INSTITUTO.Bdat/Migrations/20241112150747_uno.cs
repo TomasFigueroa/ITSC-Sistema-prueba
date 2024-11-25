@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace INSTITUTO.Bdat.Migrations
 {
     /// <inheritdoc />
-    public partial class inicial1 : Migration
+    public partial class uno : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -233,8 +233,8 @@ namespace INSTITUTO.Bdat.Migrations
                     Nota = table.Column<int>(type: "int", nullable: false),
                     Fecha = table.Column<DateTime>(type: "datetime2", nullable: false),
                     TipoEvaluacionIdTipoEva = table.Column<int>(type: "int", nullable: false),
-                    LibrosId_Libro = table.Column<int>(type: "int", nullable: false),
-                    DivsionCiclosMateriaAlumnosIdDivCicMatAlum = table.Column<int>(type: "int", nullable: false)
+                    DivsionCiclosMateriaAlumnosIdDivCicMatAlum = table.Column<int>(type: "int", nullable: false),
+                    LIbrosId_Libro = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -246,11 +246,10 @@ namespace INSTITUTO.Bdat.Migrations
                         principalColumn: "IdDivCicMatAlum",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_notas_LIbros_LibrosId_Libro",
-                        column: x => x.LibrosId_Libro,
+                        name: "FK_notas_LIbros_LIbrosId_Libro",
+                        column: x => x.LIbrosId_Libro,
                         principalTable: "LIbros",
-                        principalColumn: "Id_Libro",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id_Libro");
                     table.ForeignKey(
                         name: "FK_notas_TipoEvaluacions_TipoEvaluacionIdTipoEva",
                         column: x => x.TipoEvaluacionIdTipoEva,
@@ -305,9 +304,9 @@ namespace INSTITUTO.Bdat.Migrations
                 column: "DivsionCiclosMateriaAlumnosIdDivCicMatAlum");
 
             migrationBuilder.CreateIndex(
-                name: "IX_notas_LibrosId_Libro",
+                name: "IX_notas_LIbrosId_Libro",
                 table: "notas",
-                column: "LibrosId_Libro");
+                column: "LIbrosId_Libro");
 
             migrationBuilder.CreateIndex(
                 name: "IX_notas_TipoEvaluacionIdTipoEva",

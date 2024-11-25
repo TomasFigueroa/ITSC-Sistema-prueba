@@ -15,5 +15,7 @@ namespace INSTITUTO.Bdat.Data.Entity
         public TipoEvaluacion TipoEvaluacion { get; set; }
         public int DivsionCiclosMateriaAlumnosIdDivCicMatAlum { get; set; }
         public DivsionCiclosMateriaAlumnos DivsionCiclosMateriaAlumnos { get; set; }
+        public int? LIbrosId_Libro { get; set; }  
+        public LIbros LIbros { get; set; }
     }
 }
