@@ -168,7 +168,6 @@
 
 
 @code {
-    // private List<Carrerass> pagedCarreras = new List<Carrerass>();
     private int CurrentPage = 1; //pagina actual
     private int PageSize = 10; //cantidad de elementos por pagina
     private int TotalPages;
@@ -244,13 +243,14 @@
         }
     }
 
-    private void ChangePage(int newPage)
+    private async Task ChangePage(int newPage)
     {
         if (newPage < 1 || newPage > TotalPages)
             return;
 
         CurrentPage = newPage;
-        LoadCarreras();
+         await LoadCarreras();
+        StateHasChanged();
     }
 
     private void SortByNombre()
