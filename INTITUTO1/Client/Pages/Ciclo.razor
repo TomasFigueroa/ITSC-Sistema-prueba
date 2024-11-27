@@ -30,6 +30,23 @@
                 }
             </tbody>
         </table>
+        <!-- Paginación -->
+        <nav>
+            <ul class="pagination justify-content-center">
+                <li class="page-item @(CurrentPage == 1 ? "disabled" : "")">
+                    <button class="page-link" @onclick="() => ChangePage(CurrentPage - 1)">Anterior</button>
+                </li>
+                @for (int i = 1; i <= TotalPages; i++)
+                {
+                    <li class="page-item @(CurrentPage == i ? "active" : "")">
+                        <button class="page-link" @onclick="() => ChangePage(i)">@i</button>
+                    </li>
+                }
+                <li class="page-item @(CurrentPage == TotalPages ? "disabled" : "")">
+                    <button class="page-link" @onclick="() => ChangePage(CurrentPage + 1)">Siguiente</button>
+                </li>
+            </ul>
+        </nav>
     </div>
 </div>
 
@@ -79,6 +96,9 @@
 }
 
 @code {
+    private int CurrentPage = 1; //pagina actual
+    private int PageSize = 10; //cantidad de elementos por pagina
+    private int TotalPages;
     private List<Ciclos> ciclos = new List<Ciclos>();
     private DTOCiclo currentCiclo = new DTOCiclo();
     private bool isModalOpen = false;
@@ -96,13 +116,33 @@
     {
         try
         {
-            ciclos = await Http.GetFromJsonAsync<List<Ciclos>>("api/Ciclo");
+            var response = await Http.GetFromJsonAsync<List<Ciclos>>("api/Ciclo");
+
+            //actualizacion de paginas
+            TotalPages = (int)Math.Ceiling(response.Count / (double)PageSize);
+
+            //obtener los ciclos de la página actual
+            ciclos = response
+                .Skip((CurrentPage - 1) * PageSize)
+                .Take(PageSize)
+                .ToList();
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Error loading ciclos: {ex.Message}");
         }
     }
+
+    private async Task ChangePage(int newPage)
+    {
+        if (newPage < 1 || newPage > TotalPages)
+            return;
+
+        CurrentPage = newPage;
+        await LoadCiclos();
+        StateHasChanged();
+    }
+
 
     private void OpenModalToAdd()
     {

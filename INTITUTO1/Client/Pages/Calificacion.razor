@@ -131,6 +131,23 @@
                 }
             </tbody>
         </table>
+        <!-- Paginación -->
+        <nav>
+            <ul class="pagination justify-content-center">
+                <li class="page-item @(CurrentPage == 1 ? "disabled" : "")">
+                    <button class="page-link" @onclick="() => ChangePage(CurrentPage - 1)">Anterior</button>
+                </li>
+                @for (int i = 1; i <= TotalPages; i++)
+                {
+                    <li class="page-item @(CurrentPage == i ? "active" : "")">
+                        <button class="page-link" @onclick="() => ChangePage(i)">@i</button>
+                    </li>
+                }
+                <li class="page-item @(CurrentPage == TotalPages ? "disabled" : "")">
+                    <button class="page-link" @onclick="() => ChangePage(CurrentPage + 1)">Siguiente</button>
+                </li>
+            </ul>
+        </nav>
     </div>
 </div>
 
@@ -266,6 +283,9 @@
 
 
 @code {
+    private int CurrentPage = 1; //pagina actual
+    private int PageSize = 10; //cantidad de elementos por pagina
+    private int TotalPages;
     private List<DivsionCiclosMateriaAlumnos> divisionCicloMateriaAlumnos = new List<DivsionCiclosMateriaAlumnos>();
     private List<DivisionCicloMateria> divisionCicloMaterias = new List<DivisionCicloMateria>();
     private List<LIbros> libros = new List<LIbros>();
@@ -320,8 +340,28 @@
 
     private async Task LoadNotas()
     {
-        notasFiltradas = await Http.GetFromJsonAsync<List<NotasDto>>("api/Notas/GetNotas");
+        var response = await Http.GetFromJsonAsync<List<NotasDto>>("api/Notas/GetNotas");
+
+        //actualizacion de paginas
+        TotalPages = (int)Math.Ceiling(response.Count / (double)PageSize);
+
+        //obtener los ciclos de la página actual
+        notasFiltradas = response
+            .Skip((CurrentPage - 1) * PageSize)
+            .Take(PageSize)
+            .ToList();
     }
+
+    private async Task ChangePage(int newPage)
+    {
+        if (newPage < 1 || newPage > TotalPages)
+            return;
+
+        CurrentPage = newPage;
+        await LoadCiclos();
+        StateHasChanged();
+    }
+
     private async Task LoadAlumnos()
     {
         alumnos = await Http.GetFromJsonAsync<List<DivsionCiclosMateriaAlumnos>>("api/DivisionCicloMateriaAlumnos");

@@ -32,6 +32,22 @@
                 }
             </tbody>
         </table>
+        <nav>
+            <ul class="pagination justify-content-center">
+                <li class="page-item @(CurrentPage == 1 ? "disabled" : "")">
+                    <button class="page-link" @onclick="() => ChangePage(CurrentPage - 1)">Anterior</button>
+                </li>
+                @for (int i = 1; i <= TotalPages; i++)
+                {
+                    <li class="page-item @(CurrentPage == i ? "active" : "")">
+                        <button class="page-link" @onclick="() => ChangePage(i)">@i</button>
+                    </li>
+                }
+                <li class="page-item @(CurrentPage == TotalPages ? "disabled" : "")">
+                    <button class="page-link" @onclick="() => ChangePage(CurrentPage + 1)">Siguiente</button>
+                </li>
+            </ul>
+        </nav>
     </div>
 </div>
 
@@ -116,7 +132,9 @@
 }
 
 @code {
-
+    private int CurrentPage = 1; //pagina actual
+    private int PageSize = 10; //cantidad de elementos por pagina
+    private int TotalPages;
     private Divisiones division = new Divisiones();
     private List<Divisiones> divisiones = new List<Divisiones>();
     private List<Carrerass> carreras = new List<Carrerass>();
@@ -131,6 +149,7 @@
     private bool mostrarAlerta = false;
     private bool mostraError = false;
     string mensage = "";
+
     private void MostrarError(string menssage)
     {
         mostraError = true;
@@ -176,13 +195,32 @@
     {
         try
         {
-            divisiones = await Http.GetFromJsonAsync<List<Divisiones>>("api/Division");
+            var response = await Http.GetFromJsonAsync<List<Divisiones>>("api/Division");
+
+            //actualizacion de paginas
+            TotalPages = (int)Math.Ceiling(response.Count / (double)PageSize);
+
+            //obtener los ciclos de la página actual
+            divisiones = response
+                .Skip((CurrentPage - 1) * PageSize)
+                .Take(PageSize)
+                .ToList();
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Error loading divisiones: {ex.Message}");
         }
         idactual = 0;
+    }
+
+    private async Task ChangePage(int newPage)
+    {
+        if (newPage < 1 || newPage > TotalPages)
+            return;
+
+        CurrentPage = newPage;
+        await LoadDivisiones();
+        StateHasChanged();
     }
 
     private async Task LoadCarreras()

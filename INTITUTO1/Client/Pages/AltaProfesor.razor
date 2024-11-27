@@ -72,6 +72,23 @@
                 }
             </tbody>
         </table>
+        <!-- Paginación -->
+        <nav>
+            <ul class="pagination justify-content-center">
+                <li class="page-item @(CurrentPage == 1 ? "disabled" : "")">
+                    <button class="page-link" @onclick="() => ChangePage(CurrentPage - 1)">Anterior</button>
+                </li>
+                @for (int i = 1; i <= TotalPages; i++)
+                {
+                    <li class="page-item @(CurrentPage == i ? "active" : "")">
+                        <button class="page-link" @onclick="() => ChangePage(i)">@i</button>
+                    </li>
+                }
+                <li class="page-item @(CurrentPage == TotalPages ? "disabled" : "")">
+                    <button class="page-link" @onclick="() => ChangePage(CurrentPage + 1)">Siguiente</button>
+                </li>
+            </ul>
+        </nav>
     </div>
 </div>
 
@@ -189,6 +206,9 @@
 }
 
 @code {
+    private int CurrentPage = 1; //pagina actual
+    private int PageSize = 10; //cantidad de elementos por pagina
+    private int TotalPages;
     private List<DivsionCiclosMateriaAlumnos> divisionCicloMateriaAlumnos = new List<DivsionCiclosMateriaAlumnos>();
     private List<DivisionCicloMateria> divisionCicloMaterias = new List<DivisionCicloMateria>();
     private List<Alumnos> alumnos = new List<Alumnos>();
@@ -199,7 +219,6 @@
     private List<Divisiones> divisiones = new List<Divisiones>();
     private List<Carrerass> carreras = new List<Carrerass>();
     private List<DivisionCiclo> divCiclo = new List<DivisionCiclo>();
-
     private DivsionCiclosMateriaAlumnos currentDivisionCicloMateriaAlumno = new DivsionCiclosMateriaAlumnos();
     private DTODivisionCicloMateria currentDivisionCicloMateria = new DTODivisionCicloMateria();
     private bool isModalOpen = false;
@@ -355,7 +374,16 @@
     {
         try
         {
-            divisionCicloMaterias = await Http.GetFromJsonAsync<List<DivisionCicloMateria>>("api/DivisionCicloMateria");
+            var response = await Http.GetFromJsonAsync<List<DivisionCicloMateria>>("api/DivisionCicloMateria");
+
+            //actualizacion de paginas
+            TotalPages = (int)Math.Ceiling(response.Count / (double)PageSize);
+
+            //obtener los ciclos de la página actual
+            divisionCicloMaterias = response
+                .Skip((CurrentPage - 1) * PageSize)
+                .Take(PageSize)
+                .ToList();
         }
         catch (Exception ex)
         {
@@ -363,6 +391,15 @@
         }
     }
 
+    private async Task ChangePage(int newPage)
+    {
+        if (newPage < 1 || newPage > TotalPages)
+            return;
+
+        CurrentPage = newPage;
+        await LoadCiclos();
+        StateHasChanged();
+    }
  
 
     private async Task LoadAlumnos()
