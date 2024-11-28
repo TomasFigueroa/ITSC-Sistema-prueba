@@ -288,15 +288,7 @@ Modal de datos Inactivos *@
         idactual = 0;
     }
 
-    private async Task ChangePage(int newPage)
-    {
-        if (newPage < 1 || newPage > TotalPages)
-            return;
-
-        CurrentPage = newPage;
-        await LoadDivisiones();
-        StateHasChanged();
-    }
+   
 
     private async Task LoadCarreras()
     {

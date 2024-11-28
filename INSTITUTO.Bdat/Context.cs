@@ -55,6 +55,8 @@ namespace INSTITUTO.Bdat
                 o.HasKey(b => b.IdMateria);
                 o.Property(b => b.Nombre);
                 o.Property(b => b.IdCarrera);
+                o.Property(b => b.Estado);
+
 
             });
             modelBuilder.Entity<Ciclos>(o =>
