@@ -414,6 +414,139 @@ main {
     overflow-y: auto;
     scroll-behavior: smooth; /* Habilita el scroll suave solo en esta área */
 }
+/*css del modal defs eliminar logico*/
+/* Fondo oscuro del modal */
+.custom-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1050;
+}
+
+/* Contenedor principal del modal */
+.custom-modal-container {
+    width: 90%;
+    max-width: 800px;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Modal */
+.custom-modal {
+    background: linear-gradient(145deg, #ffffff, #f0f0f0);
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+}
+
+/* Encabezado */
+.custom-modal-header {
+    background-color: #007bff;
+    color: white;
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Cuerpo */
+.custom-modal-body {
+    padding: 20px;
+}
+
+/* Footer */
+.custom-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    padding: 15px;
+    border-top: 1px solid #e5e5e5;
+    background-color: #f9f9f9;
+}
+
+/* Botón cerrar */
+.custom-btn-close {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 14px;
+    transition: background-color 0.3s;
+}
+
+    .custom-btn-close:hover {
+        background-color: #5a6268;
+    }
+
+/* Botón activar */
+.custom-btn-activate {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+    .custom-btn-activate:hover {
+        background-color: #218838;
+        transform: scale(1.05);
+    }
+
+/* Tabla */
+.custom-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+    .custom-table th, .custom-table td {
+        text-align: left;
+        padding: 10px;
+        border-bottom: 1px solid #ddd;
+    }
+
+    .custom-table th {
+        background-color: #f8f9fa;
+        font-weight: 600;
+        color: #343a40;
+    }
+
+    .custom-table tbody tr:hover {
+        background-color: #f1f3f5;
+        transition: background-color 0.3s;
+    }
+
+/* Alerta */
+.custom-alert {
+    text-align: center;
+    background-color: #e9ecef;
+    color: #6c757d;
+    padding: 15px;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+/* Animación de entrada */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
 
 
 

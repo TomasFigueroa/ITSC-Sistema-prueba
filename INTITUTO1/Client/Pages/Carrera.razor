@@ -10,7 +10,7 @@
 <!-- ordenar por a-z o z-a -->
 
 <button class="btn btn-outline-dark" @onclick="SortByNombre">
-   Ordenar alfabeticamente (Nombre)
+    Ordenar alfabeticamente (Nombre)
     @if (sortOrder == "asc")
     {
         <i class="oi oi-arrow-thick-top"></i>
@@ -23,6 +23,10 @@
 
 
 <button class="btn btn-success" @onclick="OpenModalToAdd">Cargar Carrera</button>
+<button class="btn btn-secondary" @onclick="OpenInactiveModal">
+    Ver Carreras Inactivas
+</button>
+
 <div class="table-container" style="overflow: hidden; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); margin-bottom: 20px;">
     <div style="border-top-left-radius: 12px; border-top-right-radius: 12px; background-color: #f2f2f2; padding: 10px;">
         <table class="table" style="border-collapse: collapse; width: 100%; border: 2px solid #E6E6FA;">
@@ -35,20 +39,25 @@
                 </tr>
             </thead>
             <tbody>
-                @if(carreras!=null && carreras.Any()){
+                @if (carreras != null && carreras.Any())
+                {
                     @foreach (var carrera in carreras)
                     {
-                        <tr>
-                            <td style="border-right: 2px solid #ddd;">@carrera.Nombre</td>
-                            <td style="border-right: 2px solid #ddd;">@carrera.FechaInicio.ToShortDateString()</td>
-                            <td style="border-right: 2px solid #ddd;">@carrera.FechaFin.ToShortDateString()</td>
-                            <td>
-                                <div class="action-buttons m-1">
-                                    <button class="btn btn-primary me-2" @onclick="() => OpenModalToEdit(carrera, carrera.IdCarrera)"><i class="oi oi-pencil"></i></button>
-                                    <button class="btn btn-danger" @onclick="() => OpenConfirmDeleteModal(carrera, carrera.IdCarrera)"><i class="oi oi-trash"></i></button>
-                                </div>
-                            </td>
-                        </tr>
+                        @if (carrera.Estado == true)
+                        {
+                            <tr>
+                                <td style="border-right: 2px solid #ddd;">@carrera.Nombre</td>
+                                <td style="border-right: 2px solid #ddd;">@carrera.FechaInicio.ToShortDateString()</td>
+                                <td style="border-right: 2px solid #ddd;">@carrera.FechaFin.ToShortDateString()</td>
+                                <td>
+                                    <div class="action-buttons m-1">
+                                        <button class="btn btn-primary me-2" @onclick="() => OpenModalToEdit(carrera, carrera.IdCarrera)"><i class="oi oi-pencil"></i></button>
+                                        <button class="btn btn-danger" @onclick="() => OpenConfirmDeleteModal(carrera, carrera.IdCarrera)"><i class="oi oi-trash"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                      
                     }
                 }
                 else
@@ -67,6 +76,23 @@
 
             </tbody>
         </table>
+        <!-- Paginación -->
+        <nav>
+            <ul class="pagination justify-content-center">
+                <li class="page-item @(CurrentPage == 1 ? "disabled" : "")">
+                    <button class="page-link" @onclick="() => ChangePage(CurrentPage - 1)">Anterior</button>
+                </li>
+                @for (int i = 1; i <= TotalPages; i++)
+                {
+                    <li class="page-item @(CurrentPage == i ? "active" : "")">
+                        <button class="page-link" @onclick="() => ChangePage(i)">@i</button>
+                    </li>
+                }
+                <li class="page-item @(CurrentPage == TotalPages ? "disabled" : "")">
+                    <button class="page-link" @onclick="() => ChangePage(CurrentPage + 1)">Siguiente</button>
+                </li>
+            </ul>
+        </nav>
     </div>
 </div>
 
@@ -102,6 +128,65 @@
         </div>
     </div>
 }
+@if (isInactiveModalOpen)
+{
+    <div class="custom-modal-overlay">
+        <div class="custom-modal-container">
+            <div class="custom-modal">
+                <div class="custom-modal-header">
+                    <h5 class="modal-title">Carreras Inactivas</h5>
+                    <button type="button" class="btn-close" @onclick="CloseInactiveModal"></button>
+                </div>
+                <div class="custom-modal-body">
+                    @if (carreras != null && carreras.Any(c => !c.Estado))
+                    {
+                        <table class="custom-table">
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Fecha Inicio</th>
+                                    <th>Fecha Fin</th>
+                                    <th>Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var carrera in carreras)
+                                {
+                                    @if (!carrera.Estado)
+                                    {
+                                        <tr>
+                                            <td>@carrera.Nombre</td>
+                                            <td>@carrera.FechaInicio.ToString("dd/MM/yyyy")</td>
+                                            <td>@carrera.FechaFin.ToString("dd/MM/yyyy")</td>
+                                            <td>
+                                                <button class="custom-btn-activate"
+                                                        @onclick="() => ActivateCarrera(carrera.IdCarrera)">
+                                                    Activar
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <div class="custom-alert">
+                            No hay carreras inactivas en este momento.
+                        </div>
+                    }
+                </div>
+                <div class="custom-modal-footer">
+                    <button class="custom-btn-close" @onclick="CloseInactiveModal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+
 
 <!-- Modal para confirmar eliminación -->
 @if (isConfirmDeleteModalOpen)
@@ -132,7 +217,7 @@
             <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM6.97 11.03a.75.75 0 0 0 1.08.022L11.97 8a.75.75 0 1 0-1.08-1.04L7.5 10.21 5.646 8.354a.75.75 0 1 0-1.08 1.04l2 2z" />
         </svg>
         <div>
-           @mensage
+            @mensage
         </div>
     </div>
 }
@@ -151,6 +236,9 @@
 
 
 @code {
+    private int CurrentPage = 1; //pagina actual
+    private int PageSize = 10; //cantidad de elementos por pagina
+    private int TotalPages;
     int idcarreralocal;
     Carrerass Carreras = new Carrerass();
     List<Carrerass> carreras = new List<Carrerass>();
@@ -204,19 +292,40 @@
         try
         {
             var response = await Http.GetFromJsonAsync<List<Carrerass>>("api/Carrera");
-            if (sortOrder == "asc")
-            {
-                carreras = response.OrderBy(c => c.Nombre).ToList();
-            }
-            else
-            {
-                carreras = response.OrderByDescending(c => c.Nombre).ToList();
-            }
+            var orderedCarreras = sortOrder == "asc"
+                ? response.OrderBy(c => c.Nombre).ToList()
+                : response.OrderByDescending(c => c.Nombre).ToList();
+
+            // Actualizar total de páginas
+            TotalPages = (int)Math.Ceiling(orderedCarreras.Count / (double)PageSize);
+
+            // Obtener las carreras de la página actual
+            carreras = orderedCarreras
+                .Skip((CurrentPage - 1) * PageSize)
+                .Take(PageSize)
+                .ToList();
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Error loading carreras: {ex.Message}");
         }
+    }
+
+    private async Task ChangePage(int newPage)
+    {
+        if (newPage < 1 || newPage > TotalPages)
+            return;
+
+        CurrentPage = newPage;
+        await LoadCarreras();
+        StateHasChanged();
+    }
+
+    private void SortByNombre()
+    {
+        sortOrder = sortOrder == "asc" ? "desc" : "asc";
+        CurrentPage = 1; // Reiniciar a la primera página
+        LoadCarreras();
     }
 
     private void OpenModalToAdd()
@@ -229,7 +338,7 @@
         isModalOpen = true;
     }
 
-    private void OpenModalToEdit(Carrerass carrera,int id)
+    private void OpenModalToEdit(Carrerass carrera, int id)
     {
         currentCarrera = new DTOSCarreras
             {
@@ -331,22 +440,59 @@
             Console.WriteLine($"Exception deleting carrera: {ex.Message}");
         }
     }
-    
-    //ordenar por nombre
-    private void SortByNombre()
+
+    private bool isInactiveModalOpen = false;
+
+    private async Task LoadInactiveCarreras()
     {
-        if (sortOrder == "asc")
+        try
         {
-            sortOrder = "desc";
+            var response = await Http.GetFromJsonAsync<List<Carrerass>>("api/Carrera/inactivas");
+            carreras = response.Where(c => !c.Estado).ToList();
         }
-        else
+        catch (Exception ex)
         {
-            sortOrder = "asc";
+            Console.WriteLine($"Error loading inactive carreras: {ex.Message}");
         }
-        LoadCarreras();
     }
-   
+
+    private async Task ActivateCarrera(int id)
+    {
+        try
+        {
+            var response = await Http.PutAsync($"api/Carrera/activar/{id}", null); // Ajusta el endpoint según tu API
+            if (response.IsSuccessStatusCode)
+            {
+                await LoadCarreras();
+                await LoadInactiveCarreras();
+                MostrarAlerta("Carrera activada correctamente.");
+            }
+            else
+            {
+                MostrarError("No se pudo activar la Carrera.");
+                Console.WriteLine($"Error activating carrera: {response.ReasonPhrase}");
+            }
+        }
+        catch (Exception ex)
+        {
+            MostrarError("Error al tratar de activar la Carrera.");
+            Console.WriteLine($"Exception activating carrera: {ex.Message}");
+        }
+    }
+    
+    private async Task OpenInactiveModal()
+    {
+        await LoadInactiveCarreras();
+        isInactiveModalOpen = true;
+    }
+    
+    private void CloseInactiveModal()
+{
+    isInactiveModalOpen = false;
 }
+
+}
+
 
 
 

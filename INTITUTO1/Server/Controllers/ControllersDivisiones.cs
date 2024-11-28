@@ -24,6 +24,16 @@ namespace INTITUTO1.Server.Controllers
             return await _context.Division.ToListAsync();
         }
 
+        [HttpGet("Inactivas")]
+        public async Task<IActionResult> GetInactivas()
+        {
+            var inactivas = await _context.Division
+                .Where(d => d.Estado == false) // Asume que 'Estado' indica si está activa o no
+                .ToListAsync();
+            return Ok(inactivas);
+        }
+
+
         // GET: api/Division/{id}
         [HttpGet("{id:int}")]
         public async Task<ActionResult<Divisiones>> Get(int id)
@@ -58,6 +68,7 @@ namespace INTITUTO1.Server.Controllers
             {
                 NombreDiv = dtoDivision.NombreDiv,
                 CarrerassIdCarrera = carrera.IdCarrera, // Usar el IdCarrera de la carrera encontrada
+                Estado = true,
 
             };
 
@@ -104,6 +115,18 @@ namespace INTITUTO1.Server.Controllers
             }
             return Ok(responseApi);
         }
+        [HttpPut("Activate/{id}")]
+        public async Task<IActionResult> ActivateDivision(int id)
+        {
+            var division = await _context.Division.FindAsync(id);
+            if (division == null)
+                return NotFound();
+
+            division.Estado = true; // Cambiar estado a activo
+            await _context.SaveChangesAsync();
+            return NoContent();
+        }
+
 
         // DELETE: api/Division/{id}
         [HttpDelete("{id:int}")]
@@ -116,28 +139,33 @@ namespace INTITUTO1.Server.Controllers
                 // Buscar la división en la base de datos
                 var dbDivision = await _context.Division.FirstOrDefaultAsync(e => e.IdDivision == id);
 
-                if (dbDivision != null)
+                if (dbDivision == null)
                 {
-                    // Verificar si existen materias relacionadas con esta división
-                    bool hasRelatedMaterias = await _context.Materia
-                        .AnyAsync(m => m.IdMateria == id);
+                    responseApi.EsCorrecto = false;
+                    responseApi.Mensaje = "División no encontrada.";
+                    return NotFound(responseApi);
+                }
 
-                    if (hasRelatedMaterias)
-                    {
-                        responseApi.EsCorrecto = false;
-                        responseApi.Mensaje = "No se puede eliminar la división porque tiene materias asociadas.";
-                    }
-                    else
-                    {
-                        _context.Division.Remove(dbDivision);
-                        await _context.SaveChangesAsync();
-                        responseApi.EsCorrecto = true;
-                    }
+                // Verificar si existen materias relacionadas con esta división
+                bool hasRelatedMaterias = await _context.Materia.AnyAsync(m => m.IdDivision == id);
+
+                if (hasRelatedMaterias)
+                {
+                    // Cambiar el estado de la división a inactivo (false)
+                    dbDivision.Estado = false; // Suponiendo que 'Estado' es un booleano
+                    await _context.SaveChangesAsync();
+
+                    responseApi.EsCorrecto = true;
+                    responseApi.Mensaje = "El estado de la división ha sido cambiado a inactivo debido a materias asociadas.";
                 }
                 else
                 {
-                    responseApi.EsCorrecto = false;
-                    responseApi.Mensaje = "División no encontrada";
+                    // Eliminar la división directamente si no tiene relaciones
+                    _context.Division.Remove(dbDivision);
+                    await _context.SaveChangesAsync();
+
+                    responseApi.EsCorrecto = true;
+                    responseApi.Mensaje = "División eliminada correctamente.";
                 }
             }
             catch (Exception ex)
@@ -148,6 +176,7 @@ namespace INTITUTO1.Server.Controllers
 
             return Ok(responseApi);
         }
+
     }
 
-   }
+}

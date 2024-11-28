@@ -26,9 +26,9 @@
                 {
                     <option value="@ciclo.DivisionesIdDivision">@GetNombreDivision(ciclo.DivisionesIdDivision, ciclo.CicloIdCiclo)</option>
                 }
-                
+
             }
-            
+
         }
     </InputSelect>
 </div>
@@ -45,9 +45,9 @@
                 {
                     <option value="@divisiones.IdDivCicMat">@materia.Nombre</option>
                 }
-                
+
             }
-           
+
 
         }
     </InputSelect>
@@ -56,18 +56,18 @@
     <label class="form-label">Alumno</label>
     <InputSelect class="form-control" @bind-Value="idalumno">
         <option value="">Seleccione un Alumno</option>
-      
-            @foreach (var alumno in divisionCicloMateriaAlumnos)
-            {
-                if (iddivision == alumno.DivisionCicloMateriaIdDivCicMat)
-                {
-                    <option value="@alumno.AlumnosIdAlumno">@GetAlumnoNombre(alumno.AlumnosIdAlumno)</option>
-                }
 
+        @foreach (var alumno in divisionCicloMateriaAlumnos)
+        {
+            if (iddivision == alumno.DivisionCicloMateriaIdDivCicMat)
+            {
+                <option value="@alumno.AlumnosIdAlumno">@GetAlumnoNombre(alumno.AlumnosIdAlumno)</option>
             }
 
+        }
 
-        
+
+
     </InputSelect>
 </div>
 
@@ -98,12 +98,12 @@
                         @foreach (var notasmod in Notas)
                         {
                             @if (alumno.IdDivCicMatAlum == notasmod.DivsionCiclosMateriaAlumnosIdDivCicMatAlum && alumno.DivisionCicloMateriaIdDivCicMat == iddivision &&
-                            alumno.AlumnosIdAlumno == idalumno)
+                           alumno.AlumnosIdAlumno == idalumno)
                             {
                                 <tr>
                                     <td style="border-right: 2px solid #ddd;">@GetAlumnoNombre(alumno.AlumnosIdAlumno)</td>
                                     <td style="border-right: 2px solid #ddd;">@GetEvaluacionNombre(notasmod.TipoEvaluacionIdTipoEva)</td>
-                                    <td style="border-right: 2px solid #ddd;">@notasmod.Fecha</td>
+                                    <td style="border-right: 2px solid #ddd;">@notasmod.Fecha.ToShortDateString()</td>
                                     <td style="border-right: 2px solid #ddd;">@notasmod.Nota</td>
                                     <td style="border-right: 2px solid #ddd;">
                                         <button class="btn btn-primary me-2" @onclick="() => OpenModalToEdit(notasmod, notasmod.IdNotas)"><i class="oi oi-pencil"></i></button>
@@ -131,6 +131,23 @@
                 }
             </tbody>
         </table>
+        <!-- Paginación -->
+        <nav>
+            <ul class="pagination justify-content-center">
+                <li class="page-item @(CurrentPage == 1 ? "disabled" : "")">
+                    <button class="page-link" @onclick="() => ChangePage(CurrentPage - 1)">Anterior</button>
+                </li>
+                @for (int i = 1; i <= TotalPages; i++)
+                {
+                    <li class="page-item @(CurrentPage == i ? "active" : "")">
+                        <button class="page-link" @onclick="() => ChangePage(i)">@i</button>
+                    </li>
+                }
+                <li class="page-item @(CurrentPage == TotalPages ? "disabled" : "")">
+                    <button class="page-link" @onclick="() => ChangePage(CurrentPage + 1)">Siguiente</button>
+                </li>
+            </ul>
+        </nav>
     </div>
 </div>
 
@@ -146,7 +163,7 @@
         </div>
     </div>
 }
-@if(mostraError)
+@if (mostraError)
 {
     <div class="alert alert-danger d-flex align-items-center alert-right animated-alert" role="alert">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-x-circle-fill me-2" viewBox="0 0 16 16">
@@ -156,7 +173,7 @@
             No se cargó correctamente la nota.
         </div>
     </div>
-    
+
 }
 
 
@@ -266,6 +283,9 @@
 
 
 @code {
+    private int CurrentPage = 1; //pagina actual
+    private int PageSize = 10; //cantidad de elementos por pagina
+    private int TotalPages;
     private List<DivsionCiclosMateriaAlumnos> divisionCicloMateriaAlumnos = new List<DivsionCiclosMateriaAlumnos>();
     private List<DivisionCicloMateria> divisionCicloMaterias = new List<DivisionCicloMateria>();
     private List<LIbros> libros = new List<LIbros>();
@@ -294,7 +314,7 @@
     private bool isConfirmDeleteModalOpen = false;
     private int idactual;
     private int idToDelete;
-   
+
     protected override async Task OnInitializedAsync()
     {
         idcarrera = 0;
@@ -316,12 +336,33 @@
         await LoadProfesores();
         await LoadDivisionCicloMateriaAlumnos();
         await LoadLibros();
+        currentNota.Fecha = DateTime.Today;
     }
 
     private async Task LoadNotas()
     {
-        notasFiltradas = await Http.GetFromJsonAsync<List<NotasDto>>("api/Notas/GetNotas");
+        var response = await Http.GetFromJsonAsync<List<NotasDto>>("api/Notas/GetNotas");
+
+        //actualizacion de paginas
+        TotalPages = (int)Math.Ceiling(response.Count / (double)PageSize);
+
+        //obtener los ciclos de la página actual
+        notasFiltradas = response
+            .Skip((CurrentPage - 1) * PageSize)
+            .Take(PageSize)
+            .ToList();
     }
+
+    private async Task ChangePage(int newPage)
+    {
+        if (newPage < 1 || newPage > TotalPages)
+            return;
+
+        CurrentPage = newPage;
+        await LoadCiclos();
+        StateHasChanged();
+    }
+
     private async Task LoadAlumnos()
     {
         alumnos = await Http.GetFromJsonAsync<List<DivsionCiclosMateriaAlumnos>>("api/DivisionCicloMateriaAlumnos");
@@ -467,7 +508,7 @@
         var lib = libros.FirstOrDefault(m => m.Id_Libro == idLibro);
         if (lib == null)
             return "N/A";
-       
+
 
         return $"{lib.Nombre_Lib}";
     }
@@ -510,6 +551,7 @@
         isModalOpen = true;
         isEdit = false;
         currentNota = new DTONotas();
+        currentNota.Fecha = DateTime.Today;
     }
 
     private void OpenModalToEdit(Notas nota, int id)
@@ -616,7 +658,7 @@
             Console.WriteLine("Error al generar el reporte.");
         }
     }
-   private bool isFinal = false; // Controla si el campo de Libro es visible
+    private bool isFinal = false; // Controla si el campo de Libro es visible
 
     // Lógica para gestionar el botón que alterna la visibilidad del campo de Libro
     private void ToggleFinal()
@@ -624,5 +666,5 @@
         isFinal = !isFinal; // Alterna entre visible y no visible
     }
 
-    
+
 }

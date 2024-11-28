@@ -39,12 +39,14 @@ namespace INSTITUTO.Bdat
                 o.Property(b => b.Nombre);
                 o.Property(b => b.FechaInicio);
                 o.Property(b => b.FechaFin);
+                o.Property(b => b.Estado);
 
             });
             modelBuilder.Entity<Divisiones>(o =>
             {
                 o.HasKey(b => b.IdDivision);
                 o.Property(b => b.NombreDiv);
+                o.Property(b => b.Estado);
 
 
             });

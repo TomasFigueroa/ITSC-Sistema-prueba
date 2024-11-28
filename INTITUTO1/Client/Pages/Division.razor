@@ -6,6 +6,7 @@
 
 <PageTitle>Division</PageTitle>
 <button class="btn btn-success" @onclick="OpenModalToAdd">Cargar División</button>
+<button class="btn btn-secondary" @onclick="OpenModalInactivas">Ver Divisiones Inactivas</button>
 <div class="table-container" style="overflow: hidden; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); margin-bottom: 20px;">
     <div style="border-top-left-radius: 12px; border-top-right-radius: 12px; background-color: #f2f2f2; padding: 10px;">
         <table class="table" style="border-collapse: collapse; width: 100%; border: 2px solid #E6E6FA;">
@@ -19,19 +20,38 @@
             <tbody>
                 @foreach (var division in divisiones)
                 {
-                    <tr>
-                        <td style="border-right: 2px solid #ddd;">@division.NombreDiv</td>
-                        <td style="border-right: 2px solid #ddd;">@GetNombreCarrera(division.CarrerassIdCarrera)</td> <!-- Obtener el nombre de la carrera -->
-                        <td>
-                            <div class="action-buttons m-1">
-                                <button class="btn btn-primary me-2" @onclick="() => OpenModalToEdit(division, division.IdDivision)"><i class="oi oi-pencil"></i></button>
-                                <button class="btn btn-danger" @onclick="() => OpenConfirmDeleteModal(division.IdDivision)"><i class="oi oi-trash"></i></button>
-                            </div>
-                        </td>
-                    </tr>
+                    @if(division.Estado==true){
+                        <tr>
+                            <td style="border-right: 2px solid #ddd;">@division.NombreDiv</td>
+                            <td style="border-right: 2px solid #ddd;">@GetNombreCarrera(division.CarrerassIdCarrera)</td> <!-- Obtener el nombre de la carrera -->
+                            <td>
+                                <div class="action-buttons m-1">
+                                    <button class="btn btn-primary me-2" @onclick="() => OpenModalToEdit(division, division.IdDivision)"><i class="oi oi-pencil"></i></button>
+                                    <button class="btn btn-danger" @onclick="() => OpenConfirmDeleteModal(division.IdDivision)"><i class="oi oi-trash"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                 
                 }
             </tbody>
         </table>
+        <nav>
+            <ul class="pagination justify-content-center">
+                <li class="page-item @(CurrentPage == 1 ? "disabled" : "")">
+                    <button class="page-link" @onclick="() => ChangePage(CurrentPage - 1)">Anterior</button>
+                </li>
+                @for (int i = 1; i <= TotalPages; i++)
+                {
+                    <li class="page-item @(CurrentPage == i ? "active" : "")">
+                        <button class="page-link" @onclick="() => ChangePage(i)">@i</button>
+                    </li>
+                }
+                <li class="page-item @(CurrentPage == TotalPages ? "disabled" : "")">
+                    <button class="page-link" @onclick="() => ChangePage(CurrentPage + 1)">Siguiente</button>
+                </li>
+            </ul>
+        </nav>
     </div>
 </div>
 
@@ -114,9 +134,64 @@
     </div>
 
 }
+@* 
+Modal de datos Inactivos *@
+@if (isModalInactivasOpen)
+{
+    <div class="custom-modal-overlay">
+        <div class="custom-modal-container">
+            <div class="custom-modal">
+                <div class="custom-modal-header">
+                    <h5 class="modal-title">Divisiones Inactivas</h5>
+                    <button type="button" class="btn-close" @onclick="CloseModalInactivas"></button>
+                </div>
+                <div class="custom-modal-body">
+                    @if (divisionesInactivas != null && divisionesInactivas.Any(c => !c.Estado))
+                    {
+                        <table class="custom-table">
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Carrera</th>
+                                    <th>Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var division in divisionesInactivas)
+                                {
+                                    <tr>
+                                        <td>@division.NombreDiv</td>
+                                        <td>@GetNombreCarrera(division.CarrerassIdCarrera)</td>
+                                        <td>
+                                            <button class="btn btn-success" @onclick="() => ActivateDivision(division.IdDivision)">
+                                                Activar
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <div class="custom-alert">
+                            No hay Divisiones inactivas en este momento.
+                        </div>
+                    }
+                </div>
+                <div class="custom-modal-footer">
+                    <button class="custom-btn-close" @onclick="CloseModalInactivas">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+   
+}
 
 @code {
-
+    private int CurrentPage = 1; //pagina actual
+    private int PageSize = 10; //cantidad de elementos por pagina
+    private int TotalPages;
     private Divisiones division = new Divisiones();
     private List<Divisiones> divisiones = new List<Divisiones>();
     private List<Carrerass> carreras = new List<Carrerass>();
@@ -165,7 +240,17 @@
     {
         await LoadDivisiones();
         await LoadCarreras();
+        await LoadDivisionesInactivas();
 
+    }
+    private async Task ChangePage(int newPage)
+    {
+        if (newPage < 1 || newPage > TotalPages)
+            return;
+
+        CurrentPage = newPage;
+        await LoadDivisiones();
+        StateHasChanged();
     }
     private string GetNombreCarrera(int idCarrera)
     {
@@ -177,6 +262,14 @@
         try
         {
             divisiones = await Http.GetFromJsonAsync<List<Divisiones>>("api/Division");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading divisiones: {ex.Message}");
+        }
+        try
+        {
+            divisionesInactivas = await Http.GetFromJsonAsync<List<Divisiones>>("api/Division");
         }
         catch (Exception ex)
         {
@@ -195,6 +288,7 @@
         {
             Console.WriteLine($"Error loading carreras: {ex.Message}");
         }
+
     }
 
     private void OpenModalToAdd()
@@ -302,6 +396,59 @@
         {
             MostrarError("Error al tratar de eliminar la Division.");
             Console.WriteLine($"Exception deleting division: {ex.Message}");
+        }
+    }
+    private bool isModalInactivasOpen = false;
+    private List<Divisiones> divisionesInactivas = new List<Divisiones>();
+
+    // Abrir modal de divisiones inactivas
+    private async Task OpenModalInactivas()
+    {
+        await LoadDivisionesInactivas();
+        isModalInactivasOpen = true;
+    }
+
+    // Cerrar modal de divisiones inactivas
+    private void CloseModalInactivas()
+    {
+        isModalInactivasOpen = false;
+    }
+
+    // Cargar divisiones inactivas desde la API
+    private async Task LoadDivisionesInactivas()
+    {
+        try
+        {
+            divisionesInactivas = await Http.GetFromJsonAsync<List<Divisiones>>("api/Division/Inactivas");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading inactive divisions: {ex.Message}");
+        }
+    }
+
+    // Activar una división
+    private async Task ActivateDivision(int id)
+    {
+        try
+        {
+            var response = await Http.PutAsync($"api/Division/Activate/{id}", null);
+            if (response.IsSuccessStatusCode)
+            {
+                MostrarAlerta("División activada correctamente.");
+              
+                await OnInitializedAsync();
+            }
+            else
+            {
+                MostrarError("Error al activar la división.");
+                Console.WriteLine($"Error activating division: {response.ReasonPhrase}");
+            }
+        }
+        catch (Exception ex)
+        {
+            MostrarError("Error al intentar activar la división.");
+            Console.WriteLine($"Exception activating division: {ex.Message}");
         }
     }
 }

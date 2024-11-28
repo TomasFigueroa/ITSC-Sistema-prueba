@@ -158,7 +158,21 @@ namespace INTITUTO1.Server.Controllers
             // Asignar null si el ID del libro es 0
             if (dtoNotas.Idlibro == 0)
             {
+
+                dtoNotas.Idlibro = null;
+            }
+
+            // Validar que no existan duplicados de tipo de evaluación para la misma materia y alumno
+            var notaExistente = await _context.notas.AnyAsync(n =>
+                n.DivsionCiclosMateriaAlumnosIdDivCicMatAlum == dtoNotas.Materias &&
+                n.TipoEvaluacionIdTipoEva == dtoNotas.TipoEvaluacionIdTipoEva);
+
+            if (notaExistente)
+            {
+                return BadRequest("Ya existe una nota registrada para esta materia y tipo de evaluación.");
+
                 dtoNotas.Idlibro = 0;
+
             }
 
             // Crear nueva nota
