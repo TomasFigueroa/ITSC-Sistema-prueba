@@ -206,6 +206,7 @@ Modal de datos Inactivos *@
     private bool mostrarAlerta = false;
     private bool mostraError = false;
     string mensage = "";
+
     private void MostrarError(string menssage)
     {
         mostraError = true;
@@ -261,7 +262,16 @@ Modal de datos Inactivos *@
     {
         try
         {
-            divisiones = await Http.GetFromJsonAsync<List<Divisiones>>("api/Division");
+            var response = await Http.GetFromJsonAsync<List<Divisiones>>("api/Division");
+
+            //actualizacion de paginas
+            TotalPages = (int)Math.Ceiling(response.Count / (double)PageSize);
+
+            //obtener los ciclos de la página actual
+            divisiones = response
+                .Skip((CurrentPage - 1) * PageSize)
+                .Take(PageSize)
+                .ToList();
         }
         catch (Exception ex)
         {
@@ -276,6 +286,16 @@ Modal de datos Inactivos *@
             Console.WriteLine($"Error loading divisiones: {ex.Message}");
         }
         idactual = 0;
+    }
+
+    private async Task ChangePage(int newPage)
+    {
+        if (newPage < 1 || newPage > TotalPages)
+            return;
+
+        CurrentPage = newPage;
+        await LoadDivisiones();
+        StateHasChanged();
     }
 
     private async Task LoadCarreras()

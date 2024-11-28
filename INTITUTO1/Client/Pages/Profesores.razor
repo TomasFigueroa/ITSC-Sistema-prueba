@@ -4,6 +4,12 @@
 
 @inject HttpClient Http
 
+@if (showSuccessMessage)
+{
+    <div class="alert alert-success" role="alert">
+        @successMessage
+    </div>
+}
 <PageTitle>Profesor</PageTitle>
 <button class="btn btn-success" @onclick="OpenModalToAdd">Cargar Profesor</button>
 <div class="table-container" style="overflow: hidden; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); margin-bottom: 20px;">
@@ -36,6 +42,23 @@
                 }
             </tbody>
         </table>
+        <!-- Paginación -->
+        <nav>
+            <ul class="pagination justify-content-center">
+                <li class="page-item @(CurrentPage == 1 ? "disabled" : "")">
+                    <button class="page-link" @onclick="() => ChangePage(CurrentPage - 1)">Anterior</button>
+                </li>
+                @for (int i = 1; i <= TotalPages; i++)
+                {
+                    <li class="page-item @(CurrentPage == i ? "active" : "")">
+                        <button class="page-link" @onclick="() => ChangePage(i)">@i</button>
+                    </li>
+                }
+                <li class="page-item @(CurrentPage == TotalPages ? "disabled" : "")">
+                    <button class="page-link" @onclick="() => ChangePage(CurrentPage + 1)">Siguiente</button>
+                </li>
+            </ul>
+        </nav>
     </div>
 </div>
 
@@ -98,6 +121,9 @@
 }
 
 @code {
+    private int CurrentPage = 1; //pagina actual
+    private int PageSize = 10; //cantidad de elementos por pagina
+    private int TotalPages;
     private List<Profesor> profesores = new List<Profesor>();
     private DTOProfesor currentProfesor = new DTOProfesor();
     private bool isModalOpen = false;
@@ -105,6 +131,8 @@
     private int idProfesorToDelete;
     private bool isConfirmDeleteModalOpen = false;
     int idactual;
+    private string successMessage;
+    private bool showSuccessMessage = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -115,12 +143,31 @@
     {
         try
         {
-            profesores = await Http.GetFromJsonAsync<List<Profesor>>("api/Profesor");
+            var response = await Http.GetFromJsonAsync<List<Profesor>>("api/Profesor");
+
+            //actualizacion de paginas
+            TotalPages = (int)Math.Ceiling(response.Count / (double)PageSize);
+
+            //obtener los ciclos de la página actual
+            profesores = response
+                .Skip((CurrentPage - 1) * PageSize)
+                .Take(PageSize)
+                .ToList();
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Error loading profesores: {ex.Message}");
         }
+    }
+
+    private async Task ChangePage(int newPage)
+    {
+        if (newPage < 1 || newPage > TotalPages)
+            return;
+
+        CurrentPage = newPage;
+        await LoadProfesores();
+        StateHasChanged();
     }
 
     private void OpenModalToAdd()
@@ -169,6 +216,13 @@
             {
                 await LoadProfesores();
                 CloseModal();
+                successMessage = "Profesor agregado exitosamente.";
+                showSuccessMessage = true;
+                await LoadProfesores();
+                CloseModal();
+
+                await Task.Delay(3000);
+                showSuccessMessage = false;
             }
             else
             {
