@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace INSTITUTO.Bdat.Migrations
 {
     [DbContext(typeof(Context))]
-    [Migration("20241031205236_verificaciones")]
-    partial class verificaciones
+    [Migration("20241128183010_nuevo5")]
+    partial class nuevo5
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -86,6 +86,9 @@ namespace INSTITUTO.Bdat.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdCarrera"));
+
+                    b.Property<bool>("Estado")
+                        .HasColumnType("bit");
 
                     b.Property<DateTime>("FechaFin")
                         .HasColumnType("datetime2");
@@ -180,6 +183,9 @@ namespace INSTITUTO.Bdat.Migrations
                     b.Property<int>("CarrerassIdCarrera")
                         .HasColumnType("int");
 
+                    b.Property<bool>("Estado")
+                        .HasColumnType("bit");
+
                     b.Property<string>("NombreDiv")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -238,6 +244,9 @@ namespace INSTITUTO.Bdat.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdMateria"));
+
+                    b.Property<bool>("Estado")
+                        .HasColumnType("bit");
 
                     b.Property<int>("IdCarrera")
                         .HasColumnType("int");
@@ -416,7 +425,7 @@ namespace INSTITUTO.Bdat.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("INSTITUTO.Bdat.Data.Entity.LIbros", null)
+                    b.HasOne("INSTITUTO.Bdat.Data.Entity.LIbros", "LIbros")
                         .WithMany("notas")
                         .HasForeignKey("LIbrosId_Libro");
 
@@ -427,6 +436,8 @@ namespace INSTITUTO.Bdat.Migrations
                         .IsRequired();
 
                     b.Navigation("DivsionCiclosMateriaAlumnos");
+
+                    b.Navigation("LIbros");
 
                     b.Navigation("TipoEvaluacion");
                 });

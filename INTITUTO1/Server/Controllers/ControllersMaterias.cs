@@ -1,5 +1,6 @@
 ﻿using INSTITUTO.Bdat;
 using INSTITUTO.Bdat.Data.Entity;
+using INTITUTO1.Client.Pages;
 using INTITUTO1.Shared.DTO;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -68,7 +69,8 @@ namespace INTITUTO1.Server.Controllers
                 {
                     Nombre = dtoMaterias.Nombre,
                     IdCarrera = dtoMaterias.IdCarrera,
-                    IdDivision = dtoMaterias.IdDivision
+                    IdDivision = dtoMaterias.IdDivision,
+                    Estado = true
                 };
 
                 _context.Materia.Add(mdMateria);
@@ -142,21 +144,28 @@ namespace INTITUTO1.Server.Controllers
 
                     if (hasRelatedDivisionCicloMateria)
                     {
-                        responseApi.EsCorrecto = false;
-                        responseApi.Mensaje = "No se puede eliminar la materia porque está asociada a una o más divisiones.";
+                        // Cambiar el estado de la materia a inactiva
+                        dbMateria.Estado = false;
+                        _context.Materia.Update(dbMateria);
+                        await _context.SaveChangesAsync();
+
+                        responseApi.EsCorrecto = true;
+                        responseApi.Mensaje = "Materia inactivada porque está asociada a una o más divisiones.";
                     }
                     else
                     {
+                        // Eliminar la materia si no tiene relaciones
                         _context.Materia.Remove(dbMateria);
                         await _context.SaveChangesAsync();
+
                         responseApi.EsCorrecto = true;
-                        responseApi.Mensaje = "Materia eliminada con éxito";
+                        responseApi.Mensaje = "Materia eliminada con éxito.";
                     }
                 }
                 else
                 {
                     responseApi.EsCorrecto = false;
-                    responseApi.Mensaje = "Materia no encontrada";
+                    responseApi.Mensaje = "Materia no encontrada.";
                 }
             }
             catch (Exception ex)
@@ -167,6 +176,46 @@ namespace INTITUTO1.Server.Controllers
 
             return Ok(responseApi);
         }
+
+
+
+        // PUT: api/Materias/Activar/{id}
+        [HttpPut("Activar/{id:int}")]
+        public async Task<IActionResult> Activar(int id)
+        {
+            var responseApi = new ResponseAPI<int>();
+
+            try
+            {
+                var dbMateria = await _context.Materia.FirstOrDefaultAsync(e => e.IdMateria == id);
+
+                if (dbMateria != null && !dbMateria.Estado)
+                {
+                    // Cambiar el estado de la materia a activa
+                    dbMateria.Estado = true;
+                    _context.Materia.Update(dbMateria);
+                    await _context.SaveChangesAsync();
+
+                    responseApi.EsCorrecto = true;
+                    responseApi.Mensaje = "Materia activada con éxito.";
+                }
+                else
+                {
+                    responseApi.EsCorrecto = false;
+                    responseApi.Mensaje = dbMateria == null ?
+                        "Materia no encontrada." :
+                        "La materia ya está activa.";
+                }
+            }
+            catch (Exception ex)
+            {
+                responseApi.EsCorrecto = false;
+                responseApi.Mensaje = ex.InnerException?.Message ?? ex.Message;
+            }
+
+            return Ok(responseApi);
+        }
+
 
     }
 }

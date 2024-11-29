@@ -71,7 +71,9 @@ namespace INTITUTO1.Server.Controllers
                 {
                     Nombre = carrera.Nombres,
                     FechaInicio = carrera.Fecha_inicio,
-                    FechaFin = carrera.Fecha_fin
+                    FechaFin = carrera.Fecha_fin,
+                    Estado = true
+                 
                 };
 
                 _context.Carreras.Add(mdCarrera);
@@ -128,6 +130,30 @@ namespace INTITUTO1.Server.Controllers
             return Ok(responseApi);
         }
 
+        [HttpPut("activar/{id}")]
+        public async Task<IActionResult> ActivarCarrera(int id)
+        {
+            var carrera = await _context.Carreras.FirstOrDefaultAsync(c => c.IdCarrera == id);
+
+            if (carrera == null)
+            {
+                return NotFound(new { mensaje = "Carrera no encontrada." });
+            }
+
+            carrera.Estado = true;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+                return Ok(new { mensaje = "Carrera activada exitosamente." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { mensaje = "Error interno del servidor.", detalle = ex.Message });
+            }
+        }
+
+
         // DELETE: api/Carrera/{id}
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete(int id)
@@ -136,28 +162,36 @@ namespace INTITUTO1.Server.Controllers
 
             try
             {
-                // Verificar si existen divisiones relacionadas con la carrera
+                // Verificar si la carrera existe
+                var carrera = await _context.Carreras.FirstOrDefaultAsync(e => e.IdCarrera == id);
+
+                if (carrera == null)
+                {
+                    responseApi.EsCorrecto = false;
+                    responseApi.Mensaje = "Carrera no encontrada.";
+                    return NotFound(responseApi);
+                }
+
+                // Verificar si tiene divisiones relacionadas
                 var tieneDivisionesRelacionadas = await _context.Division.AnyAsync(d => d.CarrerassIdCarrera == id);
 
                 if (tieneDivisionesRelacionadas)
                 {
-                    responseApi.EsCorrecto = false;
-                    responseApi.Mensaje = "No se puede eliminar la carrera porque tiene divisiones relacionadas.";
-                    return BadRequest(responseApi);
-                }
-
-                var dbCarrera = await _context.Carreras.FirstOrDefaultAsync(e => e.IdCarrera == id);
-
-                if (dbCarrera != null)
-                {
-                    _context.Carreras.Remove(dbCarrera);
+                    // Cambiar el estado a inactivo
+                    carrera.Estado = false; // Suponiendo que 'Estado' es un booleano
                     await _context.SaveChangesAsync();
+
                     responseApi.EsCorrecto = true;
+                    responseApi.Mensaje = "El estado de la carrera ha sido cambiado a inactivo debido a divisiones relacionadas.";
                 }
                 else
                 {
-                    responseApi.EsCorrecto = false;
-                    responseApi.Mensaje = "Carrera no encontrada.";
+                    // Eliminar la carrera directamente si no tiene relaciones
+                    _context.Carreras.Remove(carrera);
+                    await _context.SaveChangesAsync();
+
+                    responseApi.EsCorrecto = true;
+                    responseApi.Mensaje = "Carrera eliminada correctamente.";
                 }
             }
             catch (Exception ex)
@@ -168,6 +202,8 @@ namespace INTITUTO1.Server.Controllers
 
             return Ok(responseApi);
         }
+
+
 
     }
 }

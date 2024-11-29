@@ -84,6 +84,9 @@ namespace INSTITUTO.Bdat.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdCarrera"));
 
+                    b.Property<bool>("Estado")
+                        .HasColumnType("bit");
+
                     b.Property<DateTime>("FechaFin")
                         .HasColumnType("datetime2");
 
@@ -177,6 +180,9 @@ namespace INSTITUTO.Bdat.Migrations
                     b.Property<int>("CarrerassIdCarrera")
                         .HasColumnType("int");
 
+                    b.Property<bool>("Estado")
+                        .HasColumnType("bit");
+
                     b.Property<string>("NombreDiv")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -235,6 +241,9 @@ namespace INSTITUTO.Bdat.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdMateria"));
+
+                    b.Property<bool>("Estado")
+                        .HasColumnType("bit");
 
                     b.Property<int>("IdCarrera")
                         .HasColumnType("int");

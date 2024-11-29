@@ -9,6 +9,11 @@
 <button class="btn btn-warning" @onclick="OnInitializedAsync">
     <i class="fa fa-broom"></i> Limpiar filtros
 </button>
+
+<button class="btn btn-secondary" @onclick="OpenInactiveModal">
+    Ver Materias Inactivas
+</button>
+
 <!-- Filtros -->
 <div class="mb-3">
     <label class="form-label">Carrera</label>
@@ -51,7 +56,7 @@
             <tbody>
                 @foreach (var materia in materiasFiltradas)
                 {
-                    if (idcarrera==materia.IdCarrera && iddivision==materia.IdDivision)
+                    if (idcarrera==materia.IdCarrera && iddivision==materia.IdDivision && materia.Estado== true)
                     {
                         <tr>
                             <td style="border-right: 2px solid #ddd;">@materia.Nombre</td>
@@ -192,6 +197,60 @@
     </div>
 
 }
+@if (isInactiveModalOpen)
+{
+    <div class="custom-modal-overlay">
+        <div class="custom-modal-container">
+            <div class="custom-modal">
+                <div class="custom-modal-header">
+                    <h5 class="modal-title">Materias Inactivas</h5>
+                    <button type="button" class="btn-close" @onclick="CloseInactiveModal"></button>
+                </div>
+                <div class="custom-modal-body">
+                    @if (materiasInactivas != null && materiasInactivas.Any(m => !m.Estado))
+                    {
+                        <table class="custom-table">
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Carrera</th>
+                                    <th>Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var materia in materiasInactivas)
+                                {
+                                    @if (!materia.Estado)
+                                    {
+                                        <tr>
+                                            <td>@materia.Nombre</td>
+                                            <td>@GetNombreCarrera(materia.IdCarrera)</td>
+                                            <td>
+                                                <button class="custom-btn-activate"
+                                                        @onclick="() => ActivateMateria(materia.IdMateria)">
+                                                    Activar
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <div class="custom-alert">
+                            No hay materias inactivas en este momento.
+                        </div>
+                    }
+                </div>
+                <div class="custom-modal-footer">
+                    <button class="custom-btn-close" @onclick="CloseInactiveModal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
 
 @code {
     private int CurrentPage = 1; //pagina actual
@@ -220,6 +279,7 @@
         await LoadMaterias();
         await LoadCarreras();
         await LoadDivision();
+        await LoadInactiveMaterias();
         await FiltrarMaterias();
         idcarrera = 0;
         iddivision = 0;
@@ -384,7 +444,7 @@
         try
         {
             var response = await Http.PutAsJsonAsync($"api/Materias/{idToDelete}", currentMateria);
-            
+
             if (response.IsSuccessStatusCode)
             {
                 await LoadMaterias();
@@ -424,8 +484,13 @@
             var response = await Http.DeleteAsync($"api/Materias/{idToDelete}");
             if (response.IsSuccessStatusCode)
             {
-                await LoadMaterias();
+             
                 MostrarAlerta("Materia eliminada correctamente.");
+                await LoadMaterias();
+                await LoadCarreras();
+                await LoadDivision();
+                await LoadInactiveMaterias();
+                await FiltrarMaterias();
                 CloseConfirmDeleteModal();
             }
             else
@@ -438,6 +503,60 @@
         {
             MostrarError("Error al tratar de eliminar la Materia.");
             Console.WriteLine($"Exception deleting materia: {ex.Message}");
+        }
+    }
+    private bool isInactiveModalOpen = false;
+    private List<Materias> materiasInactivas = new();
+
+    // Abrir modal
+    private void OpenInactiveModal()
+    {
+        isInactiveModalOpen = true;
+        LoadInactiveMaterias();
+    }
+
+    // Cerrar modal
+    private void CloseInactiveModal()
+    {
+        isInactiveModalOpen = false;
+    }
+
+    // Cargar materias inactivas
+    private async Task LoadInactiveMaterias()
+    {
+        try
+        {
+            materiasInactivas = await Http.GetFromJsonAsync<List<Materias>>("api/Materias");
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error al cargar materias inactivas: {ex.Message}");
+        }
+    }
+
+    // Activar materia
+    private async Task ActivateMateria(int id)
+    {
+        try
+        {
+            var response = await Http.PutAsync($"api/Materias/Activar/{id}", null);
+            if (response.IsSuccessStatusCode)
+            {
+                var materia = materiasInactivas.FirstOrDefault(m => m.IdMateria == id);
+                if (materia != null)
+                {
+                    materiasInactivas.Remove(materia);
+                    OnInitializedAsync();
+                }
+            }
+            else
+            {
+                Console.Error.WriteLine("Error al activar la materia.");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error al activar la materia: {ex.Message}");
         }
     }
 }

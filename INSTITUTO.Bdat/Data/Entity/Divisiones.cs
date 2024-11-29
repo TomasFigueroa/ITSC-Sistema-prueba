@@ -19,6 +19,7 @@ namespace INSTITUTO.Bdat.Data.Entity
         //public List<Materias> materias { get; set; }
 
         public List<DivisionCiclo> divisionCiclos { get; set; }
+        public bool Estado { get; set; }
 
     }
 }

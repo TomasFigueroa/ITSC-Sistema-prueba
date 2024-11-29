@@ -26,9 +26,9 @@
                 {
                     <option value="@ciclo.DivisionesIdDivision">@GetNombreDivision(ciclo.DivisionesIdDivision, ciclo.CicloIdCiclo)</option>
                 }
-                
+
             }
-            
+
         }
     </InputSelect>
 </div>
@@ -45,9 +45,9 @@
                 {
                     <option value="@divisiones.IdDivCicMat">@materia.Nombre</option>
                 }
-                
+
             }
-           
+
 
         }
     </InputSelect>
@@ -56,18 +56,18 @@
     <label class="form-label">Alumno</label>
     <InputSelect class="form-control" @bind-Value="idalumno">
         <option value="">Seleccione un Alumno</option>
-      
-            @foreach (var alumno in divisionCicloMateriaAlumnos)
-            {
-                if (iddivision == alumno.DivisionCicloMateriaIdDivCicMat)
-                {
-                    <option value="@alumno.AlumnosIdAlumno">@GetAlumnoNombre(alumno.AlumnosIdAlumno)</option>
-                }
 
+        @foreach (var alumno in divisionCicloMateriaAlumnos)
+        {
+            if (iddivision == alumno.DivisionCicloMateriaIdDivCicMat)
+            {
+                <option value="@alumno.AlumnosIdAlumno">@GetAlumnoNombre(alumno.AlumnosIdAlumno)</option>
             }
 
+        }
 
-        
+
+
     </InputSelect>
 </div>
 
@@ -98,12 +98,12 @@
                         @foreach (var notasmod in Notas)
                         {
                             @if (alumno.IdDivCicMatAlum == notasmod.DivsionCiclosMateriaAlumnosIdDivCicMatAlum && alumno.DivisionCicloMateriaIdDivCicMat == iddivision &&
-                            alumno.AlumnosIdAlumno == idalumno)
+                           alumno.AlumnosIdAlumno == idalumno)
                             {
                                 <tr>
                                     <td style="border-right: 2px solid #ddd;">@GetAlumnoNombre(alumno.AlumnosIdAlumno)</td>
                                     <td style="border-right: 2px solid #ddd;">@GetEvaluacionNombre(notasmod.TipoEvaluacionIdTipoEva)</td>
-                                    <td style="border-right: 2px solid #ddd;">@notasmod.Fecha</td>
+                                    <td style="border-right: 2px solid #ddd;">@notasmod.Fecha.ToShortDateString()</td>
                                     <td style="border-right: 2px solid #ddd;">@notasmod.Nota</td>
                                     <td style="border-right: 2px solid #ddd;">
                                         <button class="btn btn-primary me-2" @onclick="() => OpenModalToEdit(notasmod, notasmod.IdNotas)"><i class="oi oi-pencil"></i></button>
@@ -163,7 +163,7 @@
         </div>
     </div>
 }
-@if(mostraError)
+@if (mostraError)
 {
     <div class="alert alert-danger d-flex align-items-center alert-right animated-alert" role="alert">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-x-circle-fill me-2" viewBox="0 0 16 16">
@@ -173,7 +173,7 @@
             No se cargó correctamente la nota.
         </div>
     </div>
-    
+
 }
 
 
@@ -314,7 +314,7 @@
     private bool isConfirmDeleteModalOpen = false;
     private int idactual;
     private int idToDelete;
-   
+
     protected override async Task OnInitializedAsync()
     {
         idcarrera = 0;
@@ -336,6 +336,7 @@
         await LoadProfesores();
         await LoadDivisionCicloMateriaAlumnos();
         await LoadLibros();
+        currentNota.Fecha = DateTime.Today;
     }
 
     private async Task LoadNotas()
@@ -507,7 +508,7 @@
         var lib = libros.FirstOrDefault(m => m.Id_Libro == idLibro);
         if (lib == null)
             return "N/A";
-       
+
 
         return $"{lib.Nombre_Lib}";
     }
@@ -550,6 +551,7 @@
         isModalOpen = true;
         isEdit = false;
         currentNota = new DTONotas();
+        currentNota.Fecha = DateTime.Today;
     }
 
     private void OpenModalToEdit(Notas nota, int id)
@@ -656,7 +658,7 @@
             Console.WriteLine("Error al generar el reporte.");
         }
     }
-   private bool isFinal = false; // Controla si el campo de Libro es visible
+    private bool isFinal = false; // Controla si el campo de Libro es visible
 
     // Lógica para gestionar el botón que alterna la visibilidad del campo de Libro
     private void ToggleFinal()
@@ -664,5 +666,5 @@
         isFinal = !isFinal; // Alterna entre visible y no visible
     }
 
-    
+
 }

@@ -17,6 +17,7 @@ namespace INSTITUTO.Bdat.Data.Entity
         [Required]
         public DateTime FechaFin { get; set; }
 
-       public List<Divisiones> divisions { get; set; }
+        public List<Divisiones> divisions { get; set; }
+        public bool Estado { get; set; }
     }
 }
