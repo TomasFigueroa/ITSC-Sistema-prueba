@@ -8,6 +8,7 @@
 
 <PageTitle>Alumnos</PageTitle>
 <button class="btn btn-success" @onclick="OpenModalToAdd">Cargar Alumno</button>
+<button class="btn btn-secondary" @onclick="OpenAlumnoModal">Ver Alumno Inactivos</button>
 <div class="table-container" style="overflow: hidden; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); margin-bottom: 20px;">
     <div style="border-top-left-radius: 12px; border-top-right-radius: 12px; background-color: #f2f2f2; padding: 10px;">
         <table class="table" style="border-collapse: collapse; width: 100%; border: 2px solid #E6E6FA;">
@@ -31,26 +32,29 @@
             <tbody>
                 @foreach (var alumno in alumnos)
                 {
-                    <tr>
-                        <td style="border-right: 2px solid #ddd;">@GetNombreCarrera(alumno.Id_Carrera)</td>
-                        <td style="border-right: 2px solid #ddd;">@alumno.Nombre</td>
-                        <td style="border-right: 2px solid #ddd;">@alumno.Apellido</td>
-                        <td style="border-right: 2px solid #ddd;">@alumno.DNI_Alum</td>
-                        <td style="border-right: 2px solid #ddd;">@alumno.Cuil</td>
-                        <td style="border-right: 2px solid #ddd;">@alumno.Fecha_Nac.ToShortDateString()</td>
-                        <td style="border-right: 2px solid #ddd;">@alumno.Tbase</td>
-                        <td style="border-right: 2px solid #ddd;">@alumno.Nacionalidad</td>
-                        <td style="border-right: 2px solid #ddd;">@alumno.Sexo</td>
-                        <td style="border-right: 2px solid #ddd;">@alumno.Numero</td>
-                        <td style="border-right: 2px solid #ddd;">@(alumno.Estado ? "Activo" : "Inactivo")</td>
-                       
-                        <td>
-                            <div class="action-buttons m-1">
-                                <button class="btn btn-primary me-2" @onclick="() => OpenModalToEdit(alumno, alumno.IdAlumno)"><i class="oi oi-pencil"></i></button>
-                                <button class="btn btn-danger" @onclick="() => OpenConfirmDeleteModal(alumno.IdAlumno)"><i class="oi oi-trash"></i></button>
-                            </div>
-                        </td>
-                    </tr>
+                    @if(alumno.Estado==true){
+                        <tr>
+                            <td style="border-right: 2px solid #ddd;">@GetNombreCarrera(alumno.Id_Carrera)</td>
+                            <td style="border-right: 2px solid #ddd;">@alumno.Nombre</td>
+                            <td style="border-right: 2px solid #ddd;">@alumno.Apellido</td>
+                            <td style="border-right: 2px solid #ddd;">@alumno.DNI_Alum</td>
+                            <td style="border-right: 2px solid #ddd;">@alumno.Cuil</td>
+                            <td style="border-right: 2px solid #ddd;">@alumno.Fecha_Nac.ToShortDateString()</td>
+                            <td style="border-right: 2px solid #ddd;">@alumno.Tbase</td>
+                            <td style="border-right: 2px solid #ddd;">@alumno.Nacionalidad</td>
+                            <td style="border-right: 2px solid #ddd;">@alumno.Sexo</td>
+                            <td style="border-right: 2px solid #ddd;">@alumno.Numero</td>
+                            <td style="border-right: 2px solid #ddd;">@(alumno.Estado ? "Activo" : "Inactivo")</td>
+
+                            <td>
+                                <div class="action-buttons m-1">
+                                    <button class="btn btn-primary me-2" @onclick="() => OpenModalToEdit(alumno, alumno.IdAlumno)"><i class="oi oi-pencil"></i></button>
+                                    <button class="btn btn-danger" @onclick="() => OpenConfirmDeleteModal(alumno.IdAlumno)"><i class="oi oi-trash"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                 
                 }
             </tbody>
         </table>
@@ -177,6 +181,60 @@
         </div>
     </div>
 }
+@if (isAlumnoModalOpen)
+{
+    <div class="custom-modal-overlay">
+        <div class="custom-modal-container">
+            <div class="custom-modal">
+                <div class="custom-modal-header">
+                    <h5 class="modal-title">Alumnos Inactivos</h5>
+                    <button type="button" class="btn-close" @onclick="CloseAlumnoModal"></button>
+                </div>
+                <div class="custom-modal-body">
+                    @if (deletedAlumnos?.Count > 0)
+                    {
+                        <table class="custom-table">
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Apellido</th>
+                                    <th>DNI</th>
+                                    <th>Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var alumno in deletedAlumnos)
+                                {
+                                    <tr>
+                                        <td>@alumno.Nombre</td>
+                                        <td>@alumno.Apellido</td>
+                                        <td>@alumno.DNI_Alum</td>
+                                        <td>
+                                            <button class="custom-btn-activate"
+                                                    @onclick="() => ReactivateAlumno(alumno.IdAlumno)">
+                                                Activar
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <div class="custom-alert">
+                            No hay alumnos inactivos en este momento.
+                        </div>
+                    }
+                </div>
+                <div class="custom-modal-footer">
+                    <button class="custom-btn-close" @onclick="CloseAlumnoModal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
 
 @code {
     private int CurrentPage = 1; //pagina actual
@@ -198,6 +256,7 @@
 
         await LoadAlumnos();
         await LoadCarreras();
+        await LoadDeletedAlumnos();
     }
 
     private async Task LoadAlumnos()
@@ -296,7 +355,7 @@
             var response = await Http.PostAsJsonAsync("api/Alumnos", currentAlumno);
             if (response.IsSuccessStatusCode)
             {
-                await LoadAlumnos();
+                await OnInitializedAsync();
                 CloseModal();
             }
             else
@@ -317,7 +376,7 @@
             var response = await Http.PutAsJsonAsync($"api/Alumnos/{idactual}", currentAlumno);
             if (response.IsSuccessStatusCode)
             {
-                await LoadAlumnos();
+                await OnInitializedAsync();
                 CloseModal();
             }
             else
@@ -338,7 +397,7 @@
             var response = await Http.DeleteAsync($"api/Alumnos/{idAlumnoToDelete}");
             if (response.IsSuccessStatusCode)
             {
-                await LoadAlumnos();
+                await OnInitializedAsync();
                 CloseConfirmDeleteModal();
             }
             else
@@ -350,6 +409,43 @@
         {
             Console.WriteLine($"Exception deleting alumno: {ex.Message}");
         }
+    }
+    private bool isAlumnoModalOpen = false;
+    private List<Alumnos> deletedAlumnos;
+
+   
+
+    private async Task LoadDeletedAlumnos()
+    {
+        var response = await Http.GetFromJsonAsync<List<Alumnos>>("api/Alumnos");
+        deletedAlumnos = response?.Where(a => a.Estado == false).ToList();
+    }
+
+    private async Task ReactivateAlumno(int id)
+    {
+        var response = await Http.PostAsync($"api/Alumnos/activar/{id}", null);
+
+        if (response.IsSuccessStatusCode)
+        {
+            // Actualizar la lista
+            await OnInitializedAsync();
+        }
+        else
+        {
+            // Manejar errores
+            var errorMessage = await response.Content.ReadAsStringAsync();
+            Console.WriteLine($"Error al activar el alumno: {errorMessage}");
+        }
+    }
+
+    private void OpenAlumnoModal()
+    {
+        isAlumnoModalOpen = true;
+    }
+
+    private void CloseAlumnoModal()
+    {
+        isAlumnoModalOpen = false;
     }
 }
 

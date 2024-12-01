@@ -105,6 +105,7 @@ namespace INTITUTO1.Server.Controllers
                     dbMaterias.Nombre = dtoMaterias.Nombre;
                     dbMaterias.IdCarrera = dtoMaterias.IdCarrera;
                     dbMaterias.IdDivision = dtoMaterias.IdDivision;
+                    dbMaterias.Estado = true;
                     
 
                     _context.Materia.Update(dbMaterias);

@@ -68,7 +68,9 @@ namespace INTITUTO1.Server.Controllers
                 var mdDivCic = new DivisionCiclo
                 {
                     CicloIdCiclo = dtoDivisionCiclo.CicloIdCiclo,
-                    DivisionesIdDivision = dtoDivisionCiclo.DivisionesIdDivision
+                    DivisionesIdDivision = dtoDivisionCiclo.DivisionesIdDivision,
+                    Estado = true
+
                 };
 
                 _context.DivisionCiclos.Add(mdDivCic);
@@ -104,6 +106,7 @@ namespace INTITUTO1.Server.Controllers
 
 					dbDivCic.CicloIdCiclo = dbDivCic.CicloIdCiclo;
 					dbDivCic.DivisionesIdDivision = dbDivCic.DivisionesIdDivision;
+                    dbDivCic.Estado = true;
 					
 
 					_context.DivisionCiclos.Update(dbDivCic);
@@ -125,36 +128,86 @@ namespace INTITUTO1.Server.Controllers
 			return Ok(responseApi);
 		}
 
-		// DELETE: api/Carrera/{id}
-		[HttpDelete("{id:int}")]
-		public async Task<IActionResult> Delete(int id)
-		{
-			var responseApi = new ResponseAPI<int>();
+        // DELETE: api/Carrera/{id}
+        [HttpDelete("{id:int}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var responseApi = new ResponseAPI<int>();
 
-			try
-			{
+            try
+            {
+                // Buscar la DivisiónCiclo por su ID
+                var dbDivCic = await _context.DivisionCiclos.FirstOrDefaultAsync(e => e.IdDivCic == id);
 
-				var dbDivCic = await _context.DivisionCiclos.FirstOrDefaultAsync(e => e.IdDivCic == id);
+                if (dbDivCic != null)
+                {
+                    // Verificar si existe una relación en DivisionCicloMateria
+                    var hasRelatedMaterias = await _context.DivisionCicloMaterias.AnyAsync(e => e.DivisionCicloIdDivCic == id);
 
-				if (dbDivCic != null)
-				{
-					_context.DivisionCiclos.Remove(dbDivCic);
-					await _context.SaveChangesAsync();
-					responseApi.EsCorrecto = true;
-				}
-				else
-				{
-					responseApi.EsCorrecto = false;
-					responseApi.Mensaje = "Carrera no encontrada";
-				}
-			}
-			catch (Exception ex)
-			{
-				responseApi.EsCorrecto = false;
-				responseApi.Mensaje = ex.InnerException.Message;
-			}
-			return Ok(responseApi);
-		}
+                    if (hasRelatedMaterias)
+                    {
+                        // Cambiar el estado a false si hay relaciones
+                        dbDivCic.Estado = false;
+                        _context.DivisionCiclos.Update(dbDivCic);
+                        await _context.SaveChangesAsync();
 
-	}
+                        responseApi.EsCorrecto = true;
+                        responseApi.Mensaje = "El estado de la DivisiónCiclo se actualizó a false porque tiene materias relacionadas.";
+                    }
+                    else
+                    {
+                        // No tiene relaciones, se elimina
+                        _context.DivisionCiclos.Remove(dbDivCic);
+                        await _context.SaveChangesAsync();
+
+                        responseApi.EsCorrecto = true;
+                        responseApi.Mensaje = "DivisiónCiclo eliminada exitosamente.";
+                    }
+                }
+                else
+                {
+                    // No se encontró el registro
+                    responseApi.EsCorrecto = false;
+                    responseApi.Mensaje = "DivisiónCiclo no encontrada.";
+                }
+            }
+            catch (Exception ex)
+            {
+                // Manejo de errores
+                responseApi.EsCorrecto = false;
+                responseApi.Mensaje = ex.InnerException?.Message ?? ex.Message;
+            }
+
+            return Ok(responseApi);
+        }
+
+        [HttpGet("Deleted")]
+        public async Task<IActionResult> GetDeletedDivisions()
+        {
+            var deletedDivisions = await _context.DivisionCiclos
+                .Where(d => !d.Estado) // Asumiendo que Estado = false significa eliminado
+                .ToListAsync();
+
+            return Ok(deletedDivisions);
+        }
+
+        [HttpPut("Restore/{id}")]
+        public async Task<IActionResult> RestoreDivision(int id)
+        {
+            var division = await _context.DivisionCiclos.FindAsync(id);
+            if (division == null)
+            {
+                return NotFound("División no encontrada.");
+            }
+
+            division.Estado = true; // Restaurar cambiando el estado
+            _context.DivisionCiclos.Update(division);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+
+    }
+
 }

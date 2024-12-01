@@ -110,6 +110,7 @@ namespace INTITUTO1.Server.Controllers
                     dbCarrera.Nombre = carrera.Nombres;
                     dbCarrera.FechaInicio = carrera.Fecha_inicio;
                     dbCarrera.FechaFin = carrera.Fecha_fin;
+                    dbCarrera.Estado = true;
 
                     _context.Carreras.Update(dbCarrera);
                     await _context.SaveChangesAsync();

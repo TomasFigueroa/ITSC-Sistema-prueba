@@ -12,6 +12,7 @@
 }
 <PageTitle>Profesor</PageTitle>
 <button class="btn btn-success" @onclick="OpenModalToAdd">Cargar Profesor</button>
+<button class="btn btn-secondary" @onclick="OpenDeletedModal">Ver Profesores Inactivos</button>
 <div class="table-container" style="overflow: hidden; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); margin-bottom: 20px;">
     <div style="border-top-left-radius: 12px; border-top-right-radius: 12px; background-color: #f2f2f2; padding: 10px;">
         <table class="table" style="border-collapse: collapse; width: 100%; border: 2px solid #E6E6FA;">
@@ -27,18 +28,21 @@
             <tbody>
                 @foreach (var profesor in profesores)
                 {
-                    <tr>
-                        <td style="border-right: 2px solid #ddd;">@profesor.Nombre_Prof</td>
-                        <td style="border-right: 2px solid #ddd;">@profesor.Apellido_Prof</td>
-                        <td style="border-right: 2px solid #ddd;">@profesor.Dni</td>
-                        <td style="border-right: 2px solid #ddd;">@(profesor.Estado ? "Activo" : "Inactivo")</td>
-                        <td>
-                            <div class="action-buttons m-1">
-                                <button class="btn btn-primary me-2" @onclick="() => OpenModalToEdit(profesor, profesor.IdProfesor)"><i class="oi oi-pencil"></i></button>
-                                <button class="btn btn-danger" @onclick="() => OpenConfirmDeleteModal(profesor.IdProfesor)"><i class="oi oi-trash"></i></button>
-                            </div>
-                        </td>
-                    </tr>
+                    @if(profesor.Estado== true){
+                        <tr>
+                            <td style="border-right: 2px solid #ddd;">@profesor.Nombre_Prof</td>
+                            <td style="border-right: 2px solid #ddd;">@profesor.Apellido_Prof</td>
+                            <td style="border-right: 2px solid #ddd;">@profesor.Dni</td>
+                            <td style="border-right: 2px solid #ddd;">@(profesor.Estado ? "Activo" : "Inactivo")</td>
+                            <td>
+                                <div class="action-buttons m-1">
+                                    <button class="btn btn-primary me-2" @onclick="() => OpenModalToEdit(profesor, profesor.IdProfesor)"><i class="oi oi-pencil"></i></button>
+                                    <button class="btn btn-danger" @onclick="() => OpenConfirmDeleteModal(profesor.IdProfesor)"><i class="oi oi-trash"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                  
                 }
             </tbody>
         </table>
@@ -86,11 +90,7 @@
                             <label class="form-label">DNI</label>
                             <InputNumber class="form-control" @bind-Value="currentProfesor.Dni" />
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">Estado</label>
-                            <InputCheckbox class="form-check-input" @bind-Value="currentProfesor.Estado" />
-                            <label class="form-check-label">@((currentProfesor.Estado) ? "Activo" : "Inactivo")</label>
-                        </div>
+                       
                         <button type="submit" class="btn btn-primary">@((isEdit) ? "Guardar Cambios" : "Agregar Profesor")</button>
                     </EditForm>
                 </div>
@@ -120,6 +120,58 @@
     </div>
 }
 
+@if (isDeletedModalOpen)
+{
+    <div class="custom-modal-overlay">
+        <div class="custom-modal-container">
+            <div class="custom-modal">
+                <div class="custom-modal-header">
+                    <h5 class="modal-title">Entidades Eliminadas</h5>
+                    <button type="button" class="btn-close" @onclick="CloseDeletedModal"></button>
+                </div>
+                <div class="custom-modal-body">
+                    @if (deletedItems != null && deletedItems.Any(c => !c.Estado))
+                    {
+                        <table class="custom-table">
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Dni</th>
+                                    <th>Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in deletedItems)
+                                {
+                                    <tr>
+                                        <td>@item.Nombre_Prof</td>
+                                        <td>@item.Dni</td>
+                                        <td>
+                                            <button class="custom-btn-activate"
+                                                    @onclick="() => ActivateItem(item.IdProfesor)">
+                                                Activar
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <div class="custom-alert">
+                            No hay entidades eliminadas en este momento.
+                        </div>
+                    }
+                </div>
+                <div class="custom-modal-footer">
+                    <button class="custom-btn-close" @onclick="CloseDeletedModal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
 @code {
     private int CurrentPage = 1; //pagina actual
     private int PageSize = 10; //cantidad de elementos por pagina
@@ -137,6 +189,7 @@
     protected override async Task OnInitializedAsync()
     {
         await LoadProfesores();
+        await LoadDeletedItems();
     }
 
     private async Task LoadProfesores()
@@ -218,7 +271,7 @@
                 CloseModal();
                 successMessage = "Profesor agregado exitosamente.";
                 showSuccessMessage = true;
-                await LoadProfesores();
+                await OnInitializedAsync();
                 CloseModal();
 
                 await Task.Delay(3000);
@@ -242,7 +295,7 @@
             var response = await Http.PutAsJsonAsync($"api/Profesor/{idactual}", currentProfesor);
             if (response.IsSuccessStatusCode)
             {
-                await LoadProfesores();
+                await OnInitializedAsync();
                 CloseModal();
             }
             else
@@ -263,7 +316,7 @@
             var response = await Http.DeleteAsync($"api/Profesor/{idProfesorToDelete}");
             if (response.IsSuccessStatusCode)
             {
-                await LoadProfesores();
+                await OnInitializedAsync();
                 CloseConfirmDeleteModal();
             }
             else
@@ -274,6 +327,41 @@
         catch (Exception ex)
         {
             Console.WriteLine($"Exception deleting profesor: {ex.Message}");
+        }
+    }
+    private bool isDeletedModalOpen = false;
+    private List<Profesor> deletedItems = new();
+
+    // Método para abrir el modal
+    private async void OpenDeletedModal()
+    {
+        isDeletedModalOpen = true;
+        await OnInitializedAsync();
+    }
+
+    // Método para cerrar el modal
+    private void CloseDeletedModal()
+    {
+        isDeletedModalOpen = false;
+    }
+
+    // Método para cargar los elementos eliminados desde la API
+    private async Task LoadDeletedItems()
+    {
+        var response = await Http.GetFromJsonAsync<List<Profesor>>("api/Profesor");
+        if (response != null)
+        {
+            deletedItems = response;
+        }
+    }
+
+    // Método para activar un elemento eliminado
+    private async Task ActivateItem(int id)
+    {
+        var response = await Http.PostAsJsonAsync($"api/Profesor/activar/{id}", id);
+        if (response.IsSuccessStatusCode)
+        {
+            await OnInitializedAsync();
         }
     }
 }

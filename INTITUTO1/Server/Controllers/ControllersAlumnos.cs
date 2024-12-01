@@ -167,7 +167,7 @@ namespace INTITUTO1.Server.Controllers
                     dbAlumno.Fecha_Nac = dtoAlumnos.Fecha_Nac;
                     dbAlumno.Tbase = dtoAlumnos.Tbase;
                     dbAlumno.Nacionalidad = dtoAlumnos.Nacionalidad;
-                    dbAlumno.Estado = dtoAlumnos.Estado;
+                    dbAlumno.Estado = true;
                     dbAlumno.Numero = dtoAlumnos.Numero;
                     dbAlumno.Sexo = dtoAlumnos.Sexo;
                     dbAlumno.Id_Carrera = dtoAlumnos.Id_Carrera;
@@ -193,35 +193,70 @@ namespace INTITUTO1.Server.Controllers
 
         //DELETE: api/Alumnos/{id}
         [HttpDelete("{id:int}")]
-
         public async Task<IActionResult> Delete(int id)
         {
             var responseApi = new ResponseAPI<int>();
 
             try
             {
+                // Buscar al alumno en la base de datos
                 var dbAlumno = await _context.alumnos.FirstOrDefaultAsync(e => e.IdAlumno == id);
 
                 if (dbAlumno != null)
                 {
-                    _context.alumnos.Remove(dbAlumno);
+                    // Verificar si tiene relaciones en DivsionCicloMateriaAlumno
+                    var tieneRelacion = await _context.DivsionCiclosMateriaAlumnos
+                                                      .AnyAsync(d => d.AlumnosIdAlumno == id);
+
+                    if (tieneRelacion)
+                    {
+                        // Si tiene relaciones, cambiar el estado del alumno a falso
+                        dbAlumno.Estado = false;
+                        _context.alumnos.Update(dbAlumno);
+                        responseApi.Mensaje = "El alumno tiene relaciones y su estado se ha cambiado a inactivo.";
+                    }
+                    else
+                    {
+                        // Si no tiene relaciones, eliminar al alumno
+                        _context.alumnos.Remove(dbAlumno);
+                        responseApi.Mensaje = "Alumno eliminado correctamente.";
+                    }
+
+                    // Guardar cambios en la base de datos
                     await _context.SaveChangesAsync();
                     responseApi.EsCorrecto = true;
                 }
                 else
                 {
                     responseApi.EsCorrecto = false;
-                    responseApi.Mensaje = "Alumno no encontrado";
+                    responseApi.Mensaje = "Alumno no encontrado.";
                 }
             }
             catch (Exception ex)
             {
-                responseApi.EsCorrecto= false;
-                responseApi.Mensaje = ex.InnerException.Message;
+                responseApi.EsCorrecto = false;
+                responseApi.Mensaje = ex.InnerException?.Message ?? ex.Message;
             }
-            return Ok (responseApi);
 
+            return Ok(responseApi);
         }
+
+        [HttpPost("activar/{id}")]
+        public async Task<IActionResult> ActivateItem(int id)
+        {
+            var item = await _context.alumnos.FirstOrDefaultAsync(e => e.IdAlumno == id);
+            if (item == null)
+            {
+                return NotFound(new { mensaje = "Elemento no encontrado." });
+            }
+
+            item.Estado = true; // Cambiar estado a activo
+            _context.alumnos.Update(item);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { mensaje = "Elemento activado correctamente." });
+        }
+
 
     }
 }
