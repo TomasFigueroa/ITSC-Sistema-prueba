@@ -8,6 +8,6 @@ namespace INTITUTO1.Shared.DTO
 {
     public class DTOCiclo
     {
-        public DateTime Fecha { get; set; } 
+        public String Fecha { get; set; } 
     }
 }

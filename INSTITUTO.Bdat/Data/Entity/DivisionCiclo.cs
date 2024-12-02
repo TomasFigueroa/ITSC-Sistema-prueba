@@ -18,5 +18,6 @@ namespace INSTITUTO.Bdat.Data.Entity
 
         public List<DivisionCicloMateria> DivisionCicloMateria { get; set; }
         //public ICollection<DivisionCicloMateria> DivisionCicloMaterias { get; set; } 
+        public bool Estado { get; set; }
     }
 }

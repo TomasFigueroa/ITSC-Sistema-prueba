@@ -6,6 +6,10 @@
 
 <PageTitle>Ciclo</PageTitle>
 <button class="btn btn-success" @onclick="OpenModalToAdd">Cargar Ciclo</button>
+
+<button class="btn btn-secondary" @onclick="OpenDeletedCiclosModal">Mostrar Eliminados</button>
+
+
 <div class="table-container" style="overflow: hidden; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); margin-bottom: 20px;">
     <div style="border-top-left-radius: 12px; border-top-right-radius: 12px; background-color: #f2f2f2; padding: 10px;">
         <table class="table" style="border-collapse: collapse; width: 100%; border: 2px solid #E6E6FA;">
@@ -18,15 +22,18 @@
             <tbody>
                 @foreach (var ciclo in ciclos)
                 {
-                    <tr>
-                        <td style="border-right: 2px solid #ddd;">@ciclo.Fecha.ToShortDateString()</td>
-                        <td>
-                            <div class="action-buttons m-1">
-                                <button class="btn btn-primary me-2" @onclick="() => OpenModalToEdit(ciclo, ciclo.IdCiclo)"><i class="oi oi-pencil"></i></button>
-                                <button class="btn btn-danger" @onclick="() => OpenConfirmDeleteModal(ciclo.IdCiclo)"><i class="oi oi-trash"></i></button>
-                            </div>
-                        </td>
-                    </tr>
+                    @if(ciclo.Estado== true){
+                        <tr>
+                            <td style="border-right: 2px solid #ddd;">@ciclo.Fecha</td>
+                            <td>
+                                <div class="action-buttons m-1">
+                                    <button class="btn btn-primary me-2" @onclick="() => OpenModalToEdit(ciclo, ciclo.IdCiclo)"><i class="oi oi-pencil"></i></button>
+                                    <button class="btn btn-danger" @onclick="() => OpenConfirmDeleteModal(ciclo.IdCiclo)"><i class="oi oi-trash"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                   
                 }
             </tbody>
         </table>
@@ -64,7 +71,7 @@
                         <DataAnnotationsValidator />
                         <div class="mb-3">
                             <label class="form-label">Fecha</label>
-                            <InputDate class="form-control" @bind-Value="currentCiclo.Fecha" />
+                            <InputText class="form-control" @bind-Value="currentCiclo.Fecha" />
                         </div>
                         <button type="submit" class="btn btn-primary">@((isEdit) ? "Guardar Cambios" : "Agregar Ciclo")</button>
                     </EditForm>
@@ -94,6 +101,56 @@
         </div>
     </div>
 }
+@if (isDeletedCiclosModalOpen)
+{
+    <div class="custom-modal-overlay">
+        <div class="custom-modal-container">
+            <div class="custom-modal">
+                <div class="custom-modal-header">
+                    <h5 class="modal-title">Ciclos Eliminados</h5>
+                    <button type="button" class="btn-close" @onclick="CloseDeletedCiclosModal"></button>
+                </div>
+                <div class="custom-modal-body">
+                    @if (ciclos != null && ciclos.Any(c => !c.Estado))
+                    {
+                        <table class="custom-table">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var ciclo in ciclos)
+                                {
+                                    <tr>
+                                        <td>@ciclo.Fecha</td>
+                                        <td>
+                                            <button class="custom-btn-activate"
+                                                    @onclick="() => ActivateCiclo(ciclo.IdCiclo)">
+                                                Activar
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <div class="custom-alert">
+                            No hay ciclos eliminados en este momento.
+                        </div>
+                    }
+                </div>
+                <div class="custom-modal-footer">
+                    <button class="custom-btn-close" @onclick="CloseDeletedCiclosModal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
 
 @code {
     private int CurrentPage = 1; //pagina actual
@@ -110,6 +167,7 @@
     protected override async Task OnInitializedAsync()
     {
         await LoadCiclos();
+   
     }
 
     private async Task LoadCiclos()
@@ -147,7 +205,6 @@
     private void OpenModalToAdd()
     {
         currentCiclo = new DTOCiclo();
-        currentCiclo.Fecha = DateTime.Today;
         isEdit = false;
         isModalOpen = true;
     }
@@ -241,5 +298,46 @@
             Console.WriteLine($"Exception deleting ciclo: {ex.Message}");
         }
     }
+    private bool isDeletedCiclosModalOpen = false; // Estado del modal de eliminados
+    private List<Ciclos> deletedCiclos = new List<Ciclos>(); // Lista de ciclos eliminados
+
+    // Abrir el modal de ciclos eliminados
+    private async Task OpenDeletedCiclosModal()
+    {
+        await LoadCiclos();
+        isDeletedCiclosModalOpen = true;
+    }
+
+    // Cerrar el modal de ciclos eliminados
+    private void CloseDeletedCiclosModal()
+    {
+        isDeletedCiclosModalOpen = false;
+    }
+
+    // Cargar los ciclos eliminados
+  
+
+    // Activar un ciclo eliminado
+    private async Task ActivateCiclo(int id)
+    {
+        try
+        {
+            var response = await Http.PutAsync($"api/Ciclo/activar/{id}", null);
+            if (response.IsSuccessStatusCode)
+            {
+                
+                await LoadCiclos();
+            }
+            else
+            {
+                Console.WriteLine($"Error activating ciclo: {response.ReasonPhrase}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Exception activating ciclo: {ex.Message}");
+        }
+    }
+
 }
 

@@ -6,6 +6,8 @@
 
 <PageTitle>DivisionCiclo</PageTitle>
 <button class="btn btn-success" @onclick="OpenModalToAdd">Cargar DivisionCiclo</button>
+<button class="btn btn-secondary" @onclick="OpenDeletedModal">Ver Divisiones Eliminadas</button>
+
 <div class="table-container" style="overflow: hidden; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); margin-bottom: 20px;">
     <div style="border-top-left-radius: 12px; border-top-right-radius: 12px; background-color: #f2f2f2; padding: 10px;">
         <table class="table" style="border-collapse: collapse; width: 100%; border: 2px solid #E6E6FA;">
@@ -19,16 +21,19 @@
             <tbody>
                 @foreach (var divisionCiclo in divisionCiclos)
                 {
-                    <tr>
-                        <td style="border-right: 2px solid #ddd;">@GetCicloNombre(divisionCiclo.CicloIdCiclo)</td>
-                        <td style="border-right: 2px solid #ddd;">@GetDivisionNombre(divisionCiclo.DivisionesIdDivision)</td>
-                        <td>
-                            <div class="action-buttons m-1">
-                                <button class="btn btn-primary me-2" @onclick="() => OpenModalToEdit(divisionCiclo, divisionCiclo.IdDivCic)"><i class="oi oi-pencil"></i></button>
-                                <button class="btn btn-danger" @onclick="() => OpenConfirmDeleteModal(divisionCiclo.IdDivCic)"><i class="oi oi-trash"></i></button>
-                            </div>
-                        </td>
-                    </tr>
+                    @if(divisionCiclo.Estado==true){
+                        <tr>
+                            <td style="border-right: 2px solid #ddd;">@GetCicloNombre(divisionCiclo.CicloIdCiclo)</td>
+                            <td style="border-right: 2px solid #ddd;">@GetDivisionNombre(divisionCiclo.DivisionesIdDivision)</td>
+                            <td>
+                                <div class="action-buttons m-1">
+                                    <button class="btn btn-primary me-2" @onclick="() => OpenModalToEdit(divisionCiclo, divisionCiclo.IdDivCic)"><i class="oi oi-pencil"></i></button>
+                                    <button class="btn btn-danger" @onclick="() => OpenConfirmDeleteModal(divisionCiclo.IdDivCic)"><i class="oi oi-trash"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                   
                 }
             </tbody>
         </table>
@@ -110,6 +115,58 @@
         </div>
     </div>
 }
+@if (isDeletedModalOpen)
+{
+    <div class="custom-modal-overlay">
+        <div class="custom-modal-container">
+            <div class="custom-modal">
+                <div class="custom-modal-header">
+                    <h5 class="modal-title">Divisiones Eliminadas</h5>
+                    <button type="button" class="btn-close" @onclick="CloseDeletedModal"></button>
+                </div>
+                <div class="custom-modal-body">
+                    @if (deletedDivisiones?.Count > 0)
+                    {
+                        <table class="custom-table">
+                            <thead>
+                                <tr>
+                                    <th>Ciclo</th>
+                                    <th>División</th>
+                                    <th>Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var division in deletedDivisiones)
+                                {
+                                    <tr>
+                                        <td>@GetCicloNombre(division.CicloIdCiclo)</td>
+                                        <td>@GetDivisionNombre(division.DivisionesIdDivision)</td>
+                                        <td>
+                                            <button class="custom-btn-activate"
+                                                    @onclick="() => RestoreDivision(division.IdDivCic)">
+                                                Activar
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <div class="custom-alert">
+                            No hay divisiones eliminadas en este momento.
+                        </div>
+                    }
+                </div>
+                <div class="custom-modal-footer">
+                    <button class="custom-btn-close" @onclick="CloseDeletedModal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
 
 @code {
     private int CurrentPage = 1; //pagina actual
@@ -130,6 +187,7 @@
         await LoadDivisionCiclos();
         await LoadCiclos();
         await LoadDivisiones();
+        await LoadDeletedDivisiones();
     }
 
     private async Task LoadDivisionCiclos()
@@ -284,7 +342,7 @@
             var response = await Http.DeleteAsync($"api/DivisionCiclo/{idactual}");
             if (response.IsSuccessStatusCode)
             {
-                await LoadDivisionCiclos();
+                await OnInitializedAsync();
                 CloseConfirmDeleteModal();
             }
             else
@@ -295,6 +353,51 @@
         catch (Exception ex)
         {
             Console.WriteLine($"Exception deleting divisionCiclo: {ex.Message}");
+        }
+    }
+    private bool isDeletedModalOpen = false;
+    private List<DivisionCiclo> deletedDivisiones = new();
+
+    private void OpenDeletedModal()
+    {
+        isDeletedModalOpen = true;
+        LoadDeletedDivisiones();
+    }
+
+    private void CloseDeletedModal()
+    {
+        isDeletedModalOpen = false;
+    }
+
+    private async Task LoadDeletedDivisiones()
+    {
+        try
+        {
+            deletedDivisiones = await Http.GetFromJsonAsync<List<DivisionCiclo>>("api/DivisionCiclo/Deleted");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading deleted divisions: {ex.Message}");
+        }
+    }
+
+    private async Task RestoreDivision(int id)
+    {
+        try
+        {
+            var response = await Http.PutAsync($"api/DivisionCiclo/Restore/{id}", null);
+            if (response.IsSuccessStatusCode)
+            {
+                await OnInitializedAsync();
+            }
+            else
+            {
+                Console.WriteLine($"Error restoring division: {response.ReasonPhrase}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Exception restoring division: {ex.Message}");
         }
     }
 }

@@ -97,6 +97,7 @@ namespace INTITUTO1.Server.Controllers
                 {
                     dbDivision.NombreDiv = dtoDivision.NombreDiv;
                     dbDivision.CarrerassIdCarrera = dtoDivision.NombreCar;
+                    dbDivision.Estado = true;
 
                     _context.Division.Update(dbDivision);
                     await _context.SaveChangesAsync();

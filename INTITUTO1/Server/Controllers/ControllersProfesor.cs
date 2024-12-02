@@ -71,7 +71,7 @@ namespace INTITUTO1.Server.Controllers
                 Apellido_Prof = dtoProfesor.Apellido_Prof,
                 Nombre_Prof = dtoProfesor.Nombre_Prof,
                 Dni = dtoProfesor.Dni,
-                Estado = dtoProfesor.Estado,
+                Estado = true,
             };
 
             _context.profesors.Add(mdProfesor);
@@ -132,27 +132,79 @@ namespace INTITUTO1.Server.Controllers
 
             try
             {
-
+                // Buscar al profesor en la base de datos
                 var dbProfesor = await _context.profesors.FirstOrDefaultAsync(e => e.IdProfesor == id);
 
                 if (dbProfesor != null)
                 {
-                    _context.profesors.Remove(dbProfesor);
+                    // Verificar si existe relación con DivisionCicloMateria
+                    var tieneRelaciones = await _context.DivisionCicloMaterias
+                        .AnyAsync(d => d.ProfesorIdProfesor == id);
+
+                    if (tieneRelaciones)
+                    {
+                        // Si tiene relaciones, cambiar el estado a falso
+                        dbProfesor.Estado = false; 
+                        _context.profesors.Update(dbProfesor);
+                    }
+                    else
+                    {
+                        // Si no tiene relaciones, eliminar el registro
+                        _context.profesors.Remove(dbProfesor);
+                    }
+
+                    // Guardar cambios en la base de datos
                     await _context.SaveChangesAsync();
+
                     responseApi.EsCorrecto = true;
+                    responseApi.Mensaje = tieneRelaciones
+                        ? "Profesor inactivado debido a relaciones existentes."
+                        : "Profesor eliminado correctamente.";
                 }
                 else
                 {
                     responseApi.EsCorrecto = false;
-                    responseApi.Mensaje = "Profesor no encontrada";
+                    responseApi.Mensaje = "Profesor no encontrado.";
                 }
             }
             catch (Exception ex)
             {
                 responseApi.EsCorrecto = false;
-                responseApi.Mensaje = ex.InnerException.Message;
+                responseApi.Mensaje = ex.InnerException?.Message ?? ex.Message;
             }
+
             return Ok(responseApi);
+        }
+
+        [HttpGet("eliminados")]
+        public async Task<IActionResult> GetDeletedItems()
+        {
+            var eliminados = await _context.profesors
+                .Where(e => !e.Estado) // Suponiendo que "Estado" determina si está activo
+                .Select(e => new Profesor
+                {
+                    Nombre_Prof = e.Nombre_Prof,
+                    Dni = e.Dni
+                })
+                .ToListAsync();
+
+            return Ok(eliminados);
+        }
+
+        [HttpPost("activar/{id}")]
+        public async Task<IActionResult> ActivateItem(int id)
+        {
+            var item = await _context.profesors.FirstOrDefaultAsync(e => e.IdProfesor == id);
+            if (item == null)
+            {
+                return NotFound(new { mensaje = "Elemento no encontrado." });
+            }
+
+            item.Estado = true; // Cambiar estado a activo
+            _context.profesors.Update(item);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { mensaje = "Elemento activado correctamente." });
         }
 
     }

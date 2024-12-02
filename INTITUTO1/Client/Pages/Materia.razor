@@ -120,10 +120,11 @@
                                 <option value="">Seleccione una division</option>
                                 @foreach (var divisiones in divisions)
                                 {
-                                    if (iddivision==divisiones.IdDivision)
-                                    {
+                                    @if(divisiones.CarrerassIdCarrera == idcarrera){
                                         <option value="@divisiones.IdDivision">@divisiones.NombreDiv</option>
                                     }
+                                    
+                                    
                                    
                                 }
                             </InputSelect>
@@ -401,7 +402,8 @@
         currentMateria = new DTOMaterias
             {
                 Nombre = materia.Nombre,
-                IdCarrera = materia.IdCarrera
+                IdCarrera = materia.IdCarrera,
+                IdDivision = materia.IdDivision
             };
         idToDelete = id;
         isEdit = true;

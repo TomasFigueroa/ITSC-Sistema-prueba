@@ -69,7 +69,8 @@ namespace INTITUTO1.Server.Controllers
                 // Crear un nuevo ciclo si no existe uno con la misma fecha
                 var mdCiclo = new Ciclos
                 {
-                    Fecha = dtoCiclo.Fecha
+                    Fecha = dtoCiclo.Fecha,
+                    Estado = true
                 };
 
                 _context.Ciclos.Add(mdCiclo);
@@ -98,9 +99,10 @@ namespace INTITUTO1.Server.Controllers
             {
                 var dbCiclo = await _context.Ciclos.FirstOrDefaultAsync(e => e.IdCiclo == id);
 
-                if (dbCiclo == null)
+                if (dbCiclo != null)
                 {
                     dbCiclo.Fecha = dtoCiclo.Fecha;
+                    dbCiclo.Estado = true;
 
                     _context.Ciclos.Update(dbCiclo);
                     await _context.SaveChangesAsync();
@@ -120,34 +122,69 @@ namespace INTITUTO1.Server.Controllers
 
         // DELETE: api/Ciclo/5
         [HttpDelete("{id}")]
-            public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete(int id)
+        {
+            var responseApi = new ResponseAPI<int>();
+
+            try
             {
-                var responseApi = new ResponseAPI<int>();
+                var dbCiclo = await _context.Ciclos.FirstOrDefaultAsync(e => e.IdCiclo == id);
 
-                try
+                if (dbCiclo != null)
                 {
-                    var dbCiclo = await _context.Ciclos.FirstOrDefaultAsync(e => e.IdCiclo == id);
+                    // Verificar si tiene relaciones en DivCic
+                    var tieneRelaciones = await _context.DivisionCiclos.AnyAsync(dc => dc.CicloIdCiclo == id);
 
-                    if (dbCiclo != null)
+                    if (tieneRelaciones)
                     {
-                        _context.Ciclos.Remove(dbCiclo);
-                        await _context.SaveChangesAsync();
-                        responseApi.EsCorrecto = true;
+                        // Cambiar el estado del ciclo a false
+                        dbCiclo.Estado = false; // Asegúrate de que la propiedad `Estado` exista en la entidad Ciclos.
+                        _context.Ciclos.Update(dbCiclo);
+                        responseApi.Mensaje = "El ciclo tiene relaciones, el estado se cambió a 'false'.";
                     }
                     else
                     {
-                        responseApi.EsCorrecto = false;
-                        responseApi.Mensaje = "Ciclo no encontrado";
+                        // Eliminar el ciclo
+                        _context.Ciclos.Remove(dbCiclo);
+                        responseApi.Mensaje = "Ciclo eliminado correctamente.";
                     }
+
+                    await _context.SaveChangesAsync();
+                    responseApi.EsCorrecto = true;
                 }
-                catch (Exception ex)
+                else
                 {
                     responseApi.EsCorrecto = false;
-                    responseApi.Mensaje = ex.InnerException.Message;
+                    responseApi.Mensaje = "Ciclo no encontrado.";
                 }
-                return Ok(responseApi);
-
             }
+            catch (Exception ex)
+            {
+                responseApi.EsCorrecto = false;
+                responseApi.Mensaje = ex.InnerException?.Message ?? ex.Message;
+            }
+
+            return Ok(responseApi);
+        }
+
         
-    } 
+
+        [HttpPut("activar/{id}")]
+        public async Task<IActionResult> ActivateCiclo(int id)
+        {
+            var ciclo = await _context.Ciclos.FirstOrDefaultAsync(c => c.IdCiclo == id);
+            if (ciclo == null || ciclo.Estado)
+            {
+                return NotFound(new { message = "Ciclo no encontrado o ya está activo." });
+            }
+
+            ciclo.Estado = true;
+            _context.Ciclos.Update(ciclo);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "Ciclo activado con éxito." });
+        }
+
+
+    }
 }
