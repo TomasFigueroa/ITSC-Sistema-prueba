@@ -5,6 +5,7 @@
 
 <PageTitle>Libros</PageTitle>
 <button class="btn btn-success" @onclick="OpenModalToAdd">Cargar Libro</button>
+<button class="btn btn-secondary" @onclick="OpenDeletedLibrosModal">Mostrar Eliminados</button>
 
 @if (isSuccessMessageVisible)
 {
@@ -98,6 +99,57 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" @onclick="CloseConfirmDeleteModal">Cancelar</button>
                     <button type="button" class="btn btn-danger" @onclick="DeleteLibro">Eliminar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+//libros eliminados
+@if (isDeletedLibrosModalOpen)
+{
+    <div class="custom-modal-overlay">
+        <div class="custom-modal-container">
+            <div class="custom-modal">
+                <div class="custom-modal-header">
+                    <h5 class="modal-title">Libros Eliminados</h5>
+                    <button type="button" class="btn-close" @onclick="CloseDeletedLibrosModal"></button>
+                </div>
+                <div class="custom-modal-body">
+                    @if (libros != null && libros.Any(c => !c.Estado))
+                    {
+                        <table class="custom-table">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var libros in libros)
+                                {
+                                    <tr>
+                                        <td>@libros.Nombre_Lib</td>
+                                        <td>
+                                            <button class="custom-btn-activate"
+                                                    @onclick="() => ActivateLibro(libros.Id_Libro)">
+                                                Activar
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <div class="custom-alert">
+                            No hay ciclos eliminados en este momento.
+                        </div>
+                    }
+                </div>
+                <div class="custom-modal-footer">
+                    <button class="custom-btn-close" @onclick="CloseDeletedLibrosModal">Cerrar</button>
                 </div>
             </div>
         </div>
@@ -259,4 +311,49 @@
         isSuccessMessageVisible = true;
         _ = Task.Delay(3000).ContinueWith(_ => isSuccessMessageVisible = false);
     }
+
+
+    #region libros eliminados
+
+    private bool isDeletedLibrosModalOpen = false;
+    private List<LIbros> deletedLibros = new List<LIbros>();
+
+    // Abrir el modal de libros eliminados
+    private async Task OpenDeletedLibrosModal()
+    {
+        await LoadLibros();
+        isDeletedLibrosModalOpen = true;
+    }
+
+    // Cerrar el modal de libros eliminados
+    private void CloseDeletedLibrosModal()
+    {
+        isDeletedLibrosModalOpen = false;
+    }
+
+
+
+    // Activar un libros eliminado
+    private async Task ActivateLibro(int id)
+    {
+        try
+        {
+            var response = await Http.PutAsync($"api/Libros/activar/{id}", null);
+            if (response.IsSuccessStatusCode)
+            {
+
+                await LoadLibros();
+            }
+            else
+            {
+                Console.WriteLine($"Error activating ciclo: {response.ReasonPhrase}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Exception activating ciclo: {ex.Message}");
+        }
+    }
+
+    #endregion
 }

@@ -62,7 +62,8 @@ namespace INTITUTO1.Server.Controllers
                 // Crear un nuevo libro si no existe uno con el mismo nombre
                 var nuevoLibro = new LIbros
                 {
-                    Nombre_Lib = dtoLibros.Nombre_Lib
+                    Nombre_Lib = dtoLibros.Nombre_Lib,
+                    Estado = true
                 };
                 _context.LIbros.Add(nuevoLibro);
                 await _context.SaveChangesAsync();
@@ -98,6 +99,7 @@ namespace INTITUTO1.Server.Controllers
                 }
 
                 libroExistente.Nombre_Lib = dtoLibros.Nombre_Lib;
+                libroExistente.Estado = true;
 
                 _context.LIbros.Update(libroExistente);
                 await _context.SaveChangesAsync();
@@ -121,20 +123,25 @@ namespace INTITUTO1.Server.Controllers
 
             try
             {
+                // Buscar el libro en la base de datos
                 var libroExistente = await _context.LIbros.FindAsync(id);
 
                 if (libroExistente == null)
                 {
                     responseApi.EsCorrecto = false;
-                    responseApi.Mensaje = "Libro no encontrado";
+                    responseApi.Mensaje = "Libro no encontrado.";
                     return NotFound(responseApi);
                 }
 
-                _context.LIbros.Remove(libroExistente);
+                // Cambiar el estado del libro a false
+                libroExistente.Estado = false;
+
+                // Actualizar el registro en la base de datos
+                _context.LIbros.Update(libroExistente);
                 await _context.SaveChangesAsync();
 
                 responseApi.EsCorrecto = true;
-                return Ok(responseApi);
+                responseApi.Mensaje = "Estado del libro actualizado a inactivo.";
             }
             catch (Exception ex)
             {
@@ -142,6 +149,47 @@ namespace INTITUTO1.Server.Controllers
                 responseApi.Mensaje = ex.Message;
                 return BadRequest(responseApi);
             }
+
+            return Ok(responseApi);
         }
+
+        // PUT: api/Libros/activar/{id}
+        [HttpPut("activar/{id}")]
+        public async Task<IActionResult> ActivateLibro(int id)
+        {
+            var responseApi = new ResponseAPI<int>();
+
+            try
+            {
+                // Buscar el libro
+                var libroExistente = await _context.LIbros.FindAsync(id);
+
+                if (libroExistente == null || libroExistente.Estado)
+                {
+                    responseApi.EsCorrecto = false;
+                    responseApi.Mensaje = "Libro no encontrado o ya está activo.";
+                    return NotFound(responseApi);
+                }
+
+                // Cambiar el estado del libro a true
+                libroExistente.Estado = true;
+
+                // Actualizar el registro
+                _context.LIbros.Update(libroExistente);
+                await _context.SaveChangesAsync();
+
+                responseApi.EsCorrecto = true;
+                responseApi.Mensaje = "Libro activado con éxito.";
+            }
+            catch (Exception ex)
+            {
+                responseApi.EsCorrecto = false;
+                responseApi.Mensaje = ex.Message;
+                return BadRequest(responseApi);
+            }
+
+            return Ok(responseApi);
+        }
+
     }
 }
