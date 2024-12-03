@@ -166,7 +166,30 @@
         </div>
     </div>
 }
+@if (mostrarAlerta)
+{
 
+    <div class="alert alert-success d-flex align-items-center alert-right animated-alert" role="alert">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-check-circle-fill me-2" viewBox="0 0 16 16">
+            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM6.97 11.03a.75.75 0 0 0 1.08.022L11.97 8a.75.75 0 1 0-1.08-1.04L7.5 10.21 5.646 8.354a.75.75 0 1 0-1.08 1.04l2 2z" />
+        </svg>
+        <div>
+            @mensage
+        </div>
+    </div>
+}
+@if (mostraError)
+{
+    <div class="alert alert-danger d-flex align-items-center alert-right animated-alert" role="alert">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-x-circle-fill me-2" viewBox="0 0 16 16">
+            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z" />
+        </svg>
+        <div>
+            @mensage
+        </div>
+    </div>
+
+}
 
 @code {
     private int CurrentPage = 1; //pagina actual
@@ -181,6 +204,9 @@
     private int idDivisionCicloToDelete;
     private bool isConfirmDeleteModalOpen = false;
     int idactual;
+    private bool mostrarAlerta = false;
+    private bool mostraError = false;
+    string mensage = "";
 
     protected override async Task OnInitializedAsync()
     {
@@ -188,6 +214,36 @@
         await LoadCiclos();
         await LoadDivisiones();
         await LoadDeletedDivisiones();
+    }
+    //Alertas y Errores
+    private void MostrarError(string menssage)
+    {
+        mostraError = true;
+        mensage = menssage;
+
+        // Crear un temporizador para ocultar la alerta después de 5 segundos
+        var timer = new System.Timers.Timer(5000); // 5000 ms = 5 segundos
+        timer.Elapsed += (sender, e) =>
+        {
+            mostraError = false;
+            InvokeAsync(StateHasChanged); // Asegurar que el UI se actualice
+            timer.Dispose(); // Liberar el temporizador
+        };
+        timer.Start();
+    }
+    private void MostrarAlerta(string menssage)
+    {
+        mostrarAlerta = true;
+        mensage = menssage;
+        // Crear un temporizador para ocultar la alerta después de 5 segundos
+        var timer = new System.Timers.Timer(5000); // 5000 ms = 5 segundos
+        timer.Elapsed += (sender, e) =>
+        {
+            mostrarAlerta = false;
+            InvokeAsync(StateHasChanged); // Asegurar que el UI se actualice
+            timer.Dispose(); // Liberar el temporizador
+        };
+        timer.Start();
     }
 
     private async Task LoadDivisionCiclos()
@@ -289,17 +345,18 @@
             var response = await Http.PostAsJsonAsync("api/DivisionCiclo", currentDivisionCiclo);
             if (response.IsSuccessStatusCode)
             {
+                MostrarAlerta("División añadida.");
                 await LoadDivisionCiclos();
                 CloseModal();
             }
             else
             {
-                Console.WriteLine($"Error adding divisionCiclo: {response.ReasonPhrase}");
+                MostrarError("No se pudo añadir la división.");
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Exception adding divisionCiclo: {ex.Message}");
+            MostrarError($"Error: {ex.Message}");
         }
     }
 
@@ -310,17 +367,18 @@
             var response = await Http.PutAsJsonAsync($"api/DivisionCiclo/{idactual}", currentDivisionCiclo);
             if (response.IsSuccessStatusCode)
             {
+                MostrarAlerta("División actualizada.");
                 await LoadDivisionCiclos();
                 CloseModal();
             }
             else
             {
-                Console.WriteLine($"Error editing divisionCiclo: {response.ReasonPhrase}");
+                MostrarError("No se pudo actualizar la división.");
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Exception editing divisionCiclo: {ex.Message}");
+            MostrarError($"Error: {ex.Message}");
         }
     }
 
@@ -342,17 +400,18 @@
             var response = await Http.DeleteAsync($"api/DivisionCiclo/{idactual}");
             if (response.IsSuccessStatusCode)
             {
+                MostrarAlerta("División eliminada.");
                 await OnInitializedAsync();
                 CloseConfirmDeleteModal();
             }
             else
             {
-                Console.WriteLine($"Error deleting divisionCiclo: {response.ReasonPhrase}");
+                MostrarError("No se pudo eliminar la división.");
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Exception deleting divisionCiclo: {ex.Message}");
+            MostrarError($"Error: {ex.Message}");
         }
     }
     private bool isDeletedModalOpen = false;
@@ -388,16 +447,17 @@
             var response = await Http.PutAsync($"api/DivisionCiclo/Restore/{id}", null);
             if (response.IsSuccessStatusCode)
             {
+                MostrarAlerta("División restaurada.");
                 await OnInitializedAsync();
             }
             else
             {
-                Console.WriteLine($"Error restoring division: {response.ReasonPhrase}");
+                MostrarError("No se pudo restaurar la división.");
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Exception restoring division: {ex.Message}");
+            MostrarError($"Error: {ex.Message}");
         }
     }
 }

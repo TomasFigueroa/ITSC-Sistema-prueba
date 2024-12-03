@@ -5,6 +5,7 @@
 
 <PageTitle>Libros</PageTitle>
 <button class="btn btn-success" @onclick="OpenModalToAdd">Cargar Libro</button>
+<button class="btn btn-secondary" @onclick="OpenDeletedLibrosModal">Mostrar Eliminados</button>
 
 @if (isSuccessMessageVisible)
 {
@@ -25,15 +26,19 @@
             <tbody>
                 @foreach (var libro in libros)
                 {
-                    <tr>
-                        <td style="border-right: 2px solid #ddd;">@libro.Nombre_Lib</td>
-                        <td>
-                            <div class="action-buttons m-1">
-                                <button class="btn btn-primary me-2" @onclick="() => OpenModalToEdit(libro, libro.Id_Libro)"><i class="oi oi-pencil"></i></button>
-                                <button class="btn btn-danger" @onclick="() => OpenConfirmDeleteModal(libro, libro.Id_Libro)"><i class="oi oi-trash"></i></button>
-                            </div>
-                        </td>
-                    </tr>
+                    @if(libro.Estado== true)
+                    {
+                        <tr>
+                            <td style="border-right: 2px solid #ddd;">@libro.Nombre_Lib</td>
+                            <td>
+                                <div class="action-buttons m-1">
+                                    <button class="btn btn-primary me-2" @onclick="() => OpenModalToEdit(libro, libro.Id_Libro)"><i class="oi oi-pencil"></i></button>
+                                    <button class="btn btn-danger" @onclick="() => OpenConfirmDeleteModal(libro, libro.Id_Libro)"><i class="oi oi-trash"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                  
                 }
             </tbody>
         </table>
@@ -104,6 +109,80 @@
     </div>
 }
 
+
+@if (isDeletedLibrosModalOpen)
+{
+    <div class="custom-modal-overlay">
+        <div class="custom-modal-container">
+            <div class="custom-modal">
+                <div class="custom-modal-header">
+                    <h5 class="modal-title">Libros Eliminados</h5>
+                    <button type="button" class="btn-close" @onclick="CloseDeletedLibrosModal"></button>
+                </div>
+                <div class="custom-modal-body">
+                    @if (libros != null && libros.Any(c => !c.Estado))
+                    {
+                        <table class="custom-table">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var libros in libros)
+                                {
+                                    <tr>
+                                        <td>@libros.Nombre_Lib</td>
+                                        <td>
+                                            <button class="custom-btn-activate"
+                                                    @onclick="() => ActivateLibro(libros.Id_Libro)">
+                                                Activar
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <div class="custom-alert">
+                            No hay ciclos eliminados en este momento.
+                        </div>
+                    }
+                </div>
+                <div class="custom-modal-footer">
+                    <button class="custom-btn-close" @onclick="CloseDeletedLibrosModal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+@if (mostrarAlerta)
+{
+
+    <div class="alert alert-success d-flex align-items-center alert-right animated-alert" role="alert">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-check-circle-fill me-2" viewBox="0 0 16 16">
+            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM6.97 11.03a.75.75 0 0 0 1.08.022L11.97 8a.75.75 0 1 0-1.08-1.04L7.5 10.21 5.646 8.354a.75.75 0 1 0-1.08 1.04l2 2z" />
+        </svg>
+        <div>
+            @mensage
+        </div>
+    </div>
+}
+@if (mostraError)
+{
+    <div class="alert alert-danger d-flex align-items-center alert-right animated-alert" role="alert">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-x-circle-fill me-2" viewBox="0 0 16 16">
+            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z" />
+        </svg>
+        <div>
+            @mensage
+        </div>
+    </div>
+
+}
 @code {
     private int CurrentPage = 1; //pagina actual
     private int PageSize = 10; //cantidad de elementos por pagina
@@ -117,12 +196,46 @@
     private LIbros libroToDelete;
     private bool isConfirmDeleteModalOpen = false;
     private bool isSuccessMessageVisible = false;
+    private bool isDeletedLibrosModalOpen = false;
+    private bool mostrarAlerta = false;
+    private bool mostraError = false;
+    string mensage = "";
 
     protected override async Task OnInitializedAsync()
     {
         await LoadLibros();
     }
 
+    //Alertas
+    private void MostrarError(string menssage)
+    {
+        mostraError = true;
+        mensage = menssage;
+
+        // Crear un temporizador para ocultar la alerta después de 5 segundos
+        var timer = new System.Timers.Timer(5000); // 5000 ms = 5 segundos
+        timer.Elapsed += (sender, e) =>
+        {
+            mostraError = false;
+            InvokeAsync(StateHasChanged); // Asegurar que el UI se actualice
+            timer.Dispose(); // Liberar el temporizador
+        };
+        timer.Start();
+    }
+    private void MostrarAlerta(string menssage)
+    {
+        mostrarAlerta = true;
+        mensage = menssage;
+        // Crear un temporizador para ocultar la alerta después de 5 segundos
+        var timer = new System.Timers.Timer(5000); // 5000 ms = 5 segundos
+        timer.Elapsed += (sender, e) =>
+        {
+            mostrarAlerta = false;
+            InvokeAsync(StateHasChanged); // Asegurar que el UI se actualice
+            timer.Dispose(); // Liberar el temporizador
+        };
+        timer.Start();
+    }
     private async Task LoadLibros()
     {
         try
@@ -185,18 +298,19 @@
             var response = await Http.PostAsJsonAsync("api/Libros", currentLibro);
             if (response.IsSuccessStatusCode)
             {
+                MostrarAlerta("Libro agregado correctamente.");
                 await LoadLibros();
                 CloseModal();
-                ShowSuccessMessage();
             }
             else
             {
-                Console.WriteLine($"Error adding libro: {response.ReasonPhrase}");
+                var error = await response.Content.ReadAsStringAsync();
+                MostrarError($"No se pudo agregar el libro: {error}");
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Exception adding libro: {ex.Message}");
+            MostrarError($"Error: {ex.Message}");
         }
     }
 
@@ -207,17 +321,19 @@
             var response = await Http.PutAsJsonAsync($"api/Libros/{idLibroLocal}", currentLibro);
             if (response.IsSuccessStatusCode)
             {
+                MostrarAlerta("Libro actualizado correctamente.");
                 await LoadLibros();
                 CloseModal();
             }
             else
             {
-                Console.WriteLine($"Error editing libro: {response.ReasonPhrase}");
+                var error = await response.Content.ReadAsStringAsync();
+                MostrarError($"No se pudo actualizar el libro: {error}");
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Exception editing libro: {ex.Message}");
+            MostrarError($"Error: {ex.Message}");
         }
     }
 
@@ -240,23 +356,59 @@
             var response = await Http.DeleteAsync($"api/Libros/{idLibroLocal}");
             if (response.IsSuccessStatusCode)
             {
+                MostrarAlerta("Libro eliminado correctamente.");
                 await LoadLibros();
                 CloseConfirmDeleteModal();
             }
             else
             {
-                Console.WriteLine($"Error deleting libro: {response.ReasonPhrase}");
+                var error = await response.Content.ReadAsStringAsync();
+                MostrarError($"No se pudo eliminar el libro: {error}");
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Exception deleting libro: {ex.Message}");
+            MostrarError($"Error: {ex.Message}");
+        }
+    }
+  
+    // Abrir el modal de libros eliminados
+    private async Task OpenDeletedLibrosModal()
+    {
+        await LoadLibros();
+        isDeletedLibrosModalOpen = true;
+    }
+
+    // Cerrar el modal de libros eliminados
+    private void CloseDeletedLibrosModal()
+    {
+        isDeletedLibrosModalOpen = false;
+    }
+
+
+
+    // Activar un libros eliminado
+    private async Task ActivateLibro(int id)
+    {
+        try
+        {
+            var response = await Http.PutAsync($"api/Libros/activar/{id}", null);
+            if (response.IsSuccessStatusCode)
+            {
+                MostrarAlerta("Libro activado correctamente.");
+                await LoadLibros();
+            }
+            else
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                MostrarError($"No se pudo activar el libro: {error}");
+            }
+        }
+        catch (Exception ex)
+        {
+            MostrarError($"Error: {ex.Message}");
         }
     }
 
-    private void ShowSuccessMessage()
-    {
-        isSuccessMessageVisible = true;
-        _ = Task.Delay(3000).ContinueWith(_ => isSuccessMessageVisible = false);
-    }
+   
 }

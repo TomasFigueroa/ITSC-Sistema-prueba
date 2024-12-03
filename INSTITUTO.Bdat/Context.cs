@@ -113,7 +113,7 @@ namespace INSTITUTO.Bdat
             {
                 o.HasKey(b => b.Id_Libro);
                 o.Property(b => b.Nombre_Lib);
-
+                o.Property(b => b.Estado);
 
             });
             modelBuilder.Entity<Notas>(o =>

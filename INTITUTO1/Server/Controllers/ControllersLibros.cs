@@ -62,7 +62,8 @@ namespace INTITUTO1.Server.Controllers
                 // Crear un nuevo libro si no existe uno con el mismo nombre
                 var nuevoLibro = new LIbros
                 {
-                    Nombre_Lib = dtoLibros.Nombre_Lib
+                    Nombre_Lib = dtoLibros.Nombre_Lib,
+                    Estado = true
                 };
                 _context.LIbros.Add(nuevoLibro);
                 await _context.SaveChangesAsync();
@@ -98,6 +99,7 @@ namespace INTITUTO1.Server.Controllers
                 }
 
                 libroExistente.Nombre_Lib = dtoLibros.Nombre_Lib;
+                libroExistente.Estado = true;
 
                 _context.LIbros.Update(libroExistente);
                 await _context.SaveChangesAsync();
@@ -121,20 +123,79 @@ namespace INTITUTO1.Server.Controllers
 
             try
             {
-                var libroExistente = await _context.LIbros.FindAsync(id);
+                // Buscar el libro en la base de datos
+                var libroExistente = await _context.LIbros
+                                                   .Include(l => l.notas) // Incluir las relaciones con Notas
+                                                   .FirstOrDefaultAsync(l => l.Id_Libro == id);
 
-                if (libroExistente == null)
+                if (libroExistente != null)
+                {
+                    // Verificar si el libro tiene relaciones con Notas
+                    var tieneRelacion = libroExistente.notas != null && libroExistente.notas.Any();
+
+                    if (tieneRelacion)
+                    {
+                        // Si tiene relaciones, cambiar el estado del libro a inactivo
+                        libroExistente.Estado = false;
+                        _context.LIbros.Update(libroExistente);
+                        responseApi.Mensaje = "El libro tiene notas asociadas. Su estado ha sido cambiado a inactivo.";
+                    }
+                    else
+                    {
+                        // Si no tiene relaciones, eliminar el libro
+                        _context.LIbros.Remove(libroExistente);
+                        responseApi.Mensaje = "Libro eliminado correctamente.";
+                    }
+
+                    // Guardar cambios en la base de datos
+                    await _context.SaveChangesAsync();
+                    responseApi.EsCorrecto = true;
+                }
+                else
                 {
                     responseApi.EsCorrecto = false;
-                    responseApi.Mensaje = "Libro no encontrado";
+                    responseApi.Mensaje = "Libro no encontrado.";
+                }
+            }
+            catch (Exception ex)
+            {
+                responseApi.EsCorrecto = false;
+                responseApi.Mensaje = ex.InnerException?.Message ?? ex.Message;
+            }
+
+            return Ok(responseApi);
+        }
+
+
+
+
+        // PUT: api/Libros/activar/{id}
+        [HttpPut("activar/{id}")]
+        public async Task<IActionResult> ActivateLibro(int id)
+        {
+            var responseApi = new ResponseAPI<int>();
+
+            try
+            {
+                // Buscar el libro
+                var libroExistente = await _context.LIbros.FindAsync(id);
+
+                if (libroExistente == null || libroExistente.Estado)
+                {
+                    responseApi.EsCorrecto = false;
+                    responseApi.Mensaje = "Libro no encontrado o ya está activo.";
                     return NotFound(responseApi);
                 }
 
-                _context.LIbros.Remove(libroExistente);
+                // Cambiar el estado del libro a true
+                libroExistente.Estado = true;
+
+                // Actualizar el registro
+                _context.LIbros.Update(libroExistente);
                 await _context.SaveChangesAsync();
 
                 responseApi.EsCorrecto = true;
-                return Ok(responseApi);
+                responseApi.Mensaje = "Libro activado con éxito.";
             }
             catch (Exception ex)
             {
@@ -142,6 +203,8 @@ namespace INTITUTO1.Server.Controllers
                 responseApi.Mensaje = ex.Message;
                 return BadRequest(responseApi);
             }
+
+            return Ok(responseApi);
         }
     }
 }
