@@ -122,6 +122,7 @@ namespace INTITUTO1.Server.Controllers
             return Ok(responseApi);
         }
 
+
         // DELETE: api/DivisionCicloMateriaAlumnos/{id}
         [HttpDelete("{id:int}")]
         public async Task<ActionResult<ResponseAPI<int>>> Delete(int id)
@@ -130,30 +131,41 @@ namespace INTITUTO1.Server.Controllers
 
             try
             {
-                var dbDivCicMatAlu = await _context.DivsionCiclosMateriaAlumnos.FirstOrDefaultAsync(e => e.IdDivCicMatAlum == id);
+                var dbDivCicMatAlu = await _context.DivsionCiclosMateriaAlumnos
+                    .Include(d => d.Notas)
+                    .FirstOrDefaultAsync(e => e.IdDivCicMatAlum == id);
 
-                if (dbDivCicMatAlu != null)
-                {
-                    _context.DivsionCiclosMateriaAlumnos.Remove(dbDivCicMatAlu);
-                    await _context.SaveChangesAsync();
-                    responseApi.EsCorrecto = true;
-                    responseApi.Mensaje = "Registro eliminado con éxito";
-                    responseApi.Valor = id;
-                }
-                else
+                if (dbDivCicMatAlu == null)
                 {
                     responseApi.EsCorrecto = false;
-                    responseApi.Mensaje = "DivisionCicloMateriaAlumno no encontrada";
+                    responseApi.Mensaje = "División no encontrada.";
+                    return NotFound(responseApi);
                 }
+
+                if (dbDivCicMatAlu.Notas != null && dbDivCicMatAlu.Notas.Any())
+                {
+                    responseApi.EsCorrecto = false;
+                    responseApi.Mensaje = "No se puede eliminar la división porque tiene notas asociadas.";
+                    return Conflict(responseApi); // Devuelve un código 409 Conflict
+                }
+
+                _context.DivsionCiclosMateriaAlumnos.Remove(dbDivCicMatAlu);
+                await _context.SaveChangesAsync();
+
+                responseApi.EsCorrecto = true;
+                responseApi.Mensaje = "División eliminada con éxito.";
+                responseApi.Valor = id;
+                return Ok(responseApi);
             }
             catch (Exception ex)
             {
                 responseApi.EsCorrecto = false;
                 responseApi.Mensaje = ex.Message;
+                return StatusCode(500, responseApi);
             }
-
-            return Ok(responseApi);
         }
+
+
     }
 
 }

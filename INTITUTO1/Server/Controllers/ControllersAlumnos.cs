@@ -59,6 +59,19 @@ namespace INTITUTO1.Server.Controllers
 
                 foreach (var dtoAlumno in dtoAlumnos)
                 {
+                    // Validar si ya existe un alumno con el mismo DNI y CUIL en la misma carrera
+                    bool existeAlumno = await _context.alumnos.AnyAsync(a =>
+                        a.DNI_Alum == dtoAlumno.DNI_Alum &&
+                        a.Cuil == dtoAlumno.Cuil &&
+                        a.Id_Carrera == dtoAlumno.Id_Carrera);
+
+                    if (existeAlumno)
+                    {
+                        // Agregar un mensaje indicando el conflicto (opcional)
+                        responseApi.Mensaje += $"El alumno con DNI {dtoAlumno.DNI_Alum} y CUIL {dtoAlumno.Cuil} ya existe en la carrera {dtoAlumno.Id_Carrera}. ";
+                        continue; // Saltar al siguiente alumno
+                    }
+
                     var mdAlumno = new Alumnos
                     {
                         Nombre = dtoAlumno.Nombre,
@@ -70,7 +83,7 @@ namespace INTITUTO1.Server.Controllers
                         Nacionalidad = dtoAlumno.Nacionalidad,
                         Estado = dtoAlumno.Estado,
                         Numero = dtoAlumno.Numero,
-                        Sexo =dtoAlumno.Sexo,
+                        Sexo = dtoAlumno.Sexo,
                         Id_Carrera = dtoAlumno.Id_Carrera
                     };
 
@@ -79,8 +92,16 @@ namespace INTITUTO1.Server.Controllers
                     idsAlumnos.Add(mdAlumno.IdAlumno);
                 }
 
-                responseApi.EsCorrecto = true;
-                responseApi.Valor = idsAlumnos; // Devolver los ids de los alumnos creados
+                if (idsAlumnos.Count > 0)
+                {
+                    responseApi.EsCorrecto = true;
+                    responseApi.Valor = idsAlumnos;
+                }
+                else
+                {
+                    responseApi.EsCorrecto = false;
+                    responseApi.Mensaje += "No se creó ningún alumno debido a conflictos de duplicidad.";
+                }
             }
             catch (Exception ex)
             {
@@ -90,6 +111,7 @@ namespace INTITUTO1.Server.Controllers
 
             return Ok(responseApi);
         }
+
 
         // POST api/Alumnos
         [HttpPost]
