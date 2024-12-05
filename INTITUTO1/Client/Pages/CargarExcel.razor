@@ -79,6 +79,30 @@
         </div>
         <button type="submit" class="btn-submit">Enviar Alumnos Seleccionados</button>
     </EditForm>
+
+    @if (mostrarAlerta)
+    {
+
+        <div class="alert alert-success d-flex align-items-center alert-right animated-alert" role="alert">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-check-circle-fill me-2" viewBox="0 0 16 16">
+                <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM6.97 11.03a.75.75 0 0 0 1.08.022L11.97 8a.75.75 0 1 0-1.08-1.04L7.5 10.21 5.646 8.354a.75.75 0 1 0-1.08 1.04l2 2z" />
+            </svg>
+            <div>
+                @mensaje
+            </div>
+        </div>
+    }
+    @if (mostraError)
+    {
+        <div class="alert alert-danger d-flex align-items-center alert-right animated-alert" role="alert">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-x-circle-fill me-2" viewBox="0 0 16 16">
+                <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z" />
+            </svg>
+            <div>
+                @mensaje
+            </div>
+        </div>
+
 }
 
 <style>
@@ -212,7 +236,7 @@
     }
 </style>
 
-@code {
+    @code {
     private List<Carrerass> carreras = new List<Carrerass>();
     private List<AlumnoViewModel> alumnos = new();
     private List<DTOAlumnos> selectedAlumnos = new();
@@ -220,10 +244,12 @@
     private bool selectAll = false;
     private int idcarrera;
     private bool mostrarMensajeExito = false;
+    string mensaje = "";
+    private bool mostrarAlerta = false;
+    private bool mostraError = false;
+
     protected override async Task OnInitializedAsync()
     {
-
-      
         await LoadCarreras();
     }
     private async Task HandleSelected(InputFileChangeEventArgs e)
@@ -271,29 +297,76 @@
             }
         }
     }
+
+
   
 
     private async Task EnviarAlumnosSeleccionados()
     {
         selectedAlumnos = alumnos.Where(a => a.IsSelected).Select(a => a.ToAlumnoDto()).ToList();
 
-        if (selectedAlumnos.Any())
+        if (!selectedAlumnos.Any())
         {
-            var response = await Http.PostAsJsonAsync("api/Alumnos/crear-alumnos", selectedAlumnos);
+            MostrarError("Debe seleccionar al menos un alumno para enviar.");
+            return;
+        }
 
-            if (response.IsSuccessStatusCode)
+        //verificas si estan duplicados en la lista de alumnos
+        foreach (var alumnoSeleccionado in selectedAlumnos)
+        {
+            if (alumnos.Any(a => a.DNI_Alum == alumnoSeleccionado.DNI_Alum &&
+                                 a.idcarrera == alumnoSeleccionado.Id_Carrera &&
+                                 !a.IsSelected)) //ignora los seleccionados
             {
-                // Manejar el éxito
-                Console.WriteLine("Alumnos enviados con éxito.");
-                mostrarMensajeExito = true;
-
-            }
-            else
-            {
-                // Manejar el error
-                Console.WriteLine("Error al enviar los alumnos.");
+                MostrarError($"El alumno con DNI {alumnoSeleccionado.DNI_Alum} ya está registrado en la carrera seleccionada.");
+                return; 
             }
         }
+        
+        //todo pelota
+        var response = await Http.PostAsJsonAsync("api/Alumnos/crear-alumnos", selectedAlumnos);
+
+        if (response.IsSuccessStatusCode)
+        {
+            MostrarAlerta("Alumnos enviados con éxito.");
+            alumnos.RemoveAll(a => a.IsSelected); //se remueven los alumnos repetidos seleccionados
+        }
+        else
+        {
+            MostrarError("Error al enviar los alumnos.");
+        }
+    }
+
+
+    //Alertas
+    private void MostrarError(string menssage)
+    {
+        mostraError = true;
+        mensaje = menssage;
+
+        // Crear un temporizador para ocultar la alerta después de 5 segundos
+        var timer = new System.Timers.Timer(5000); // 5000 ms = 5 segundos
+        timer.Elapsed += (sender, e) =>
+        {
+            mostraError = false;
+            InvokeAsync(StateHasChanged); // Asegurar que el UI se actualice
+            timer.Dispose(); // Liberar el temporizador
+        };
+        timer.Start();
+    }
+    private void MostrarAlerta(string menssage)
+    {
+        mostrarAlerta = true;
+        mensaje = menssage;
+        // Crear un temporizador para ocultar la alerta después de 5 segundos
+        var timer = new System.Timers.Timer(5000); // 5000 ms = 5 segundos
+        timer.Elapsed += (sender, e) =>
+        {
+            mostrarAlerta = false;
+            InvokeAsync(StateHasChanged); // Asegurar que el UI se actualice
+            timer.Dispose(); // Liberar el temporizador
+        };
+        timer.Start();
     }
 
     private void EliminarAlumno(AlumnoViewModel alumno)
@@ -350,4 +423,4 @@
         }
     }
 }
-
+     }
