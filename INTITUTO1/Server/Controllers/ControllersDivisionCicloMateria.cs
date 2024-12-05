@@ -138,28 +138,45 @@ namespace INTITUTO1.Server.Controllers
 
             try
             {
-
-                var dbDivCicMat = await _context.DivisionCicloMaterias.FirstOrDefaultAsync(e => e.IdDivCicMat == id);
+                // Buscar el registro en DivisionCicloMaterias
+                var dbDivCicMat = await _context.DivisionCicloMaterias
+                    .Include(e => e.DivsionCiclosMateriaAlumnos) // Incluir la relación
+                    .FirstOrDefaultAsync(e => e.IdDivCicMat == id);
 
                 if (dbDivCicMat != null)
                 {
-                    _context.DivisionCicloMaterias.Remove(dbDivCicMat);
-                    await _context.SaveChangesAsync();
-                    responseApi.EsCorrecto = true;
+                    // Verificar si tiene relaciones con DivisionCicloMateriaAlumnos
+                    if (dbDivCicMat.DivsionCiclosMateriaAlumnos == null || !dbDivCicMat.DivsionCiclosMateriaAlumnos.Any())
+                    {
+                        // Si no tiene relaciones, eliminar
+                        _context.DivisionCicloMaterias.Remove(dbDivCicMat);
+                        await _context.SaveChangesAsync();
+
+                        responseApi.EsCorrecto = true;
+                        responseApi.Mensaje = "DivisionCicloMateria eliminada correctamente.";
+                    }
+                    else
+                    {
+                        // Si tiene relaciones, no se puede eliminar
+                        responseApi.EsCorrecto = false;
+                        responseApi.Mensaje = "No se puede eliminar porque tiene relaciones asociadas.";
+                    }
                 }
                 else
                 {
                     responseApi.EsCorrecto = false;
-                    responseApi.Mensaje = "DivisionCicloMateria no encontrada";
+                    responseApi.Mensaje = "DivisionCicloMateria no encontrada.";
                 }
             }
             catch (Exception ex)
             {
                 responseApi.EsCorrecto = false;
-                responseApi.Mensaje = ex.InnerException.Message;
+                responseApi.Mensaje = ex.InnerException?.Message ?? ex.Message;
             }
+
             return Ok(responseApi);
         }
+
 
     }
 }

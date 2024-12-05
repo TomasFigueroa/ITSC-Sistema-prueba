@@ -1,4 +1,4 @@
-﻿@page "/DivisionCicloMateriaAlumnos"
+﻿@page "/AltaProfesor"
 @attribute [Authorize]
 
 @using Microsoft.EntityFrameworkCore
@@ -204,6 +204,31 @@
         </div>
     </div>
 }
+@if (mostrarAlerta)
+{
+
+    <div class="alert alert-success d-flex align-items-center alert-right animated-alert" role="alert">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-check-circle-fill me-2" viewBox="0 0 16 16">
+            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM6.97 11.03a.75.75 0 0 0 1.08.022L11.97 8a.75.75 0 1 0-1.08-1.04L7.5 10.21 5.646 8.354a.75.75 0 1 0-1.08 1.04l2 2z" />
+        </svg>
+        <div>
+            @mensage
+        </div>
+    </div>
+}
+@if (mostraError)
+{
+    <div class="alert alert-danger d-flex align-items-center alert-right animated-alert" role="alert">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-x-circle-fill me-2" viewBox="0 0 16 16">
+            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z" />
+        </svg>
+        <div>
+            @mensage
+        </div>
+    </div>
+
+}
+
 
 @code {
     private int CurrentPage = 1; //pagina actual
@@ -211,7 +236,7 @@
     private int TotalPages;
     private List<DivsionCiclosMateriaAlumnos> divisionCicloMateriaAlumnos = new List<DivsionCiclosMateriaAlumnos>();
     private List<DivisionCicloMateria> divisionCicloMaterias = new List<DivisionCicloMateria>();
-    private List<Alumnos> alumnos = new List<Alumnos>();
+    // private List<Alumnos> alumnos = new List<Alumnos>();
     private List<LIbros> libros = new List<LIbros>();
     private List<Materias> materias = new List<Materias>();
     private List<Profesor> profesores = new List<Profesor>();
@@ -219,17 +244,17 @@
     private List<Divisiones> divisiones = new List<Divisiones>();
     private List<Carrerass> carreras = new List<Carrerass>();
     private List<DivisionCiclo> divCiclo = new List<DivisionCiclo>();
-    private DivsionCiclosMateriaAlumnos currentDivisionCicloMateriaAlumno = new DivsionCiclosMateriaAlumnos();
+    // private DivsionCiclosMateriaAlumnos currentDivisionCicloMateriaAlumno = new DivsionCiclosMateriaAlumnos();
     private DTODivisionCicloMateria currentDivisionCicloMateria = new DTODivisionCicloMateria();
     private bool isModalOpen = false;
     private bool isEdit = false;
     private bool isConfirmDeleteModalOpen = false;
     private int idActual;
-    private bool isModalOpenAlumno = false;
-    private bool isEditAlumno = false;
-    private int idDivisionCicloMateriaAlumnoToDelete;
-    private bool isConfirmDeleteModalOpenAlumno = false;
-    private int idActualAlumno;
+    // private bool isModalOpenAlumno = false;
+    // private bool isEditAlumno = false;
+    // private int idDivisionCicloMateriaAlumnoToDelete;
+    // private bool isConfirmDeleteModalOpenAlumno = false;
+    // private int idActualAlumno;
     private int idDivisionCicloMateriaToDelete;
     private int idcarrera;
     private int idciclo;
@@ -239,6 +264,22 @@
     private int cicloAnteriorId;
     private int cicloNuevoId;
     int idactual;
+    private bool mostrarAlerta = false;
+    private bool mostraError = false;
+    string mensage = "";
+    private bool mostrarModalAdvertencia = false;
+
+    private void MostrarModalAdvertencia()
+    {
+        CloseConfirmDeleteModal();
+        mostrarModalAdvertencia = true;
+    }
+
+    private void CerrarModalAdvertencia()
+    {
+        mostrarModalAdvertencia = false;
+    }
+
     protected override async Task OnInitializedAsync()
     {
         await LoadData();
@@ -246,10 +287,10 @@
 
     private async Task LoadData()
     {
-        await LoadDivisionCicloMateriaAlumnos();
+        // await LoadDivisionCicloMateriaAlumnos();
         await LoadDivisionCicloMaterias();
-        await LoadAlumnos();
-        await LoadLibros();
+        // await LoadAlumnos();
+        // await LoadLibros();
         await LoadMaterias();
         await LoadProfesores();
         await LoadDivisiones();
@@ -261,6 +302,7 @@
 
     private void OpenDuplicarMateriasModal()
     {
+
         isDuplicarMateriasModalOpen = true;
     }
 
@@ -358,17 +400,17 @@
             Console.WriteLine($"Error loading materias: {ex.Message}");
         }
     }
-    private async Task LoadDivisionCicloMateriaAlumnos()
-    {
-        try
-        {
-            divisionCicloMateriaAlumnos = await Http.GetFromJsonAsync<List<DivsionCiclosMateriaAlumnos>>("api/DivisionCicloMateriaAlumnos");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error loading DivisionCicloMateriaAlumnos: {ex.Message}");
-        }
-    }
+    // private async Task LoadDivisionCicloMateriaAlumnos()
+    // {
+    //     try
+    //     {
+    //         divisionCicloMateriaAlumnos = await Http.GetFromJsonAsync<List<DivsionCiclosMateriaAlumnos>>("api/DivisionCicloMateriaAlumnos");
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         Console.WriteLine($"Error loading DivisionCicloMateriaAlumnos: {ex.Message}");
+    //     }
+    // }
 
     private async Task LoadDivisionCicloMaterias()
     {
@@ -402,29 +444,29 @@
     }
  
 
-    private async Task LoadAlumnos()
-    {
-        try
-        {
-            alumnos = await Http.GetFromJsonAsync<List<Alumnos>>("api/Alumnos");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error loading Alumnos: {ex.Message}");
-        }
-    }
+    // private async Task LoadAlumnos()
+    // {
+    //     try
+    //     {
+    //         alumnos = await Http.GetFromJsonAsync<List<Alumnos>>("api/Alumnos");
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         Console.WriteLine($"Error loading Alumnos: {ex.Message}");
+    //     }
+    // }
 
-    private async Task LoadLibros()
-    {
-        try
-        {
-            libros = await Http.GetFromJsonAsync<List<LIbros>>("api/Libros");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error loading Libros: {ex.Message}");
-        }
-    }
+    // private async Task LoadLibros()
+    // {
+    //     try
+    //     {
+    //         libros = await Http.GetFromJsonAsync<List<LIbros>>("api/Libros");
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         Console.WriteLine($"Error loading Libros: {ex.Message}");
+    //     }
+    // }
 
     private async Task LoadMaterias()
     {
@@ -512,14 +554,14 @@
         return $"{division.NombreDiv}-{ciclo.Fecha}-{materia.Nombre}-{profesor.Nombre_Prof}";
     }
 
-    private string GetAlumnoNombre(int idAlumno)
-    {
-        var alumno = alumnos.FirstOrDefault(a => a.IdAlumno == idAlumno);
-        if (alumno == null)
-            return "N/A";
+    // private string GetAlumnoNombre(int idAlumno)
+    // {
+    //     var alumno = alumnos.FirstOrDefault(a => a.IdAlumno == idAlumno);
+    //     if (alumno == null)
+    //         return "N/A";
 
-        return $"{alumno.Nombre} {alumno.Apellido}";
-    }
+    //     return $"{alumno.Nombre} {alumno.Apellido}";
+    // }
 
     private string GetLibroNombre(int idLibro)
     {
@@ -555,12 +597,12 @@
         isEdit = false;
     }
 
-    private void OpenModalToAddDivisionCicloMateriaAlumno()
-    {
-        currentDivisionCicloMateriaAlumno = new DivsionCiclosMateriaAlumnos();
-        isModalOpen = true;
-        isEdit = false;
-    }
+    // private void OpenModalToAddDivisionCicloMateriaAlumno()
+    // {
+    //     currentDivisionCicloMateriaAlumno = new DivsionCiclosMateriaAlumnos();
+    //     isModalOpen = true;
+    //     isEdit = false;
+    // }
 
     private void OpenModalToEditDivisionCicloMateria(DivisionCicloMateria divisionCicloMateria, int id)
     {
@@ -576,13 +618,13 @@
         isEdit = true;
     }
 
-    private void OpenModalToEditDivisionCicloMateriaAlumno(DivsionCiclosMateriaAlumnos divisionCicloMateriaAlumno)
-    {
-        currentDivisionCicloMateriaAlumno = divisionCicloMateriaAlumno;
-        idActual = divisionCicloMateriaAlumno.IdDivCicMatAlum;
-        isModalOpen = true;
-        isEdit = true;
-    }
+    // private void OpenModalToEditDivisionCicloMateriaAlumno(DivsionCiclosMateriaAlumnos divisionCicloMateriaAlumno)
+    // {
+    //     currentDivisionCicloMateriaAlumno = divisionCicloMateriaAlumno;
+    //     idActual = divisionCicloMateriaAlumno.IdDivCicMatAlum;
+    //     isModalOpen = true;
+    //     isEdit = true;
+    // }
 
     private void OpenConfirmDeleteModalDivisionCicloMateria(int id)
     {
@@ -590,11 +632,11 @@
         isConfirmDeleteModalOpen = true;
     }
 
-    private void OpenConfirmDeleteModalDivisionCicloMateriaAlumno(int id)
-    {
-        idActual = id;
-        isConfirmDeleteModalOpen = true;
-    }
+    // private void OpenConfirmDeleteModalDivisionCicloMateriaAlumno(int id)
+    // {
+    //     idActual = id;
+    //     isConfirmDeleteModalOpen = true;
+    // }
     private void OpenModalToAdd()
     {
         currentDivisionCicloMateria = new DTODivisionCicloMateria();
@@ -638,19 +680,21 @@
             var response = await Http.PostAsJsonAsync("api/DivisionCicloMateria", currentDivisionCicloMateria);
             if (response.IsSuccessStatusCode)
             {
+                MostrarAlerta("¡División agregada con éxito!");
                 await LoadDivisionCicloMaterias();
                 CloseModal();
             }
             else
             {
-                Console.WriteLine($"Error adding divisionCicloMateria: {response.ReasonPhrase}");
+                MostrarError("No se pudo agregar la división. Intenta nuevamente.");
             }
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            Console.WriteLine($"Exception adding divisionCicloMateria: {ex.Message}");
+            MostrarError("Error al agregar la división. Verifica los datos.");
         }
     }
+
 
     private async Task EditDivisionCicloMateria()
     {
@@ -659,19 +703,21 @@
             var response = await Http.PutAsJsonAsync($"api/DivisionCicloMateria/{idactual}", currentDivisionCicloMateria);
             if (response.IsSuccessStatusCode)
             {
+                MostrarAlerta("¡División actualizada correctamente!");
                 await LoadDivisionCicloMaterias();
                 CloseModal();
             }
             else
             {
-                Console.WriteLine($"Error editing divisionCicloMateria: {response.ReasonPhrase}");
+                MostrarError("No se pudo actualizar la división. Intenta nuevamente.");
             }
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            Console.WriteLine($"Exception editing divisionCicloMateria: {ex.Message}");
+            MostrarError("Error al actualizar la división. Verifica los datos.");
         }
     }
+
 
     private async Task DeleteDivisionCicloMateria()
     {
@@ -680,117 +726,70 @@
             var response = await Http.DeleteAsync($"api/DivisionCicloMateria/{idDivisionCicloMateriaToDelete}");
             if (response.IsSuccessStatusCode)
             {
-                await LoadDivisionCicloMaterias();
-                CloseConfirmDeleteModal();
+                var responseContent = await response.Content.ReadFromJsonAsync<ResponseAPI<int>>();
+                if (responseContent != null && responseContent.EsCorrecto)
+                {
+                    MostrarAlerta("¡División eliminada correctamente!");
+                    await LoadDivisionCicloMaterias();
+                    CloseConfirmDeleteModal();
+                }
+                else
+                {
+                    if (responseContent?.Mensaje.Contains("tiene relaciones asociadas") == true)
+                    {
+                        MostrarError("Tiene datos Cargados");
+                    }
+                    else
+                    {
+                        MostrarError(responseContent?.Mensaje ?? "Error desconocido al eliminar la división.");
+                    }
+                }
             }
             else
             {
-                Console.WriteLine($"Error deleting divisionCicloMateria: {response.ReasonPhrase}");
+                MostrarError("Error al comunicarse con el servidor. Intente nuevamente.");
             }
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            Console.WriteLine($"Exception deleting divisionCicloMateria: {ex.Message}");
-        }
-    }
-    private void OpenModalToAddAlumno()
-    {
-        currentDivisionCicloMateriaAlumno = new DivsionCiclosMateriaAlumnos();
-        isEditAlumno = false;
-        isModalOpenAlumno = true;
-    }
-
-    private void OpenModalToEditAlumno(DivsionCiclosMateriaAlumnos divisionCicloMateriaAlumno, int id)
-    {
-        currentDivisionCicloMateriaAlumno = new DivsionCiclosMateriaAlumnos
-            {
-                DivisionCicloMateriaIdDivCicMat = divisionCicloMateriaAlumno.DivisionCicloMateriaIdDivCicMat,
-                AlumnosIdAlumno = divisionCicloMateriaAlumno.AlumnosIdAlumno,
-             
-            };
-        idActualAlumno = id;
-        isEditAlumno = true;
-        isModalOpenAlumno = true;
-    }
-
-    private void CloseModalAlumno()
-    {
-        isModalOpenAlumno = false;
-    }
-
-    private void OpenConfirmDeleteModalAlumno(int id)
-    {
-        idDivisionCicloMateriaAlumnoToDelete = id;
-        isConfirmDeleteModalOpenAlumno = true;
-    }
-
-    private void CloseConfirmDeleteModalAlumno()
-    {
-        isConfirmDeleteModalOpenAlumno = false;
-    }
-
-    private async Task AddDivisionCicloMateriaAlumno()
-    {
-        try
-        {
-            var response = await Http.PostAsJsonAsync("api/DivisionCicloMateriaAlumnos", currentDivisionCicloMateriaAlumno);
-            if (response.IsSuccessStatusCode)
-            {
-                await LoadDivisionCicloMateriaAlumnos();
-                CloseModalAlumno();
-            }
-            else
-            {
-                Console.WriteLine($"Error adding DivisionCicloMateriaAlumno: {response.ReasonPhrase}");
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Exception adding DivisionCicloMateriaAlumno: {ex.Message}");
+            MostrarError("Error al eliminar la división. Intente más tarde.");
         }
     }
 
-    private async Task EditDivisionCicloMateriaAlumno()
-    {
-        try
-        {
-            var response = await Http.PutAsJsonAsync($"api/DivisionCicloMateriaAlumnos/{idActualAlumno}", currentDivisionCicloMateriaAlumno);
-            if (response.IsSuccessStatusCode)
-            {
-                await LoadDivisionCicloMateriaAlumnos();
-                CloseModalAlumno();
-            }
-            else
-            {
-                Console.WriteLine($"Error editing DivisionCicloMateriaAlumno: {response.ReasonPhrase}");
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Exception editing DivisionCicloMateriaAlumno: {ex.Message}");
-        }
-    }
 
-    private async Task DeleteDivisionCicloMateriaAlumno()
+
+    private void MostrarError(string menssage)
     {
-        try
+        mostraError = true;
+        mensage = menssage;
+
+        // Crear un temporizador para ocultar la alerta después de 5 segundos
+        var timer = new System.Timers.Timer(5000); // 5000 ms = 5 segundos
+        timer.Elapsed += (sender, e) =>
         {
-            var response = await Http.DeleteAsync($"api/DivisionCicloMateriaAlumnos/{idDivisionCicloMateriaAlumnoToDelete}");
-            if (response.IsSuccessStatusCode)
-            {
-                await LoadDivisionCicloMateriaAlumnos();
-                CloseConfirmDeleteModalAlumno();
-            }
-            else
-            {
-                Console.WriteLine($"Error deleting DivisionCicloMateriaAlumno: {response.ReasonPhrase}");
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Exception deleting DivisionCicloMateriaAlumno: {ex.Message}");
-        }
+            mostraError = false;
+            InvokeAsync(StateHasChanged); // Asegurar que el UI se actualice
+            timer.Dispose(); // Liberar el temporizador
+
+        };
+        timer.Start();
     }
+    private void MostrarAlerta(string menssage)
+    {
+        mostrarAlerta = true;
+        mensage = menssage;
+        // Crear un temporizador para ocultar la alerta después de 5 segundos
+        var timer = new System.Timers.Timer(5000); // 5000 ms = 5 segundos
+        timer.Elapsed += (sender, e) =>
+        {
+            mostrarAlerta = false;
+            InvokeAsync(StateHasChanged); // Asegurar que el UI se actualice
+            timer.Dispose(); // Liberar el temporizador
+
+        };
+        timer.Start();
+    }
+  
 }
 
 

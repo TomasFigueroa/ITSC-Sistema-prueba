@@ -124,34 +124,50 @@ namespace INTITUTO1.Server.Controllers
             try
             {
                 // Buscar el libro en la base de datos
-                var libroExistente = await _context.LIbros.FindAsync(id);
+                var libroExistente = await _context.LIbros
+                                                   .Include(l => l.notas) // Incluir las relaciones con Notas
+                                                   .FirstOrDefaultAsync(l => l.Id_Libro == id);
 
-                if (libroExistente == null)
+                if (libroExistente != null)
+                {
+                    // Verificar si el libro tiene relaciones con Notas
+                    var tieneRelacion = libroExistente.notas != null && libroExistente.notas.Any();
+
+                    if (tieneRelacion)
+                    {
+                        // Si tiene relaciones, cambiar el estado del libro a inactivo
+                        libroExistente.Estado = false;
+                        _context.LIbros.Update(libroExistente);
+                        responseApi.Mensaje = "El libro tiene notas asociadas. Su estado ha sido cambiado a inactivo.";
+                    }
+                    else
+                    {
+                        // Si no tiene relaciones, eliminar el libro
+                        _context.LIbros.Remove(libroExistente);
+                        responseApi.Mensaje = "Libro eliminado correctamente.";
+                    }
+
+                    // Guardar cambios en la base de datos
+                    await _context.SaveChangesAsync();
+                    responseApi.EsCorrecto = true;
+                }
+                else
                 {
                     responseApi.EsCorrecto = false;
                     responseApi.Mensaje = "Libro no encontrado.";
-                    return NotFound(responseApi);
                 }
-
-                // Cambiar el estado del libro a false
-                libroExistente.Estado = false;
-
-                // Actualizar el registro en la base de datos
-                _context.LIbros.Update(libroExistente);
-                await _context.SaveChangesAsync();
-
-                responseApi.EsCorrecto = true;
-                responseApi.Mensaje = "Estado del libro actualizado a inactivo.";
             }
             catch (Exception ex)
             {
                 responseApi.EsCorrecto = false;
-                responseApi.Mensaje = ex.Message;
-                return BadRequest(responseApi);
+                responseApi.Mensaje = ex.InnerException?.Message ?? ex.Message;
             }
 
             return Ok(responseApi);
         }
+
+
+
 
         // PUT: api/Libros/activar/{id}
         [HttpPut("activar/{id}")]
@@ -190,6 +206,5 @@ namespace INTITUTO1.Server.Controllers
 
             return Ok(responseApi);
         }
-
     }
 }

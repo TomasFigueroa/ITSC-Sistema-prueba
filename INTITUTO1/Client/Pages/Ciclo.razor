@@ -150,7 +150,30 @@
         </div>
     </div>
 }
+@if (mostrarAlerta)
+{
 
+    <div class="alert alert-success d-flex align-items-center alert-right animated-alert" role="alert">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-check-circle-fill me-2" viewBox="0 0 16 16">
+            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM6.97 11.03a.75.75 0 0 0 1.08.022L11.97 8a.75.75 0 1 0-1.08-1.04L7.5 10.21 5.646 8.354a.75.75 0 1 0-1.08 1.04l2 2z" />
+        </svg>
+        <div>
+            @mensage
+        </div>
+    </div>
+}
+@if (mostraError)
+{
+    <div class="alert alert-danger d-flex align-items-center alert-right animated-alert" role="alert">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-x-circle-fill me-2" viewBox="0 0 16 16">
+            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z" />
+        </svg>
+        <div>
+            @mensage
+        </div>
+    </div>
+
+}
 
 @code {
     private int CurrentPage = 1; //pagina actual
@@ -163,11 +186,45 @@
     private int idCicloToDelete;
     private bool isConfirmDeleteModalOpen = false;
     int idactual;
+    private bool mostrarAlerta = false;
+    private bool mostraError = false;
+    string mensage = "";
+
 
     protected override async Task OnInitializedAsync()
     {
         await LoadCiclos();
    
+    }
+    //Alertas y Errores
+    private void MostrarError(string menssage)
+    {
+        mostraError = true;
+        mensage = menssage;
+
+        // Crear un temporizador para ocultar la alerta después de 5 segundos
+        var timer = new System.Timers.Timer(5000); // 5000 ms = 5 segundos
+        timer.Elapsed += (sender, e) =>
+        {
+            mostraError = false;
+            InvokeAsync(StateHasChanged); // Asegurar que el UI se actualice
+            timer.Dispose(); // Liberar el temporizador
+        };
+        timer.Start();
+    }
+    private void MostrarAlerta(string menssage)
+    {
+        mostrarAlerta = true;
+        mensage = menssage;
+        // Crear un temporizador para ocultar la alerta después de 5 segundos
+        var timer = new System.Timers.Timer(5000); // 5000 ms = 5 segundos
+        timer.Elapsed += (sender, e) =>
+        {
+            mostrarAlerta = false;
+            InvokeAsync(StateHasChanged); // Asegurar que el UI se actualice
+            timer.Dispose(); // Liberar el temporizador
+        };
+        timer.Start();
     }
 
     private async Task LoadCiclos()
@@ -232,40 +289,44 @@
             var response = await Http.PostAsJsonAsync("api/Ciclo", currentCiclo);
             if (response.IsSuccessStatusCode)
             {
+                MostrarAlerta("Ciclo añadido correctamente.");
                 await LoadCiclos();
                 CloseModal();
             }
             else
             {
-                Console.WriteLine($"Error adding ciclo: {response.ReasonPhrase}");
+                var error = await response.Content.ReadAsStringAsync();
+                MostrarError($"Error al añadir el ciclo: {error}");
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Exception adding ciclo: {ex.Message}");
+            MostrarError($"Error al añadir el ciclo: {ex.Message}");
         }
     }
 
-    private async Task EditCiclo()
+   private async Task EditCiclo()
+{
+    try
     {
-        try
+        var response = await Http.PutAsJsonAsync($"api/Ciclo/{idactual}", currentCiclo);
+        if (response.IsSuccessStatusCode)
         {
-            var response = await Http.PutAsJsonAsync($"api/Ciclo/{idactual}", currentCiclo);
-            if (response.IsSuccessStatusCode)
-            {
-                await LoadCiclos();
-                CloseModal();
-            }
-            else
-            {
-                Console.WriteLine($"Error editing ciclo: {response.ReasonPhrase}");
-            }
+            MostrarAlerta("Ciclo editado correctamente.");
+            await LoadCiclos();
+            CloseModal();
         }
-        catch (Exception ex)
+        else
         {
-            Console.WriteLine($"Exception editing ciclo: {ex.Message}");
+            var error = await response.Content.ReadAsStringAsync();
+            MostrarError($"Error al editar el ciclo: {error}");
         }
     }
+    catch (Exception ex)
+    {
+        MostrarError($"Error al editar el ciclo: {ex.Message}");
+    }
+}
 
     private void OpenConfirmDeleteModal(int id)
     {
@@ -285,17 +346,19 @@
             var response = await Http.DeleteAsync($"api/Ciclo/{idactual}");
             if (response.IsSuccessStatusCode)
             {
+                MostrarAlerta("Ciclo eliminado correctamente.");
                 await LoadCiclos();
                 CloseConfirmDeleteModal();
             }
             else
             {
-                Console.WriteLine($"Error deleting ciclo: {response.ReasonPhrase}");
+                var error = await response.Content.ReadAsStringAsync();
+                MostrarError($"Error al eliminar el ciclo: {error}");
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Exception deleting ciclo: {ex.Message}");
+            MostrarError($"Error al eliminar el ciclo: {ex.Message}");
         }
     }
     private bool isDeletedCiclosModalOpen = false; // Estado del modal de eliminados
@@ -325,17 +388,18 @@
             var response = await Http.PutAsync($"api/Ciclo/activar/{id}", null);
             if (response.IsSuccessStatusCode)
             {
-                
+                MostrarAlerta("Ciclo activado correctamente.");
                 await LoadCiclos();
             }
             else
             {
-                Console.WriteLine($"Error activating ciclo: {response.ReasonPhrase}");
+                var error = await response.Content.ReadAsStringAsync();
+                MostrarError($"Error al activar el ciclo: {error}");
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Exception activating ciclo: {ex.Message}");
+            MostrarError($"Error al activar el ciclo: {ex.Message}");
         }
     }
 
