@@ -10,6 +10,6 @@ namespace INTITUTO1.Shared.DTO
     {
         public int DivisionCicloMateriaIdDivCicMat { get; set; }
         public int AlumnosIdAlumno { get; set; }
-        public int LibrosId_Libro { get; set; }
+      
     }
 }

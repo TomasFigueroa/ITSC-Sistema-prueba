@@ -20,6 +20,7 @@ namespace INTITUTO1.Shared.DTO
         public string Carrera { get; set; }
         public string TipoEvaluacion { get; set; }
         public int? IdLibro { get; set; }
+        public int? NumeroFolio { get; set; }
         public string Division { get; set; }
     }
 

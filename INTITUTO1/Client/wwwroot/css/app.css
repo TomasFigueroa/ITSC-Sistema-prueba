@@ -205,38 +205,13 @@ a, .btn-link {
     align-items: center;
 }
 
-/* Estilo de alertas */
-.alert-right {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 1000;
-    width: 300px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    border-radius: 8px;
+
+
+
+.fadeOut {
+    animation: fadeOut 0.5s ease-out 6.5s forwards;
 }
 
-.animated-alert {
-    animation: slideInRight 0.5s ease-in-out, fadeOut 0.5s ease-out 4.5s forwards;
-}
-
-@keyframes slideInRight {
-    from {
-        transform: translateX(100%);
-        opacity: 0;
-    }
-
-    to {
-        transform: translateX(0);
-        opacity: 1;
-    }
-}
-
-@keyframes fadeOut {
-    to {
-        opacity: 0;
-    }
-}
 
 /* Animación del logo en el loading */
 /* Estilo para el contenedor principal */
@@ -394,20 +369,19 @@ h5 {
 }
 
 @keyframes fadeIn {
-    0%
+    0% {
+        opacity: 0;
+    }
 
-{
-    opacity: 0;
+    100% {
+        opacity: 1;
+    }
 }
 
-100% {
-    opacity: 1;
-}
-
-}
 html {
     scroll-behavior: smooth;
 }
+
 main {
     margin-left: 250px;
     padding-top: 60px;
@@ -547,9 +521,36 @@ main {
         transform: scale(1);
     }
 }
+/* Estilo de alertas */
+.alert-right {
+    position: fixed;
+    top: 20px; /* Distancia desde la parte superior */
+    right: 20px; /* Distancia desde el borde derecho */
+    z-index: 1050; /* Asegúrate de que esté encima de otros elementos */
+    width: auto;
+    max-width: 300px; /* Opcional, ajusta según el diseño */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Sombra para visibilidad */
+    border-radius: 8px;
+}
 
+.animated-alert {
+    animation: slideInRight 0.5s ease-in-out, fadeOut 0.5s ease-out 4.5s forwards;
+}
 
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
 
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
 
-
-
+@keyframes fadeOut {
+    to {
+        opacity: 0;
+    }
+}

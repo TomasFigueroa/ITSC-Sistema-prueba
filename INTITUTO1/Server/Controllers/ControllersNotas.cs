@@ -46,7 +46,8 @@ namespace INTITUTO1.Server.Controllers
                             Fecha = nota.Fecha,
                             Nota = nota.Nota,
                             TipoEvaluacion = tipoEvaluacion.NombreEva,
-                            IdLibro = nota.LIbrosId_Libro
+                            IdLibro = nota.LIbrosId_Libro,
+                            NumeroFolio = nota.NumeroFolio,
                         };
 
             return Ok(await query.ToListAsync());
@@ -183,6 +184,7 @@ namespace INTITUTO1.Server.Controllers
                 DivsionCiclosMateriaAlumnosIdDivCicMatAlum = dtoNotas.Materias,
                 TipoEvaluacionIdTipoEva = dtoNotas.TipoEvaluacionIdTipoEva,
                 LIbrosId_Libro = dtoNotas.Idlibro,
+                NumeroFolio = dtoNotas.NumeroFolio,
             };
 
             _context.notas.Add(nuevaNota);
@@ -217,6 +219,7 @@ namespace INTITUTO1.Server.Controllers
                     dbNotas.DivsionCiclosMateriaAlumnosIdDivCicMatAlum = dtoNotas.Materias;
                     dbNotas.TipoEvaluacionIdTipoEva = dtoNotas.TipoEvaluacionIdTipoEva;
                     dbNotas.LIbrosId_Libro = dtoNotas.Idlibro;
+                    dbNotas.NumeroFolio = dtoNotas.NumeroFolio;
 
                     _context.notas.Update(dbNotas);
                     await _context.SaveChangesAsync();

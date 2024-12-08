@@ -129,56 +129,73 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">@(isEditAlumno ? "Editar Inscripcion" : "Inscribir Alumno")</h5>
+                    <h5 class="modal-title">@(isEditAlumno ? "Editar Inscripción" : "Inscribir Alumno")</h5>
                     <button type="button" class="btn-close" @onclick="CloseModalAlumno"></button>
                 </div>
                 <div class="modal-body">
                     <EditForm Model="@currentDivisionCicloMateriaAlumno" OnValidSubmit="@(isEditAlumno ? EditDivisionCicloMateriaAlumno : AddDivisionCicloMateriaAlumno)">
                         <DataAnnotationsValidator />
+
+                        <!-- Campo para Carrera -->
                         <div class="mb-3">
                             <label class="form-label">Carrera</label>
                             <InputSelect class="form-control" @bind-Value="idcarrera">
                                 <option value="">Seleccione una carrera</option>
                                 @foreach (var carrera in carreras)
                                 {
-                                    if(carrera.IdCarrera==idcarrera){
-                                        <option value="@carrera.IdCarrera">@carrera.Nombre</option>
-                                    }
-                                    
+                                    <option value="@carrera.IdCarrera">@carrera.Nombre</option>
                                 }
                             </InputSelect>
                         </div>
+
+                        <!-- Selección de múltiples materias -->
                         <div class="mb-3">
-                            <label class="form-label">DivisionCicloMateria</label>
-                            <InputSelect class="form-control" @bind-Value="currentDivisionCicloMateriaAlumno.DivisionCicloMateriaIdDivCicMat">
+                            <label class="form-label">Materias</label>
+                            <div>
                                 @foreach (var divisionCicloMateria in divisionCicloMaterias)
                                 {
-                                    @foreach (var materia in materiasFiltradas)
+                                    var materia = materiasFiltradas.FirstOrDefault(m =>
+                                    m.IdMateria == divisionCicloMateria.MateriasIdMateria &&
+                                    m.IdCarrera == idcarrera);
+
+                                    if (materia != null)
                                     {
-                                        if (idmateria == divisionCicloMateria.IdDivCicMat&& materia.IdMateria==divisionCicloMateria.MateriasIdMateria&& materia.IdCarrera==idcarrera)
-                                        {
-                                            <option value="@divisionCicloMateria.IdDivCicMat">@materia.Nombre</option>
-                                        }
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input"
+                                                   id="materia-@materia.IdMateria"
+                                                   value="@divisionCicloMateria.IdDivCicMat"
+                                                   @onchange="(e) => ToggleMateriaSelection(e, divisionCicloMateria.IdDivCicMat)" />
+                                            <label class="form-check-label" for="materia-@materia.IdMateria">
+                                                @materia.Nombre
+                                            </label>
+                                        </div>
                                     }
-                                       
-                                    
                                 }
-                            </InputSelect>
+                            </div>
                         </div>
+
+                        <!-- Buscador de alumnos -->
+                        <div class="mb-3">
+                            <label class="form-label">Buscar Alumno por DNI</label>
+                            <input type="text" class="form-control" placeholder="Ingrese el DNI" @bind="searchDni" @oninput="FilterAlumnos" />
+                        </div>
+
+                        <!-- Selección de alumno -->
                         <div class="mb-3">
                             <label class="form-label">Alumno</label>
                             <InputSelect class="form-control" @bind-Value="currentDivisionCicloMateriaAlumno.AlumnosIdAlumno">
-                                @foreach (var alumno in alumnos)
+                                <option value="">Seleccione un alumno</option>
+                                @foreach (var alumno in filteredAlumnos)
                                 {
-                                    if(idcarrera==alumno.Id_Carrera)
+                                    @if(alumno.Id_Carrera == idcarrera)
                                     {
                                         <option value="@alumno.IdAlumno">@GetAlumnoNombre(alumno.IdAlumno)</option>
                                     }
-                                    
-                                }
+
+                            }
                             </InputSelect>
                         </div>
-                      
+
                         <button type="submit" class="btn btn-primary">@((isEditAlumno) ? "Guardar Cambios" : "Agregar DivisionCicloMateriaAlumno")</button>
                     </EditForm>
                 </div>
@@ -186,6 +203,7 @@
         </div>
     </div>
 }
+
 
 @if (isConfirmDeleteModalOpenAlumno)
 {
@@ -242,6 +260,7 @@
     private List<Carrerass> carreras = new List<Carrerass>();
     private List<Divisiones> divisions = new List<Divisiones>();
     private List<Profesor> profesores = new List<Profesor>();
+
     private int idcarrera;
     private int idciclo;
     private int iddivision;
@@ -266,6 +285,9 @@
     private string filtroNombre = string.Empty;
     private string filtroCarrera = string.Empty;
     private List<Materias> materiasFiltradas = new List<Materias>();
+    private string searchDni = string.Empty; // Para almacenar el valor del buscador
+    private List<Alumnos> filteredAlumnos = new List<Alumnos>(); // Para los resultados filtrados
+    private List<int> selectedMaterias = new(); // Almacena las materias seleccionadas
 
     protected override async Task OnInitializedAsync()
     {
@@ -284,6 +306,7 @@
         await FiltrarMaterias();
         await LoadLibros();
         await LoadDivCiclo();
+        filteredAlumnos = alumnos;
 
     }
     //Alertas
@@ -321,7 +344,43 @@
         await JS.InvokeVoidAsync("gp");
     }
 
+    // Método para filtrar alumnos por DNI
+    private void FilterAlumnos(ChangeEventArgs e)
+    {
+        searchDni = e.Value.ToString();
+        if (!string.IsNullOrWhiteSpace(searchDni))
+        {
+            filteredAlumnos = alumnos
+                .Where(a => a.DNI_Alum.Contains(searchDni) && a.Id_Carrera == idcarrera)
+                .ToList();
+        }
+        else
+        {
+            filteredAlumnos = alumnos.Where(a => a.Id_Carrera == idcarrera).ToList();
+        }
+    }
+    // Actualiza la lista de materias según la carrera seleccionada
+    private void FilterMaterias(ChangeEventArgs e)
+    {
+        idcarrera = int.TryParse(e.Value?.ToString(), out var id) ? id : 0;
+        selectedMaterias.Clear(); // Limpia la selección al cambiar de carrera
+    }
 
+    // Agrega o elimina una materia de la lista seleccionada
+    private void ToggleMateriaSelection(ChangeEventArgs e, int materiaId)
+    {
+        if ((e.Value as bool?) == true)
+        {
+            if (!selectedMaterias.Contains(materiaId))
+            {
+                selectedMaterias.Add(materiaId);
+            }
+        }
+        else
+        {
+            selectedMaterias.Remove(materiaId);
+        }
+    }
 
     private async Task LoadMaterias()
     {
@@ -562,27 +621,37 @@
         isConfirmDeleteModalOpenAlumno = false;
     }
 
-    private async Task AddDivisionCicloMateriaAlumno()
+   private async Task AddDivisionCicloMateriaAlumno()
+{
+    try
     {
-        try
+        foreach (var materiaId in selectedMaterias)
         {
-            var response = await Http.PostAsJsonAsync("api/DivisionCicloMateriaAlumnos", currentDivisionCicloMateriaAlumno);
-            if (response.IsSuccessStatusCode)
+            var nuevoRegistro = new DTODivisionCicloMateriaAlumno
             {
-                await LoadDivisionCicloMateriaAlumnos();
-                CloseModalAlumno();
-                MostrarAlerta("Registro agregado exitosamente.");
-            }
-            else
+                DivisionCicloMateriaIdDivCicMat = materiaId,
+                AlumnosIdAlumno = currentDivisionCicloMateriaAlumno.AlumnosIdAlumno
+            };
+
+            var response = await Http.PostAsJsonAsync("api/DivisionCicloMateriaAlumnos", nuevoRegistro);
+            if (!response.IsSuccessStatusCode)
             {
-                MostrarError($"Error al agregar: {response.ReasonPhrase}");
+                MostrarError($"Error al agregar materia {materiaId}: {response.ReasonPhrase}");
+                return;
             }
         }
-        catch (Exception ex)
-        {
-            MostrarError($"Excepción al agregar: {ex.Message}");
-        }
+
+        await LoadDivisionCicloMateriaAlumnos();
+        CloseModalAlumno();
+        MostrarAlerta("Registro agregado exitosamente.");
+        selectedMaterias.Clear();
     }
+    catch (Exception ex)
+    {
+        MostrarError($"Excepción al agregar: {ex.Message}");
+    }
+}
+
 
 
     private async Task EditDivisionCicloMateriaAlumno()
@@ -639,9 +708,5 @@
             MostrarError($"Excepción al eliminar la división: {ex.Message}");
         }
     }
-
-
-    
-
-    
+  
 }

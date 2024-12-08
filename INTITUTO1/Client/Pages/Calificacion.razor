@@ -76,28 +76,41 @@
 <button class="btn btn-warning" @onclick="OnInitializedAsync">
     <i class="fa fa-broom"></i> Limpiar
 </button>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4>Listado de Notas</h4>
+    <button class="btn btn-secondary" @onclick="ToggleNotas">
+        @(MostrarNotasFinales ? "Ver Notas Comunes" : "Ver Notas Finales")
+    </button>
+</div>
 
 <!-- Tabla de notas -->
 <div class="table-container" style="overflow: hidden; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); margin-bottom: 20px;">
     <div style="border-top-left-radius: 12px; border-top-right-radius: 12px; background-color: #f2f2f2; padding: 10px;">
         <table class="table" style="border-collapse: collapse; width: 100%; border: 2px solid #E6E6FA;">
             <thead>
-                <tr border-bottom: 2px solid #ddd;>
+                <tr>
                     <th style="border-right: 2px solid #ddd;">Alumno</th>
-                    <th style="border-right: 2px solid #ddd;">Tipo Evaluacion</th>
+                    <th style="border-right: 2px solid #ddd;">Tipo Evaluación</th>
                     <th style="border-right: 2px solid #ddd;">Fecha</th>
                     <th style="border-right: 2px solid #ddd;">Nota</th>
+                    @if (MostrarNotasFinales)
+                    {
+                        <th style="border-right: 2px solid #ddd;">Id Libro</th>
+                        <th style="border-right: 2px solid #ddd;">Número Folio</th>
+                    }
                     <th style="border-right: 2px solid #ddd;">Acciones</th>
                 </tr>
             </thead>
+
             <tbody>
                 @if (divisionCicloMateriaAlumnos != null && divisionCicloMateriaAlumnos.Any())
                 {
                     @foreach (var alumno in divisionCicloMateriaAlumnos)
                     {
-                        @foreach (var notasmod in Notas)
+                        @foreach (var notasmod in FiltrarNotas(Notas))
                         {
-                            @if (alumno.IdDivCicMatAlum == notasmod.DivsionCiclosMateriaAlumnosIdDivCicMatAlum && alumno.DivisionCicloMateriaIdDivCicMat == iddivision &&
+                            @if (alumno.IdDivCicMatAlum == notasmod.DivsionCiclosMateriaAlumnosIdDivCicMatAlum &&
+                           alumno.DivisionCicloMateriaIdDivCicMat == iddivision &&
                            alumno.AlumnosIdAlumno == idalumno)
                             {
                                 <tr>
@@ -105,15 +118,18 @@
                                     <td style="border-right: 2px solid #ddd;">@GetEvaluacionNombre(notasmod.TipoEvaluacionIdTipoEva)</td>
                                     <td style="border-right: 2px solid #ddd;">@notasmod.Fecha.ToShortDateString()</td>
                                     <td style="border-right: 2px solid #ddd;">@notasmod.Nota</td>
+                                    @if (MostrarNotasFinales)
+                                    {
+                                        <td style="border-right: 2px solid #ddd;">@notasmod.LIbrosId_Libro</td>
+                                        <td style="border-right: 2px solid #ddd;">@notasmod.NumeroFolio</td>
+                                    }
                                     <td style="border-right: 2px solid #ddd;">
                                         <button class="btn btn-primary me-2" @onclick="() => OpenModalToEdit(notasmod, notasmod.IdNotas)"><i class="oi oi-pencil"></i></button>
                                         <button class="btn btn-danger" @onclick="() => OpenConfirmDeleteModal(notasmod.IdNotas)"><i class="oi oi-trash"></i></button>
                                     </td>
                                 </tr>
                             }
-
                         }
-
                     }
                 }
                 else
@@ -121,15 +137,14 @@
                     <tr>
                         <td colspan="6" style="text-align: center; padding: 20px;">
                             <div style="text-align: center;">
-                                <!-- Logo del Instituto -->
                                 <img src="Logo_IT.png" alt="Logo ITSC" style="max-width: 100px; margin-bottom: 20px; animation: fadeIn 1s ease-in-out;">
-                                <!-- Mensaje elegante -->
                                 <h5 style="color: #6c757d; font-style: italic;">No se encontraron notas.</h5>
                             </div>
                         </td>
                     </tr>
                 }
             </tbody>
+
         </table>
         <!-- Paginación -->
         <nav>
@@ -242,6 +257,12 @@
                                 }
                             </InputSelect>
                         </div>
+                        <div class="mb-3 animate__animated animate__fadeIn">
+                            <label for="NumeroFolio" class="form-label">Libro:</label>
+                            <InputNumber class="form-control" id="libroSelect" @bind-Value="currentNota.NumeroFolio">
+                               
+                            </InputNumber>
+                        </div>
                     }
                 </div>
 
@@ -338,7 +359,26 @@
         await LoadLibros();
         currentNota.Fecha = DateTime.Today;
     }
+    private bool MostrarNotasFinales { get; set; } = false;
 
+    private void ToggleNotas()
+    {
+        MostrarNotasFinales = !MostrarNotasFinales;
+    }
+
+    private IEnumerable<Notas> FiltrarNotas(IEnumerable<Notas> todasNotas)
+    {
+        if (MostrarNotasFinales)
+        {
+            // Notas finales tienen valores específicos en IdLibro y NumeroFolio
+            return todasNotas.Where(nota => nota.LIbrosId_Libro != null && nota.NumeroFolio != null);
+        }
+        else
+        {
+            // Notas comunes no tienen IdLibro ni NumeroFolio
+            return todasNotas.Where(nota => nota.LIbrosId_Libro == null && nota.NumeroFolio == null);
+        }
+    }
     private async Task LoadNotas()
     {
         var response = await Http.GetFromJsonAsync<List<NotasDto>>("api/Notas/GetNotas");
@@ -565,7 +605,10 @@
                 Nota = nota.Nota,
                 Fecha = nota.Fecha,
                 Materias = nota.DivsionCiclosMateriaAlumnosIdDivCicMatAlum,
-                TipoEvaluacionIdTipoEva = nota.TipoEvaluacionIdTipoEva
+                TipoEvaluacionIdTipoEva = nota.TipoEvaluacionIdTipoEva,
+                Idlibro = nota.LIbrosId_Libro,
+                NumeroFolio = nota.NumeroFolio
+
             };
     }
 

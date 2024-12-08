@@ -17,5 +17,7 @@ namespace INSTITUTO.Bdat.Data.Entity
         public DivsionCiclosMateriaAlumnos DivsionCiclosMateriaAlumnos { get; set; }
         public int? LIbrosId_Libro { get; set; }  
         public LIbros LIbros { get; set; }
+        public int? NumeroFolio { get; set; }
+
     }
 }

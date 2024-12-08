@@ -123,6 +123,7 @@ namespace INSTITUTO.Bdat
                 o.Property(b => b.Fecha);
 
 
+
             });
             modelBuilder.Entity<TipoEvaluacion>(o =>
             {

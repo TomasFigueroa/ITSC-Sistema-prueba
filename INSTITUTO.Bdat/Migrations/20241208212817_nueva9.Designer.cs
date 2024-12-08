@@ -4,6 +4,7 @@ using INSTITUTO.Bdat;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace INSTITUTO.Bdat.Migrations
 {
     [DbContext(typeof(Context))]
-    partial class ContextModelSnapshot : ModelSnapshot
+    [Migration("20241208212817_nueva9")]
+    partial class nueva9
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -290,7 +293,7 @@ namespace INSTITUTO.Bdat.Migrations
                     b.Property<int>("Nota")
                         .HasColumnType("int");
 
-                    b.Property<int?>("NumeroFolio")
+                    b.Property<int>("NumeroFolio")
                         .HasColumnType("int");
 
                     b.Property<int>("TipoEvaluacionIdTipoEva")
