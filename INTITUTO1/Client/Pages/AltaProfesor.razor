@@ -100,7 +100,7 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">@(isEdit ? "Editar DivisionCicloMateria" : "Agregar DivisionCicloMateria")</h5>
+                    <h5 class="modal-title">@(isEdit ? "Editar Alta de Profesor" : "Agregar Alta de Profesor")</h5>
                     <button type="button" class="btn-close" @onclick="CloseModal"></button>
                 </div>
                 <div class="modal-body">
@@ -110,8 +110,14 @@
                             <label class="form-label">DivisionCiclo</label>
                             <InputSelect class="form-control" @bind-Value="currentDivisionCicloMateria.DivisionCicloIdDivCic">
                                 @foreach (var divisionCiclo in divCiclo)
-                                {
-                                    <option value="@divisionCiclo.IdDivCic">@GetDivisionCicloNombre(divisionCiclo.IdDivCic)</option>
+                                { @foreach (var div in divisiones)
+                                    {
+                                        if (div.CarrerassIdCarrera == idcarrera && divisionCiclo.DivisionesIdDivision == div.IdDivision)
+                                        {
+                                            <option value="@divisionCiclo.IdDivCic">@GetNombreDivision(divisionCiclo.DivisionesIdDivision, divisionCiclo.CicloIdCiclo)</option>
+                                        }
+
+                                    }
                                 }
                             </InputSelect>
                         </div>
@@ -137,7 +143,7 @@
                                 }
                             </InputSelect>
                         </div>
-                        <button type="submit" class="btn btn-primary">@((isEdit) ? "Guardar Cambios" : "Agregar DivisionCicloMateria")</button>
+                        <button type="submit" class="btn btn-primary">@((isEdit) ? "Guardar Cambios" : "Agregar Alta de Profesor")</button>
                     </EditForm>
                 </div>
             </div>
@@ -155,7 +161,7 @@
                     <button type="button" class="btn-close" @onclick="CloseConfirmDeleteModal"></button>
                 </div>
                 <div class="modal-body">
-                    ¿Estás seguro de que deseas eliminar esta DivisionCicloMateria?
+                    ¿Estás seguro de que deseas eliminar esta Alta de Profesor?
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" @onclick="CloseConfirmDeleteModal">Cancelar</button>
