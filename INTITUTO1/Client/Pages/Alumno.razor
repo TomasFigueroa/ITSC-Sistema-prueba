@@ -7,76 +7,111 @@
 @inject HttpClient Http
 
 <PageTitle>Alumnos</PageTitle>
+<div class="filters-section mb-3 p-3 border rounded shadow-sm">
+    <div class="form-group mb-2">
+        <label for="carrera-select" class="form-label">Selecciona una Carrera:</label>
+        <select id="carrera-select" class="form-select" @onchange="FilterByCarrera">
+            <option value="0">Todas</option>
+            @foreach (var carrera in carreras)
+            {
+                <option value="@carrera.IdCarrera">@carrera.Nombre</option>
+            }
+        </select>
+    </div>
+
+    @if (SelectedCarreraId != 0)
+    {
+        <div class="form-group">
+            <label for="dni-input" class="form-label">Buscar por DNI:</label>
+            <input id="dni-input" @bind="SearchDni" placeholder="Ingrese DNI" @oninput="FilterByDni"
+                   class="form-control" />
+        </div>
+    }
+</div>
+
+
+
 <button class="btn btn-success" @onclick="OpenModalToAdd">Cargar Alumno</button>
 <button class="btn btn-secondary" @onclick="OpenAlumnoModal">Ver Alumno Inactivos</button>
-<div class="table-container" style="overflow: hidden; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); margin-bottom: 20px;">
-    <div style="border-top-left-radius: 12px; border-top-right-radius: 12px; background-color: #f2f2f2; padding: 10px;">
-        <table class="table" style="border-collapse: collapse; width: 100%; border: 2px solid #E6E6FA;">
-            <thead>
-                <tr style="border-bottom: 2px solid #ddd;">
-                    <th style="border-right: 2px solid #ddd;">Carrera</th>
-                    <th style="border-right: 2px solid #ddd;">Nombre</th>
-                    <th style="border-right: 2px solid #ddd;">Apellido</th>
-                    <th style="border-right: 2px solid #ddd;">DNI</th>
-                    <th style="border-right: 2px solid #ddd;">CUIL</th>
-                    <th style="border-right: 2px solid #ddd;">Fecha de Nacimiento</th>
-                    <th style="border-right: 2px solid #ddd;">Tbase</th>
-                    <th style="border-right: 2px solid #ddd;">Nacionalidad</th>
-                    <th style="border-right: 2px solid #ddd;">Sexo</th>
-                    <th style="border-right: 2px solid #ddd;">Telefono</th>
-                    <th style="border-right: 2px solid #ddd;">Estado</th>
-                    
-                    <th style="border-right: 2px solid #ddd;">Acción</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var alumno in alumnos)
-                {
-                    @if(alumno.Estado==true){
-                        <tr>
-                            <td style="border-right: 2px solid #ddd;">@GetNombreCarrera(alumno.Id_Carrera)</td>
-                            <td style="border-right: 2px solid #ddd;">@alumno.Nombre</td>
-                            <td style="border-right: 2px solid #ddd;">@alumno.Apellido</td>
-                            <td style="border-right: 2px solid #ddd;">@alumno.DNI_Alum</td>
-                            <td style="border-right: 2px solid #ddd;">@alumno.Cuil</td>
-                            <td style="border-right: 2px solid #ddd;">@alumno.Fecha_Nac.ToShortDateString()</td>
-                            <td style="border-right: 2px solid #ddd;">@alumno.Tbase</td>
-                            <td style="border-right: 2px solid #ddd;">@alumno.Nacionalidad</td>
-                            <td style="border-right: 2px solid #ddd;">@alumno.Sexo</td>
-                            <td style="border-right: 2px solid #ddd;">@alumno.Numero</td>
-                            <td style="border-right: 2px solid #ddd;">@(alumno.Estado ? "Activo" : "Inactivo")</td>
+@if (FilteredAlumnos?.Any() == true)
+{
+    <div class="table-container" style="overflow: hidden; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); margin-bottom: 20px;">
+        <div style="border-top-left-radius: 12px; border-top-right-radius: 12px; background-color: #f2f2f2; padding: 10px;">
+            <table class="table" style="border-collapse: collapse; width: 100%; border: 2px solid #E6E6FA;">
+                <thead>
+                    <tr style="border-bottom: 2px solid #ddd;">
+                        <th style="border-right: 2px solid #ddd;">Carrera</th>
+                        <th style="border-right: 2px solid #ddd;">Nombre</th>
+                        <th style="border-right: 2px solid #ddd;">Apellido</th>
+                        <th style="border-right: 2px solid #ddd;">DNI</th>
+                        <th style="border-right: 2px solid #ddd;">CUIL</th>
+                        <th style="border-right: 2px solid #ddd;">Fecha de Nacimiento</th>
+                        <th style="border-right: 2px solid #ddd;">Tbase</th>
+                        <th style="border-right: 2px solid #ddd;">Nacionalidad</th>
+                        <th style="border-right: 2px solid #ddd;">Sexo</th>
+                        <th style="border-right: 2px solid #ddd;">Telefono</th>
+                        <th style="border-right: 2px solid #ddd;">Estado</th>
 
-                            <td>
-                                <div class="action-buttons m-1">
-                                    <button class="btn btn-primary me-2" @onclick="() => OpenModalToEdit(alumno, alumno.IdAlumno)"><i class="oi oi-pencil"></i></button>
-                                    <button class="btn btn-danger" @onclick="() => OpenConfirmDeleteModal(alumno.IdAlumno)"><i class="oi oi-trash"></i></button>
-                                </div>
-                            </td>
-                        </tr>
+                        <th style="border-right: 2px solid #ddd;">Acción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (FilteredAlumnos != null && FilteredAlumnos.Any())
+                    {
+                        @foreach (var alumno in FilteredAlumnos)
+                        {
+                            <tr>
+                                <td>@GetNombreCarrera(alumno.Id_Carrera)</td>
+                                <td>@alumno.Nombre</td>
+                                <td>@alumno.Apellido</td>
+                                <td>@alumno.DNI_Alum</td>
+                                <td>@alumno.Cuil</td>
+                                <td>@alumno.Fecha_Nac.ToShortDateString()</td>
+                                <td>@alumno.Tbase</td>
+                                <td>@alumno.Nacionalidad</td>
+                                <td>@alumno.Sexo</td>
+                                <td>@alumno.Numero</td>
+                                <td>@(alumno.Estado ? "Activo" : "Inactivo")</td>
+                                <td>
+                                    <button class="btn btn-primary me-2" @onclick="() => OpenModalToEdit(alumno, alumno.IdAlumno)">
+                                        <i class="oi oi-pencil"></i>
+                                    </button>
+                                    <button class="btn btn-danger" @onclick="() => OpenConfirmDeleteModal(alumno.IdAlumno)">
+                                        <i class="oi oi-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        }
                     }
-                 
-                }
-            </tbody>
-        </table>
-        <!-- Paginación -->
-        <nav>
-            <ul class="pagination justify-content-center">
-                <li class="page-item @(CurrentPage == 1 ? "disabled" : "")">
-                    <button class="page-link" @onclick="() => ChangePage(CurrentPage - 1)">Anterior</button>
-                </li>
-                @for (int i = 1; i <= TotalPages; i++)
-                {
-                    <li class="page-item @(CurrentPage == i ? "active" : "")">
-                        <button class="page-link" @onclick="() => ChangePage(i)">@i</button>
+                </tbody>
+
+
+            </table>
+            <!-- Paginación -->
+            <nav>
+                <ul class="pagination justify-content-center">
+                    <li class="page-item @(CurrentPage == 1 ? "disabled" : "")">
+                        <button class="page-link" @onclick="() => ChangePage(CurrentPage - 1)">Anterior</button>
                     </li>
-                }
-                <li class="page-item @(CurrentPage == TotalPages ? "disabled" : "")">
-                    <button class="page-link" @onclick="() => ChangePage(CurrentPage + 1)">Siguiente</button>
-                </li>
-            </ul>
-        </nav>
+                    @for (int i = 1; i <= TotalPages; i++)
+                    {
+                        <li class="page-item @(CurrentPage == i ? "active" : "")">
+                            <button class="page-link" @onclick="() => ChangePage(i)">@i</button>
+                        </li>
+                    }
+                    <li class="page-item @(CurrentPage == TotalPages ? "disabled" : "")">
+                        <button class="page-link" @onclick="() => ChangePage(CurrentPage + 1)">Siguiente</button>
+                    </li>
+                </ul>
+            </nav>
+        </div>
     </div>
-</div>
+}
+else
+{
+    <div class="alert alert-info mt-3">No se encontraron alumnos para esta carrera y/o DNI.</div>
+}
+
 
 @if (isModalOpen)
 {
@@ -258,6 +293,25 @@
     </div>
 
 }
+   <style>
+       /* Estilo de alertas */
+.alert-right {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    width: 300px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+}
+
+
+.animated-alert {
+    animation: slideInRight 0.5s ease-in-out, fadeOut 0.5s ease-out 4.5s forwards;
+}
+
+
+   </style>
 
 @code {
     private int CurrentPage = 1; //pagina actual
@@ -276,13 +330,39 @@
     private bool mostrarAlerta = false;
     private bool mostraError = false;
     string mensage = "";
+    private List<Alumnos> FilteredAlumnos { get; set; } = new();
+    private string SearchDni { get; set; } = string.Empty;
+    private int SelectedCarreraId { get; set; } = 0;
+
     protected override async Task OnInitializedAsync()
     {
-
         await LoadAlumnos();
         await LoadCarreras();
         await LoadDeletedAlumnos();
+        
     }
+
+    private void FilterByCarrera(ChangeEventArgs e)
+    {
+        SelectedCarreraId = int.Parse(e.Value.ToString());
+        SearchDni = string.Empty;
+        ApplyFilters();
+    }
+
+    private void FilterByDni(ChangeEventArgs e)
+    {
+        SearchDni = e.Value.ToString();
+        ApplyFilters();
+    }
+
+    private void ApplyFilters()
+    {
+        FilteredAlumnos = alumnos
+            .Where(a => (SelectedCarreraId == 0 || a.Id_Carrera == SelectedCarreraId) &&
+                        (string.IsNullOrWhiteSpace(SearchDni) || a.DNI_Alum.Contains(SearchDni)))
+            .ToList();
+    }
+
     //Alertas
     private void MostrarError(string menssage)
     {

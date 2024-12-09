@@ -233,7 +233,22 @@
     </div>
 
 }
+<style>
+    .alert-right {
+        position: fixed;
+        top: 20px; /* Distancia desde la parte superior */
+        right: 20px; /* Distancia desde el borde derecho */
+        z-index: 1050; /* Asegúrate de que esté encima de otros elementos */
+        width: auto;
+        max-width: 300px; /* Opcional, ajusta según el diseño */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Sombra para visibilidad */
+        border-radius: 8px;
+    }
 
+    .animated-alert {
+        animation: slideInRight 0.5s ease-in-out, fadeOut 0.5s ease-out 4.5s forwards;
+    }
+</style>
 
 @code {
     private int CurrentPage = 1; //pagina actual
