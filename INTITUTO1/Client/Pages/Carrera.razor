@@ -109,24 +109,35 @@
                 <div class="modal-body">
                     <EditForm Model="@currentCarrera" OnValidSubmit="@(isEdit ? EditCarrera : AddCarrera)">
                         <DataAnnotationsValidator />
+                        <ValidationSummary class="text-danger" />
+
                         <div class="mb-3">
                             <label class="form-label">Nombre</label>
                             <InputText class="form-control" @bind-Value="currentCarrera.Nombres" />
+                            <ValidationMessage For="@(() => currentCarrera.Nombres)" />
                         </div>
+
                         <div class="mb-3">
                             <label class="form-label">Fecha Inicio</label>
                             <InputDate class="form-control" @bind-Value="currentCarrera.Fecha_inicio" />
+                            <ValidationMessage For="@(() => currentCarrera.Fecha_inicio)" />
                         </div>
+
                         <div class="mb-3">
                             <label class="form-label">Fecha Fin</label>
                             <InputDate class="form-control" @bind-Value="currentCarrera.Fecha_fin" />
+                            <ValidationMessage For="@(() => currentCarrera.Fecha_fin)" />
                         </div>
-                        <button type="submit" class="btn btn-primary">@((isEdit) ? "Guardar Cambios" : "Agregar Carrera")</button>
+
+                        <button type="submit" class="btn btn-primary">
+                            @((isEdit) ? "Guardar Cambios" : "Agregar Carrera")
+                        </button>
                     </EditForm>
                 </div>
             </div>
         </div>
     </div>
+
 }
 @if (isInactiveModalOpen)
 {

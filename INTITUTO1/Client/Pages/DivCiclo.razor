@@ -69,30 +69,40 @@
                 <div class="modal-body">
                     <EditForm Model="@currentDivisionCiclo" OnValidSubmit="@(isEdit ? EditDivisionCiclo : AddDivisionCiclo)">
                         <DataAnnotationsValidator />
+                        <ValidationSummary class="text-danger" />
+
                         <div class="mb-3">
                             <label class="form-label">Ciclo</label>
                             <InputSelect class="form-control" @bind-Value="currentDivisionCiclo.CicloIdCiclo">
+                                <option value="">Seleccione un ciclo</option>
                                 @foreach (var ciclo in ciclos)
                                 {
                                     <option value="@ciclo.IdCiclo">@ciclo.Fecha</option>
                                 }
                             </InputSelect>
+                            <ValidationMessage For="@(() => currentDivisionCiclo.CicloIdCiclo)" class="text-danger" />
                         </div>
                         <div class="mb-3">
                             <label class="form-label">División</label>
                             <InputSelect class="form-control" @bind-Value="currentDivisionCiclo.DivisionesIdDivision">
+                                <option value="">Seleccione una división</option>
                                 @foreach (var division in divisiones)
                                 {
                                     <option value="@division.IdDivision">@division.NombreDiv</option>
                                 }
                             </InputSelect>
+                            <ValidationMessage For="@(() => currentDivisionCiclo.DivisionesIdDivision)" class="text-danger" />
                         </div>
-                        <button type="submit" class="btn btn-primary">@((isEdit) ? "Guardar Cambios" : "Agregar DivisionCiclo")</button>
+
+                        <button type="submit" class="btn btn-primary">
+                            @((isEdit) ? "Guardar Cambios" : "Agregar DivisionCiclo")
+                        </button>
                     </EditForm>
                 </div>
             </div>
         </div>
     </div>
+
 }
 
 @if (isConfirmDeleteModalOpen)

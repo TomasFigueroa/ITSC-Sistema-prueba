@@ -106,45 +106,59 @@
                 <div class="modal-body">
                     <EditForm Model="@currentDivisionCicloMateria" OnValidSubmit="@(isEdit ? EditDivisionCicloMateria : AddDivisionCicloMateria)">
                         <DataAnnotationsValidator />
+                        <ValidationSummary class="text-danger" />
+
+                        <!-- Campo División-Ciclo -->
                         <div class="mb-3">
-                            <label class="form-label">DivisionCiclo</label>
+                            <label class="form-label">División-Ciclo</label>
                             <InputSelect class="form-control" @bind-Value="currentDivisionCicloMateria.DivisionCicloIdDivCic">
+                                <option value="">Seleccione una División-Ciclo</option>
                                 @foreach (var divisionCiclo in divCiclo)
-                                { @foreach (var div in divisiones)
+                                {
+                                    foreach (var div in divisiones)
                                     {
                                         if (div.CarrerassIdCarrera == idcarrera && divisionCiclo.DivisionesIdDivision == div.IdDivision)
                                         {
                                             <option value="@divisionCiclo.IdDivCic">@GetNombreDivision(divisionCiclo.DivisionesIdDivision, divisionCiclo.CicloIdCiclo)</option>
                                         }
-
                                     }
                                 }
                             </InputSelect>
+                            <ValidationMessage For="@(() => currentDivisionCicloMateria.DivisionCicloIdDivCic)" class="text-danger" />
                         </div>
+
+                        <!-- Campo Materia -->
                         <div class="mb-3">
                             <label class="form-label">Materia</label>
                             <InputSelect class="form-control" @bind-Value="currentDivisionCicloMateria.MateriasIdMateria">
+                                <option value="">Seleccione una Materia</option>
                                 @foreach (var materia in materias)
                                 {
-                                    if (idcarrera==materia.IdCarrera)
+                                    if (idcarrera == materia.IdCarrera)
                                     {
                                         <option value="@materia.IdMateria">@GetMateriaNombre(materia.IdMateria)</option>
                                     }
-                                   
                                 }
                             </InputSelect>
+                            <ValidationMessage For="@(() => currentDivisionCicloMateria.MateriasIdMateria)" class="text-danger" />
                         </div>
+
+                        <!-- Campo Profesor -->
                         <div class="mb-3">
                             <label class="form-label">Profesor</label>
                             <InputSelect class="form-control" @bind-Value="currentDivisionCicloMateria.ProfesorIdProfesor">
+                                <option value="">Seleccione un Profesor</option>
                                 @foreach (var profesor in profesores)
                                 {
                                     <option value="@profesor.IdProfesor">@GetProfesorNombre(profesor.IdProfesor)</option>
                                 }
                             </InputSelect>
+                            <ValidationMessage For="@(() => currentDivisionCicloMateria.ProfesorIdProfesor)" class="text-danger" />
                         </div>
+
                         <button type="submit" class="btn btn-primary">@((isEdit) ? "Guardar Cambios" : "Agregar Alta de Profesor")</button>
                     </EditForm>
+
                 </div>
             </div>
         </div>
@@ -177,7 +191,7 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Duplicar Materias</h5>
+                    <h5 class="modal-title">Nuevo Año</h5>
                     <button type="button" class="btn-close" @onclick="CloseDuplicarMateriasModal"></button>
                 </div>
                 <div class="modal-body">
