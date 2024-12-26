@@ -4,6 +4,7 @@
 
 @inject NavigationManager Navigation
 @using Microsoft.EntityFrameworkCore
+@using System.ComponentModel.DataAnnotations
 @inject HttpClient Http
 
 <PageTitle>Alumnos</PageTitle>
@@ -130,30 +131,43 @@ else
                     <EditForm Model="@currentAlumno" OnValidSubmit="@(isEdit ? EditAlumno : AddAlumno)">
                         <DataAnnotationsValidator />
                         <ValidationSummary />
+
                         <div class="mb-3">
                             <label class="form-label">Nombre</label>
                             <InputText class="form-control" @bind-Value="currentAlumno.Nombre" />
+                            <ValidationMessage For="() => currentAlumno.Nombre" />
                         </div>
+
                         <div class="mb-3">
                             <label class="form-label">Apellido</label>
                             <InputText class="form-control" @bind-Value="currentAlumno.Apellido" />
+                            <ValidationMessage For="() => currentAlumno.Apellido" />
                         </div>
+
                         <div class="mb-3">
                             <label class="form-label">DNI</label>
                             <InputText class="form-control" @bind-Value="currentAlumno.DNI_Alum" />
+                            <ValidationMessage For="() => currentAlumno.DNI_Alum" />
                         </div>
+
                         <div class="mb-3">
                             <label class="form-label">CUIL</label>
                             <InputText class="form-control" @bind-Value="currentAlumno.Cuil" />
+                            <ValidationMessage For="() => currentAlumno.Cuil" />
                         </div>
+
                         <div class="mb-3">
                             <label class="form-label">Fecha de Nacimiento</label>
                             <InputDate class="form-control" @bind-Value="currentAlumno.Fecha_Nac" />
+                            <ValidationMessage For="() => currentAlumno.Fecha_Nac" />
                         </div>
+
                         <div class="mb-3">
                             <label class="form-label">Tbase</label>
                             <InputText class="form-control" @bind-Value="currentAlumno.Tbase" />
+                            <ValidationMessage For="() => currentAlumno.Tbase" />
                         </div>
+
                         <div class="mb-3">
                             <label class="form-label">Nacionalidad</label>
                             <InputSelect class="form-select" @bind-Value="currentAlumno.Nacionalidad">
@@ -163,8 +177,9 @@ else
                                     <option value="@nacionalidad">@nacionalidad</option>
                                 }
                             </InputSelect>
+                            <ValidationMessage For="() => currentAlumno.Nacionalidad" />
                         </div>
-                        
+
                         <div class="mb-3">
                             <label class="form-label">Sexo</label>
                             <InputSelect class="form-select" @bind-Value="currentAlumno.Sexo">
@@ -174,11 +189,15 @@ else
                                     <option value="@sexo">@sexo</option>
                                 }
                             </InputSelect>
+                            <ValidationMessage For="() => currentAlumno.Sexo" />
                         </div>
+
                         <div class="mb-3">
                             <label class="form-label">Numero</label>
                             <InputText class="form-control" @bind-Value="currentAlumno.Numero" />
+                            <ValidationMessage For="() => currentAlumno.Numero" />
                         </div>
+
                         <div class="mb-3">
                             <label class="form-label">Carrera</label>
                             <InputSelect class="form-select" @bind-Value="currentAlumno.Id_Carrera">
@@ -188,13 +207,10 @@ else
                                     <option value="@Carrera.IdCarrera">@Carrera.Nombre</option>
                                 }
                             </InputSelect>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Estado</label>
-                            <InputCheckbox class="form-check-input" @bind-Value="currentAlumno.Estado" />
-                            <label class="form-check-label">@((currentAlumno.Estado) ? "Activo" : "Inactivo")</label>
+                            <ValidationMessage For="() => currentAlumno.Id_Carrera" />
                         </div>
 
+                      
                         <button type="submit" class="btn btn-primary">@((isEdit) ? "Guardar Cambios" : "Agregar Alumno")</button>
                     </EditForm>
                 </div>
@@ -349,7 +365,17 @@ else
         ApplyFilters();
 
     }
-
+    private void ValidateDniCuil()
+    {
+        if (!string.IsNullOrWhiteSpace(currentAlumno.DNI_Alum) && !string.IsNullOrWhiteSpace(currentAlumno.Cuil))
+        {
+            string dniFromCuil = currentAlumno.Cuil.Substring(2, 8);
+            if (currentAlumno.DNI_Alum != dniFromCuil)
+            {
+                throw new ValidationException("El DNI no coincide con la parte central del CUIL.");
+            }
+        }
+    }
     private void FilterByCarrera(ChangeEventArgs e)
     {
         SelectedCarreraId = int.Parse(e.Value.ToString());

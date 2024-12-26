@@ -68,18 +68,22 @@
                 <div class="modal-body">
                     <EditForm Model="@currentDivision" OnValidSubmit="@(isEdit ? EditDivision : AddDivision)">
                         <DataAnnotationsValidator />
+                        <ValidationSummary class="text-danger" />
                         <div class="mb-3">
                             <label class="form-label">Nombre</label>
                             <InputText class="form-control" @bind-Value="currentDivision.NombreDiv" />
+                            <ValidationMessage For="@(() => currentDivision.NombreDiv)" class="text-danger" />
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Carrera</label>
                             <InputSelect class="form-control" @bind-Value="currentDivision.NombreCar">
+                                <option value="0">Seleccione una carrera</option>
                                 @foreach (var carrera in carreras)
                                 {
                                     <option value="@carrera.IdCarrera">@carrera.Nombre</option>
                                 }
                             </InputSelect>
+                            <ValidationMessage For="@(() => currentDivision.NombreCar)" class="text-danger" />
                         </div>
                         <button type="submit" class="btn btn-primary">@((isEdit) ? "Guardar Cambios" : "Agregar División")</button>
                     </EditForm>

@@ -28,6 +28,10 @@
     </InputSelect>
 </div>
 
+<button class="btn btn-warning" @onclick="OnInitializedAsync">
+    <i class="fa fa-broom"></i> Limpiar
+</button>
+
 <div class="table-container shadow-sm mb-4" style="border-radius: 12px; overflow: hidden;">
     <div style="border-top-left-radius: 12px; border-top-right-radius: 12px; background-color: #f9f9f9; padding: 10px;">
         <table class="table table-hover" style="border-collapse: collapse; width: 100%; border: 2px solid #E6E6FA; border-radius: 12px;">
@@ -71,9 +75,7 @@
 </div>
 
 <button class="btn btn-success" @onclick="OpenModalToAddAlumno">Inscribir Alumno</button>
-<button class="btn btn-warning" @onclick="OnInitializedAsync">
-    <i class="fa fa-broom"></i> Limpiar
-</button>
+
 
 <div class="table-container shadow-sm mb-4" style="border-radius: 12px; overflow: hidden;">
     <div style="background-color: #f9f9f9; padding: 10px; border-top-left-radius: 12px; border-top-right-radius: 12px;">

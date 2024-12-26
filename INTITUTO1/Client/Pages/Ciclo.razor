@@ -69,16 +69,23 @@
                 <div class="modal-body">
                     <EditForm Model="@currentCiclo" OnValidSubmit="@(isEdit ? EditCiclo : AddCiclo)">
                         <DataAnnotationsValidator />
+                        <ValidationSummary class="text-danger" />
+
                         <div class="mb-3">
                             <label class="form-label">Fecha</label>
                             <InputText class="form-control" @bind-Value="currentCiclo.Fecha" />
+                            <ValidationMessage For="@(() => currentCiclo.Fecha)" class="text-danger" />
                         </div>
-                        <button type="submit" class="btn btn-primary">@((isEdit) ? "Guardar Cambios" : "Agregar Ciclo")</button>
+
+                        <button type="submit" class="btn btn-primary">
+                            @((isEdit) ? "Guardar Cambios" : "Agregar Ciclo")
+                        </button>
                     </EditForm>
                 </div>
             </div>
         </div>
     </div>
+
 }
 
 @if (isConfirmDeleteModalOpen)

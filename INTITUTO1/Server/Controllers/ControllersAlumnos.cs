@@ -81,7 +81,7 @@ namespace INTITUTO1.Server.Controllers
                         Fecha_Nac = dtoAlumno.Fecha_Nac,
                         Tbase = dtoAlumno.Tbase,
                         Nacionalidad = dtoAlumno.Nacionalidad,
-                        Estado = dtoAlumno.Estado,
+                        Estado = true,
                         Numero = dtoAlumno.Numero,
                         Sexo = dtoAlumno.Sexo,
                         Id_Carrera = dtoAlumno.Id_Carrera
@@ -149,7 +149,7 @@ namespace INTITUTO1.Server.Controllers
                     Fecha_Nac = dtoAlumno.Fecha_Nac,
                     Tbase = dtoAlumno.Tbase,
                     Nacionalidad = dtoAlumno.Nacionalidad,
-                    Estado = dtoAlumno.Estado,
+                    Estado = true,
                     Numero = dtoAlumno.Numero,
                     Sexo = dtoAlumno.Sexo,
                     Id_Carrera = dtoAlumno.Id_Carrera

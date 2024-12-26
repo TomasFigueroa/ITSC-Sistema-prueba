@@ -78,25 +78,33 @@
                 <div class="modal-body">
                     <EditForm Model="@currentProfesor" OnValidSubmit="@(isEdit ? EditProfesor : AddProfesor)">
                         <DataAnnotationsValidator />
+                        <ValidationSummary class="text-danger" />
+
                         <div class="mb-3">
                             <label class="form-label">Nombre</label>
                             <InputText class="form-control" @bind-Value="currentProfesor.Nombre_Prof" />
+                            <ValidationMessage For="@(() => currentProfesor.Nombre_Prof)" class="text-danger" />
                         </div>
+
                         <div class="mb-3">
                             <label class="form-label">Apellido</label>
                             <InputText class="form-control" @bind-Value="currentProfesor.Apellido_Prof" />
+                            <ValidationMessage For="@(() => currentProfesor.Apellido_Prof)" class="text-danger" />
                         </div>
+
                         <div class="mb-3">
                             <label class="form-label">DNI</label>
                             <InputNumber class="form-control" @bind-Value="currentProfesor.Dni" />
+                            <ValidationMessage For="@(() => currentProfesor.Dni)" class="text-danger" />
                         </div>
-                       
+
                         <button type="submit" class="btn btn-primary">@((isEdit) ? "Guardar Cambios" : "Agregar Profesor")</button>
                     </EditForm>
                 </div>
             </div>
         </div>
     </div>
+
 }
 
 @if (isConfirmDeleteModalOpen)

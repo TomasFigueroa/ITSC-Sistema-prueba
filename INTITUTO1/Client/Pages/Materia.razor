@@ -5,14 +5,8 @@
 @inject HttpClient Http
 
 <PageTitle>Materias</PageTitle>
-<button class="btn btn-success" @onclick="OpenModalToAdd">Cargar Materia</button>
-<button class="btn btn-warning" @onclick="OnInitializedAsync">
-    <i class="fa fa-broom"></i> Limpiar filtros
-</button>
 
-<button class="btn btn-secondary" @onclick="OpenInactiveModal">
-    Ver Materias Inactivas
-</button>
+
 
 <!-- Filtros -->
 <div class="mb-3">
@@ -42,6 +36,13 @@
         
     </InputSelect>
 </div>
+<button class="btn btn-success" @onclick="OpenModalToAdd">Cargar Materia</button>
+<button class="btn btn-warning" @onclick="OnInitializedAsync">
+    <i class="fa fa-broom"></i> Limpiar filtros
+</button>
+<button class="btn btn-secondary" @onclick="OpenInactiveModal">
+    Ver Materias Inactivas
+</button>
 <div class="table-container" style="overflow: hidden; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); margin-bottom: 20px;">
     <div style="border-top-left-radius: 12px; border-top-right-radius: 12px; background-color: #f2f2f2; padding: 10px;">
         <table class="table" style="border-collapse: collapse; width: 100%; border: 2px solid #E6E6FA;">
@@ -74,6 +75,8 @@
                 }
             </tbody>
         </table>
+
+        
         <!-- Paginación -->
         <nav>
             <ul class="pagination justify-content-center">
@@ -107,50 +110,54 @@
                 <div class="modal-body">
                     <EditForm Model="@currentMateria" OnValidSubmit="@(isEdit ? EditMateria : AddMateria)">
                         <DataAnnotationsValidator />
+                        <ValidationSummary class="text-danger" />
+
                         <div class="mb-3">
                             <label class="form-label">Nombre</label>
                             <div>
-                                <small class="form-text text-muted">Ejemplo: (Materia) (carrera) (año asignado)</small>
+                                <small class="form-text text-muted">Ejemplo: (Materia) (Carrera) (Año Asignado)</small>
                             </div>
                             <InputText class="form-control" @bind-Value="currentMateria.Nombre" />
+                            <ValidationMessage For="@(() => currentMateria.Nombre)" class="text-danger" />
                         </div>
+
                         <div class="mb-3">
-                            <label class="form-label">Division</label>
+                            <label class="form-label">División</label>
                             <InputSelect class="form-control" @bind-Value="currentMateria.IdDivision">
-                                <option value="">Seleccione una division</option>
-                                @foreach (var divisiones in divisions)
+                                <option value="0">Seleccione una división</option>
+                                @foreach (var division in divisions)
                                 {
-                                    @if(divisiones.CarrerassIdCarrera == idcarrera){
-                                        <option value="@divisiones.IdDivision">@divisiones.NombreDiv</option>
+                                    if (division.CarrerassIdCarrera == idcarrera)
+                                    {
+                                        <option value="@division.IdDivision">@division.NombreDiv</option>
                                     }
-                                    
-                                    
-                                   
                                 }
                             </InputSelect>
+                            <ValidationMessage For="@(() => currentMateria.IdDivision)" class="text-danger" />
                         </div>
+
                         <div class="mb-3">
                             <label class="form-label">Carrera</label>
                             <InputSelect class="form-control" @bind-Value="currentMateria.IdCarrera">
-                                <option value="">Seleccione una carrera</option>
+                                <option value="0">Seleccione una carrera</option>
                                 @foreach (var carrera in carreras)
-                                { 
-                                    if (idcarrera==carrera.IdCarrera)
+                                {
+                                    if (idcarrera == carrera.IdCarrera)
                                     {
                                         <option value="@carrera.IdCarrera">@carrera.Nombre</option>
-
                                     }
-                                  
                                 }
                             </InputSelect>
+                            <ValidationMessage For="@(() => currentMateria.IdCarrera)" class="text-danger" />
                         </div>
-                    
+
                         <button type="submit" class="btn btn-primary">@((isEdit) ? "Guardar Cambios" : "Agregar Materia")</button>
                     </EditForm>
                 </div>
             </div>
         </div>
     </div>
+
 }
 
 <!-- Modal para confirmar eliminación -->

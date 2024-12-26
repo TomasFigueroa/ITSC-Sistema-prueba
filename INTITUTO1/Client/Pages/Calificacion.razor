@@ -76,12 +76,10 @@
 <button class="btn btn-warning" @onclick="OnInitializedAsync">
     <i class="fa fa-broom"></i> Limpiar
 </button>
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h4>Listado de Notas</h4>
-    <button class="btn btn-secondary" @onclick="ToggleNotas">
+ <button class="btn btn-secondary" @onclick="ToggleNotas">
         @(MostrarNotasFinales ? "Ver Notas Comunes" : "Ver Notas Finales")
-    </button>
-</div>
+ </button>
+
 
 <!-- Tabla de notas -->
 <div class="table-container" style="overflow: hidden; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); margin-bottom: 20px;">
@@ -95,7 +93,7 @@
                     <th style="border-right: 2px solid #ddd;">Nota</th>
                     @if (MostrarNotasFinales)
                     {
-                        <th style="border-right: 2px solid #ddd;">Id Libro</th>
+                        <th style="border-right: 2px solid #ddd;">Libro</th>
                         <th style="border-right: 2px solid #ddd;">Número Folio</th>
                     }
                     <th style="border-right: 2px solid #ddd;">Acciones</th>
@@ -120,7 +118,7 @@
                                     <td style="border-right: 2px solid #ddd;">@notasmod.Nota</td>
                                     @if (MostrarNotasFinales)
                                     {
-                                        <td style="border-right: 2px solid #ddd;">@notasmod.LIbrosId_Libro</td>
+                                        <td style="border-right: 2px solid #ddd;">@GetNombrelibronull(notasmod.LIbrosId_Libro)</td>
                                         <td style="border-right: 2px solid #ddd;">@notasmod.NumeroFolio</td>
                                     }
                                     <td style="border-right: 2px solid #ddd;">
@@ -204,77 +202,79 @@
                     <button type="button" class="btn-close" aria-label="Close" @onclick="CloseModal"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="notaInput" class="form-label">Nota:</label>
-                        <input type="number" class="form-control" id="notaInput" @bind="currentNota.Nota" min="1" max="10" />
-                    </div>
+                    <EditForm Model="currentNota" OnValidSubmit="@(isEdit ? EditNota : AddNota)">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary />
 
-                    <div class="mb-3">
-                        <label for="fechaInput" class="form-label">Fecha:</label>
-                        <input type="date" class="form-control" id="fechaInput" @bind="currentNota.Fecha" />
-                    </div>
+                        <div class="mb-3">
+                            <label for="notaInput" class="form-label">Nota:</label>
+                            <InputNumber id="notaInput" class="form-control" @bind-Value="currentNota.Nota" Min="1" Max="10" />
+                        </div>
 
-                    <div class="mb-3">
-                        <label for="alumnoSelect" class="form-label">Alumno:</label>
-                        <InputSelect class="form-select" id="alumnoSelect" @bind-Value="currentNota.Materias">
-                            <option value="0">Seleccione un alumno</option>
-                            @foreach (var alumno in divisionCicloMateriaAlumnos)
-                            {
-                                if (alumno.DivisionCicloMateriaIdDivCicMat == iddivision && idalumno == alumno.AlumnosIdAlumno)
+                        <div class="mb-3">
+                            <label for="fechaInput" class="form-label">Fecha:</label>
+                            <InputDate id="fechaInput" class="form-control" @bind-Value="currentNota.Fecha" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="alumnoSelect" class="form-label">Alumno:</label>
+                            <InputSelect id="alumnoSelect" class="form-select" @bind-Value="currentNota.Materias">
+                                <option value="0">Seleccione un alumno</option>
+                                @foreach (var alumno in divisionCicloMateriaAlumnos)
                                 {
-                                    <option value="@alumno.IdDivCicMatAlum">@GetAlumnoNombre(alumno.AlumnosIdAlumno)</option>
-                                }
-                            }
-                        </InputSelect>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="tipoEvaluacionSelect" class="form-label">Tipo de Evaluación:</label>
-                        <InputSelect class="form-select" id="tipoEvaluacionSelect" @bind-Value="currentNota.TipoEvaluacionIdTipoEva">
-                            <option value="0">Seleccione una evaluación</option>
-                            @foreach (var evaluacion in tipoEvaluaciones)
-                            {
-                                <option value="@evaluacion.IdTipoEva">@evaluacion.NombreEva</option>
-                            }
-                        </InputSelect>
-                    </div>
-
-                    <div class="d-flex justify-content-end">
-                        <button type="button" class="btn btn-info me-2" @onclick="ToggleFinal">
-                            Mostrar/Ocultar Libro
-                        </button>
-                    </div>
-
-                    @if (isFinal)
-                    {
-                        <div class="mb-3 animate__animated animate__fadeIn">
-                            <label for="libroSelect" class="form-label">Libro:</label>
-                            <InputSelect class="form-select" id="libroSelect" @bind-Value="currentNota.Idlibro">
-                                <option value="0">Seleccione un libro</option>
-                                @foreach (var libro in libros)
-                                {
-                                    <option value="@libro.Id_Libro">@GetNombrelibro(libro.Id_Libro)</option>
+                                    if (alumno.DivisionCicloMateriaIdDivCicMat == iddivision && idalumno == alumno.AlumnosIdAlumno)
+                                    {
+                                        <option value="@alumno.IdDivCicMatAlum">@GetAlumnoNombre(alumno.AlumnosIdAlumno)</option>
+                                    }
                                 }
                             </InputSelect>
                         </div>
-                        <div class="mb-3 animate__animated animate__fadeIn">
-                            <label for="NumeroFolio" class="form-label">Libro:</label>
-                            <InputNumber class="form-control" id="libroSelect" @bind-Value="currentNota.NumeroFolio">
-                               
-                            </InputNumber>
-                        </div>
-                    }
-                </div>
 
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" @onclick="CloseModal">Cancelar</button>
-                    <button type="button" class="btn btn-primary" @onclick="@(isEdit ? EditNota : AddNota)">
-                        @(isEdit ? "Guardar cambios" : "Agregar Nota")
-                    </button>
+                        <div class="mb-3">
+                            <label for="tipoEvaluacionSelect" class="form-label">Tipo de Evaluación:</label>
+                            <InputSelect id="tipoEvaluacionSelect" class="form-select" @bind-Value="currentNota.TipoEvaluacionIdTipoEva">
+                                <option value="0">Seleccione una evaluación</option>
+                                @foreach (var evaluacion in tipoEvaluaciones)
+                                {
+                                    <option value="@evaluacion.IdTipoEva">@evaluacion.NombreEva</option>
+                                }
+                            </InputSelect>
+                        </div>
+
+                        <div class="d-flex justify-content-end">
+                            <button type="button" class="btn btn-info me-2" @onclick="ToggleFinal">
+                                Mostrar/Ocultar Libro
+                            </button>
+                        </div>
+
+                        @if (isFinal)
+                        {
+                            <div class="mb-3 animate__animated animate__fadeIn">
+                                <label for="libroSelect" class="form-label">Libro:</label>
+                                <InputSelect id="libroSelect" class="form-select" @bind-Value="currentNota.Idlibro">
+                                    <option value="0">Seleccione un libro</option>
+                                    @foreach (var libro in libros)
+                                    {
+                                        <option value="@libro.Id_Libro">@GetNombrelibro(libro.Id_Libro)</option>
+                                    }
+                                </InputSelect>
+                            </div>
+                            <div class="mb-3 animate__animated animate__fadeIn">
+                                <label for="NumeroFolio" class="form-label">Número de Folio:</label>
+                                <InputNumber id="NumeroFolio" class="form-control" @bind-Value="currentNota.NumeroFolio" />
+                            </div>
+                        }
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" @onclick="CloseModal">Cancelar</button>
+                            <button type="submit" class="btn btn-primary">@(isEdit ? "Guardar cambios" : "Agregar Nota")</button>
+                        </div>
+                    </EditForm>
                 </div>
             </div>
         </div>
     </div>
+
 }
 
 
@@ -544,6 +544,16 @@
         return $"{div.NombreDiv}-{Cic.Fecha.ToString()}";
     }
     private string GetNombrelibro(int idLibro)
+    {
+        var lib = libros.FirstOrDefault(m => m.Id_Libro == idLibro);
+        if (lib == null)
+            return "N/A";
+
+
+        return $"{lib.Nombre_Lib}";
+
+    }
+    private string GetNombrelibronull(int? idLibro)
     {
         var lib = libros.FirstOrDefault(m => m.Id_Libro == idLibro);
         if (lib == null)
