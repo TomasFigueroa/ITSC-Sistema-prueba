@@ -10,5 +10,6 @@ namespace INTITUTO1.Shared.DTO
     {
         public string Correo { get; set; }
         public string Clave { get; set; }
+        public string Token { get; set; }
     }
 }
